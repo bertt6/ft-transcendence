@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class AuthConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'API.Apps.Auth'
+    name = 'Apps.Auth'
