@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+
+
 class Stats(models.Model):
     total_games = models.IntegerField()
     total_wins = models.IntegerField()
