@@ -30,6 +30,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
         user.set_password(validated_data['password'])
+        #sorulucak satır
+        #profile = Profile.objects.create(user=user, nickname=None, stats=Stats.objects.create())
         user.save()
 
         return user
