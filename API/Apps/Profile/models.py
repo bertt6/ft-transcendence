@@ -7,6 +7,7 @@ class Stats(models.Model):
     total_wins = models.IntegerField()
     total_losses = models.IntegerField()
     points = models.IntegerField()
+    # match_history = models.ManyToManyField('Game', blank=True)
 
 
 class Profile(models.Model):
@@ -16,4 +17,6 @@ class Profile(models.Model):
     # messages = models.ManyToManyField('Message', blank=True)
     is_online = models.BooleanField(default=False)
     friends = models.ManyToManyField('Profile', blank=True)
-    # match_history = models.ManyToManyField('Game', blank=True)
+
+
+
