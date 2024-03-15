@@ -1,19 +1,13 @@
-import datetime
-from rest_framework.views import APIView
 from API.serializers import RegisterSerializer
 from API.serializers import ProfileSerializer
-from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-from rest_framework import authentication, permissions, status
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
-from API.Apps.Auth.utils import *
-from rest_framework_simplejwt.views import TokenObtainPairView
-from django.http import HttpRequest
+from ..utils import *
 from rest_framework_simplejwt.tokens import RefreshToken
-from API.Apps.Auth.api.permissions import IsEmailVerified
+from .permissions import IsEmailVerified
 
 
 @api_view(['POST'])
