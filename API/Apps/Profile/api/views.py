@@ -20,6 +20,32 @@ class ProfileView(APIView):
             return Response(profile_serializer.errors, status=400)
         profile_serializer.save()
         return Response(profile_serializer.data, status=201)
+
+
+class ProfileDetailView(APIView):
+    def get(self, request,profile_id):
+        profile = Profile.objects.get(id=profile_id)
+        if not profile:
+            return Response({"error": "Profile not found"}, status=404)
+        profile_serializer = ProfileGetSerializer(profile)
+        return Response(profile_serializer.data, status=200)
+
+    def put(self, request,profile_id):
+        profile = Profile.objects.get(id=profile_id)
+        if not profile:
+            return Response({"error": "Profile not found"}, status=404)
+        profile_serializer = ProfilePostSerializer(profile, data=request.data)
+        if not profile_serializer.is_valid():
+            return Response(profile_serializer.errors, status=400)
+        profile_serializer.save()
+        return Response(profile_serializer.data, status=200)
+
+    def delete(self, request,profile_id):
+        profile = Profile.objects.get(id=profile_id)
+        if not profile:
+            return Response({"error": "Profile not found"}, status=404)
+        profile.delete()
+        return Response(status=204)
 class ProfileStatsView(APIView):
     def get(self, request,profile_id):
         profile = Profile.objects.get(id=profile_id)
