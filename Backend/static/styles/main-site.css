@@ -1,0 +1,150 @@
+.main-buttons-wrapper {
+  display: flex;
+  height: 100%;
+}
+
+.profile-wrapper {
+  aspect-ratio: 1/1;
+  height: 3rem;
+  margin: 1rem;
+}
+.profile-wrapper img {
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+}
+.play-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  gap: 8rem;
+}
+
+.play-button {
+  width: 15rem;
+  height: 15rem;
+  text-align: center;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  border: 1px transparent;
+  border-radius: 2rem;
+  font-size: larger;
+  transition: border 1s linear;
+}
+.play-button:hover {
+  transition: border 1s linear;
+  border: 1px solid white;
+}
+.button-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 15rem;
+  margin-right: 5rem;
+}
+.chat-wrapper {
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.chat-message-wrapper {
+  display: flex;
+  flex-direction: column;
+  font-size: smaller;
+  flex: 1;
+}
+
+.chat-send {
+  content: "";
+  height: 1.3rem;
+  width: 1.3rem;
+  object-fit: contain;
+  position: absolute;
+  right: 2rem;
+  top: 4.5px;
+  cursor: pointer;
+}
+
+.received-message {
+  align-self: flex-start;
+  text-wrap: wrap;
+}
+.sent-message {
+  align-self: flex-end;
+  text-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+}
+.sent-message span {
+  text-wrap: wrap;
+  align-self: flex-end;
+}
+.sent-message span:first-child {
+  text-decoration: underline;
+}
+.received-message span:first-child {
+  text-decoration: underline;
+}
+@media only screen and (max-width: 1535px) {
+  .button-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+  .chat-wrapper {
+    display: none;
+  }
+}
+.multiplayer-menu {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: none;
+}
+.find-match {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  background-repeat: no-repeat;
+  object-fit: cover;
+  flex: 1;
+  position: relative;
+}
+.find-tournement {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  background-repeat: no-repeat;
+  object-fit: scale-down;
+  flex: 1;
+  position: relative;
+}
+.find-tournement::after {
+  position: absolute;
+  content: "TOURNEMENT";
+  color: white;
+  top: 45%;
+  right: 50%;
+  transform: translate(50%);
+  text-shadow: 4px 4px #000000cb;
+  font-size: 70px;
+}
+.find-match::after {
+  content: "FIND MATCH";
+  color: white;
+  top: 45%;
+  right: 50%;
+  transform: translate(50%);
+  font-size: 70px;
+  text-shadow: 4px 4px #000000cb;
+  position: absolute;
+}
+.return-to-main {
+  position: absolute;
+  background-color: transparent;
+  top: -5rem;
+  left: 1rem;
+  color: white;
+  z-index: 10;
+  outline: none;
+  border: none;
+  font-size: 50px;
+}
