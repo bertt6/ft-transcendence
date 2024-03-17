@@ -3,7 +3,7 @@
 name: Run Django Tests
 on:
   push:
-    branches: [main]
+    branches: '*'
 jobs:
   test-django-app:
     runs-on: ubuntu-latest
