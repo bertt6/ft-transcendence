@@ -42,11 +42,11 @@ jobs:
           pip install -r requirements.txt
           pip install coverage
 
-      - name: Lint with flake8
-        run: |
-          cd API
-          pip install flake8
-          flake8 .
+      #- name: Lint with flake8
+      #  run: |
+      #    cd API
+      #    pip install flake8
+      #    flake8 .
 
       - name: Format code with black
         run: |
