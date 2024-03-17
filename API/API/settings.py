@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig"
 ]
-#asda
+#asdafas
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
