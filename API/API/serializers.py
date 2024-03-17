@@ -49,8 +49,36 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
 
-    def update(self, instance, validated_data):
-        print('asdasdasASDASDASDAS')
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(
+        write_only=True,
+        required=True
+    )
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        min_length=6,
+        max_length=68
+    )
+    new_password2 = serializers.CharField(
+        write_only=True,
+        required=True,
+        min_length=6,
+        max_length=68
+    )
+
+    class Meta:
+        model = User
+        fields = ('old_password', 'new_password', 'new_password2')
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password2']:
+            raise serializers.ValidationError({"new_password": "Password fields didn't match."})
+
+        return attrs
+
+
 
 
 class ProfileSerializer(serializers.ModelSerializer):
