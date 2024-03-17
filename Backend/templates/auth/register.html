@@ -25,7 +25,7 @@
     <main class="main">
       <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
-          <form class="register-wrapper p-5 gap-2">
+          <form class="register-wrapper p-5 gap-2" id="register-form">
             <div
               style="
                 display: flex;
@@ -60,7 +60,7 @@
                 <input
                   type="text"
                   class="register-input p-2"
-                  id="password"
+                  id="password2"
                   required
                 />
               </div>
@@ -93,5 +93,6 @@
         </div>
       </div>
     </main>
+    <script src="{% static 'scripts/register.js' %}" type="module"></script>
   </body>
 </html>

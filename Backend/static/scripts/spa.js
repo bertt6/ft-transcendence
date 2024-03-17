@@ -53,7 +53,7 @@ const pageHTML = new Map([
     "                <button class=\"ecole-login-button\">\n" +
     "                    Login with 42\n" +
     "                    <div>\n" +
-    "                        <img src=\"{% static 'public/42.svg' %}\" alt=\"\"/>\n" +
+    "                        <img src=\"{%static'public/42.svg' %}\" alt=\"\"/>\n" +
     "                    </div>\n" +
     "                </button>\n" +
     "            </form>\n" +
@@ -154,11 +154,21 @@ async function loadPage(fileName)
     link.type = 'text/css';
     link.href = '/static/styles/' + fileName + '.css';
     document.head.appendChild(link);
+    let script = document.createElement('script');
+    script.src = '/static/scripts/' + fileName + '.js';
+    script.type = 'module';
+    document.head.appendChild(script);
     content.innerHTML = pageHtml;
 }
 
 window.addEventListener('popstate', (event ) => {
-        let fileName = event.state.to;
-        console.log(fileName)
+    let pathName = window.location.pathname;
+    let value = pathName[pathName.length - 1] === '/' ? pathName.slice(0, -1) : pathName;
+        for (let [key, val] of routes.entries()) {
+        if (val === value) {
+            loadPage(key).catch(console.error);
+            break;
+        }
+    }
     }
 );
