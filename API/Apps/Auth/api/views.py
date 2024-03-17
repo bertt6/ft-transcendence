@@ -13,8 +13,10 @@ from .permissions import IsEmailVerified
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
+    print(request.data)
     serializer = RegisterSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST,headers={'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true'})
     send_email(request)
     return Response(serializer.data)
 

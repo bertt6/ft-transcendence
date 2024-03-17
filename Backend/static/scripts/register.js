@@ -30,7 +30,6 @@ const registerSubmit = async (event) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken,
         },
         body: JSON.stringify(formData),
     });
@@ -39,6 +38,8 @@ const registerSubmit = async (event) => {
         console.log(data);
     } else {
         console.error('Error:', response);
+        const data = await response.json();
+        console.log(data);
     }
     } catch (error) {
         console.error('Error:', error);
