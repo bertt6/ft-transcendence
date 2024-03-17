@@ -17,7 +17,7 @@ def send_email(user):
     receiver = 'yusufugurlu39@outlook.com'  # test
     subject = 'LAST DANCE Email Verification'
 
-    message = f'Hi! {user.username} your one-time verification code is {otp_code['otp']}'
+    message = f'Hi! {user} your one-time verification code is {otp_code['otp']}'
 
     from_email = 'mailtrap@demomailtrap.com'
     recipient_list = [receiver]

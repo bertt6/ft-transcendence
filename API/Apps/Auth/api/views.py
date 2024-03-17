@@ -17,7 +17,7 @@ def register(request):
     serializer = RegisterSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST,headers={'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true'})
-    send_email(request)
+    send_email(request.data)
     return Response(serializer.data)
 
 
