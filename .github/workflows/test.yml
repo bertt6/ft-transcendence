@@ -26,4 +26,5 @@ jobs:
       - name: Run Django test
         run: |
           cd API
+          pip install django
           python manage.py test
