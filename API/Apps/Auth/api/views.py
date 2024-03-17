@@ -15,7 +15,6 @@ from .permissions import IsEmailVerified
 def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    send_email(request)
     return Response(serializer.data)
 
 
@@ -74,6 +73,22 @@ def get_profile(request):
     user = request.user
     serializer = ProfileSerializer(user, many=False)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    username = request.data['username']
+    password = request.data['password']
+
+    user = User.objects.filter(username=username).first()
+
+    if user is None or not user.check_password(password):
+        raise AuthenticationFailed("Old password is not correct!")
+
+    user.set_password(password)
+    return  Response(status=status.HTTP_200_OK)
+
 
 
 '''
