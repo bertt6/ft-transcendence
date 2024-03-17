@@ -23,19 +23,6 @@ class RegisterSerializer(serializers.ModelSerializer):
                 {"password": "Password fields didn't match."})
         return attrs
 
-    def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-        )
-
-        user.set_password(validated_data['password'])
-        #sorulucak satır
-        #profile = Profile.objects.create(user=user, nickname=None, stats=Stats.objects.create())
-        user.save()
-
-        return user
-
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:

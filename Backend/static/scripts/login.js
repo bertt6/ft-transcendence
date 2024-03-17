@@ -7,7 +7,4 @@ async function login(event)
     return false;
 }
 
-window.onhashchange = function(event) {
-    console.log('hash changed' ,window.location.origin + " / "+ window.location.hash.split('#')[1]);
-    location.replace(window.location.origin + "/auth/"+ window.location.hash.split('#')[1]);
-}
+
