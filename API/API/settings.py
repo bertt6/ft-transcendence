@@ -27,10 +27,18 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_DOMAIN = "localhost"
 # Application definition
-
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = False
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

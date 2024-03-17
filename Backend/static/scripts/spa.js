@@ -1,3 +1,4 @@
+export const API_URL = 'http://localhost:8000/api/v1';
 const routes = new Map([
     ['login', '/auth/login'],
     ['register', '/auth/register'],
