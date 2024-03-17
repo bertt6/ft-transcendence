@@ -33,7 +33,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        print('asdasdas')
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -42,13 +41,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         profile = Profile.objects.create(
             user=user,
-            nickname=None,
-            stats=Stats.objects.create(total_games=0, total_points=0, total_assists=0)
+            nickname="",
+            stats=Stats.objects.create(total_games=0, total_wins=0, total_losses=0, points=0)
         )
         profile.save()
         user.save()
 
-        return profile
+        return user
 
     def update(self, instance, validated_data):
         print('asdasdasASDASDASDAS')

@@ -12,7 +12,7 @@ class Stats(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    nickname = models.CharField(max_length=100)
+    nickname = models.CharField(max_length=100, blank=True, null=True, default=None)
     stats = models.OneToOneField(Stats, on_delete=models.CASCADE)
     # messages = models.ManyToManyField('Message', blank=True)
     is_online = models.BooleanField(default=False)
