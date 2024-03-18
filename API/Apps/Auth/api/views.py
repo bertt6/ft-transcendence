@@ -44,7 +44,6 @@ def send_email_for_verification(request):
 
     if user is None or not user.check_password(password):
         raise AuthenticationFailed("Wrong Password or Username!")
-
     response = send_email(user)
     return response
 

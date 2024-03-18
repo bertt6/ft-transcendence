@@ -27,10 +27,10 @@ def generate_otp():
 
 def send_email(user):
     otp_code = generate_otp()
-    receiver = user.email  # test
+    receiver = "yusufugurlu39@outlook.com"  # test
     subject = 'LAST DANCE Email Verification'
     message = f'Hi! {user} your one-time verification code is {otp_code['otp']}'
-    from_email = 'mailtrap@demomailtrap.com'
+    from_email = 'kaanmesum@gmail.com'
     recipient_list = [receiver]
     send_mail(subject, message, from_email, recipient_list)
 
