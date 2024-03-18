@@ -1,0 +1,41 @@
+:root {
+  --main-color: #201433;
+}
+html,
+body {
+  height: 100%;
+  margin: 0 !important;
+}
+* {
+  font-family: "Pixelify Sans", sans-serif;
+  box-sizing: border-box;
+  color: white;
+}
+.main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+}
+.background {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("../public/disarda-fotor-202312242273.jpg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  height: 80%;
+  flex: 1;
+}
+img {
+  width: 100%;
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  width: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(43, 43, 43, 0.493);
+}

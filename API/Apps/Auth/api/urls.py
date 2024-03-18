@@ -3,10 +3,10 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from Apps.Auth.api.views import *
 
 urlpatterns = [
-    path('api/profile', get_profile, name='profile'),
-    path('api/register', register, name='register'),
-    path('api/login', login, name='login'),
-    path('api/send_email_for_verification', send_email_for_verification, name='email_verification'),
-    path('api/email_verification', email_verification, name='email_verification'),
-    path('api/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('register', register, name='register'),
+    path('login', login, name='login'),
+    path('send_email_for_verification', send_email_for_verification, name='email_verification'),
+    path('email_verification', email_verification, name='email_verification'),
+    path('change_password', change_password, name='change_password'),
+    path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
 ]

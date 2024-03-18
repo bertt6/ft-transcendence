@@ -94,3 +94,4 @@ class ProfileGameHistoryView(APIView):
         profile.game_history = request.data
         profile.save()
         return Response(profile.game_history, status=200)
+
