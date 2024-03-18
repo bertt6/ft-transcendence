@@ -6,7 +6,7 @@ from rest_framework.permissions import *
 from ..utils import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsEmailVerified
-from ...Profile.models import Profile, Tweet
+from ...Profile.models import Profile
 
 
 @api_view(['POST'])
@@ -23,9 +23,7 @@ def register(request):
 def login(request):
     user = User.objects.filter(username=request.data['username']).first()
 
-    # rest framework token api view
     refresh = RefreshToken.for_user(user)
-
     response = Response()
     response.set_cookie(key='jwt', value=str(refresh.access_token), httponly=True)
     response.data = {
@@ -34,7 +32,6 @@ def login(request):
         'username': user.username
     }
     response.status_code = 200
-
     return response
 
 
@@ -43,7 +40,6 @@ def login(request):
 def send_email_for_verification(request):
     username = request.data['username']
     password = request.data['password']
-
     user = User.objects.filter(username=username).first()
 
     if user is None or not user.check_password(password):
@@ -51,6 +47,7 @@ def send_email_for_verification(request):
 
     response = send_email(user)
     return response
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

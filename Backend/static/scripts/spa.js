@@ -2,6 +2,7 @@ export const API_URL = 'http://localhost:8000/api/v1';
 const routes = new Map([
     ['login', '/auth/login'],
     ['register', '/auth/register'],
+    ['email-verification', '/auth/email-verification'],
     ['logout', '/auth/logout'],
     ['home', '/home'],
     ['profile', '/profile'],
@@ -131,6 +132,7 @@ const pageHTML = new Map([
     '      </div>'],
     ['home', 'home.html'],
     ['profile', 'profile.html'],
+    ['email-verification', '<h1>asd</h1>'],
 ]);
 let elements = document.querySelectorAll("pong-redirect");
 for(let element of elements)
@@ -146,7 +148,7 @@ for(let element of elements)
     });
 }
 
-async function loadPage(fileName)
+export async function loadPage(fileName)
 {
     let pageHtml = pageHTML.get(fileName);
     let content = document.getElementById('main');
