@@ -1,8 +1,20 @@
 import pyotp
 from datetime import datetime, timedelta
+
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
+
+from Apps.Profile.models import Profile
+
+
+def token_expired_callback(token):
+    user_id = token['user_id']
+    user = User.objects.get(id=user_id)
+    profile = Profile.objects.get(user=user)
+    profile.is_verified = False
+    profile.save()
 
 
 def generate_otp():
