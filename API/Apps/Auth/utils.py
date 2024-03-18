@@ -1,7 +1,20 @@
 import pyotp
 from datetime import datetime, timedelta
+
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from rest_framework import status
 from rest_framework.response import Response
+
+from Apps.Profile.models import Profile
+
+
+def token_expired_callback(token):
+    user_id = token['user_id']
+    user = User.objects.get(id=user_id)
+    profile = Profile.objects.get(user=user)
+    profile.is_verified = False
+    profile.save()
 
 
 def generate_otp():
@@ -14,7 +27,7 @@ def generate_otp():
 
 def send_email(user):
     otp_code = generate_otp()
-    receiver = 'yusufugurlu39@outlook.com'  # test
+    receiver = user.email  # test
     subject = 'LAST DANCE Email Verification'
 
     message = f'Hi! {user} your one-time verification code is {otp_code['otp']}'
@@ -27,5 +40,6 @@ def send_email(user):
     response.data = {'otp': otp_code['otp'], 'valid_date': otp_code['valid_date']}
     response.set_cookie(key='otp', value=str(otp_code['otp']), httponly=True)
     response.set_cookie(key='otp_valid_date', value=str(otp_code['valid_date']), httponly=True)
+    response.status_code = status.HTTP_200_OK
 
     return response

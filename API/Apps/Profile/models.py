@@ -16,5 +16,5 @@ class Profile(models.Model):
     stats = models.OneToOneField(Stats, on_delete=models.CASCADE)
     # messages = models.ManyToManyField('Message', blank=True)
     is_online = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
     friends = models.ManyToManyField('Profile', blank=True)
-
