@@ -38,27 +38,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          cd API
-          pip install -r requirements.txt
-          pip install coverage
-
-      #- name: Lint with flake8
-      #  run: |
-      #    cd API
-      #    pip install flake8
-      #    flake8 .
+          pip install -r API/requirements.txt
+          pip install coverage black isort bandit
 
       - name: Format code with black
         run: |
-          cd API
-          pip install black
-          black .
+          black API
 
       - name: Sort imports with isort
         run: |
-          cd API
-          pip install isort
-          isort .
+          isort API
 
       - name: Run Django migrations
         run: |
@@ -68,15 +57,12 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          cd API
-          coverage run --source='.' manage.py test
+          coverage run --source='.' API/manage.py test
           coverage report -m
 
       - name: Check security with bandit
         run: |
-          cd API
-          pip install bandit
-          bandit -r .
+          bandit -r API
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v2
