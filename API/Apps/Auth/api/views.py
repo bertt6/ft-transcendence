@@ -13,11 +13,9 @@ from .permissions import IsEmailVerified
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
-    print(request.data)
     serializer = RegisterSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST,headers={'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true'})
-    send_email(request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
     return Response(serializer.data)
 
 
@@ -76,6 +74,22 @@ def get_profile(request):
     user = request.user
     serializer = ProfileSerializer(user, many=False)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    username = request.data['username']
+    password = request.data['password']
+
+    user = User.objects.filter(username=username).first()
+
+    if user is None or not user.check_password(password):
+        raise AuthenticationFailed("Old password is not correct!")
+
+    user.set_password(password)
+    return  Response(status=status.HTTP_200_OK)
+
 
 
 '''
