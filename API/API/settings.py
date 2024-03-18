@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'corsheaders',
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig",
+    'Apps.SocialMedia.apps.SocialmediaConfig'
 ]
 #asdafas
 MIDDLEWARE = [

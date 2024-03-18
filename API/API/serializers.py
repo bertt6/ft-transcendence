@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 from Apps.Profile.models import Profile, Stats
+from Apps.SocialMedia.models import Tweet
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -82,4 +83,16 @@ class ChangePasswordSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = '__all__'
+
+
+class TweetSerializer(serializers.ModelSerializer):
+    content = serializers.CharField(
+        write_only=True,
+        required=True,
+        max_length=250,
+    )
+
+    class Meta:
+        model = Tweet
         fields = '__all__'
