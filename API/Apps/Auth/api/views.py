@@ -6,7 +6,7 @@ from rest_framework.permissions import *
 from ..utils import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsEmailVerified
-from ...Profile.models import Profile, Tweet
+from ...Profile.models import Profile
 
 
 @api_view(['POST'])
