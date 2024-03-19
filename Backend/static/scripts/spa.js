@@ -133,6 +133,44 @@ const pageHTML = new Map([
     ['home', 'home.html'],
     ['profile', 'profile.html'],
     ['email-verification', '<h1>asd</h1>'],
+    ['main-page', "      <div\n" +
+    "        class=\"background container-fluid position-relative\"\n" +
+    "        style=\"padding: 0\"\n" +
+    "      >\n" +
+    "        <div class=\"multiplayer-menu\">\n" +
+    "          <button class=\"return-to-main\" id=\"multi-close-button\">X</button>\n" +
+    "          <div class=\"find-match\">\n" +
+    "            <img src=\"/public/Clouds 3.png\" alt=\"\" />\n" +
+    "          </div>\n" +
+    "          <div class=\"find-tournement\">\n" +
+    "            <img src=\"/public/Clouds 7.png\" alt=\"\" />\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"main-buttons-wrapper\">\n" +
+    "          <div class=\"profile-wrapper\">\n" +
+    "            <img src=\"https://picsum.photos/seed/picsum/200/300\" alt=\"\" />\n" +
+    "          </div>\n" +
+    "          <div class=\"play-wrapper\">\n" +
+    "            <div\n" +
+    "              style=\"\n" +
+    "                display: flex;\n" +
+    "                align-items: center;\n" +
+    "                justify-content: center;\n" +
+    "              \"\n" +
+    "            >\n" +
+    "              <h1>WELCOME TO PONG</h1>\n" +
+    "            </div>\n" +
+    "            <div class=\"button-wrapper\">\n" +
+    "              <button class=\"play-button\">LEADERBOARD</button>\n" +
+    "              <button class=\"play-button\" id=\"multiplayer-button\">\n" +
+    "                MULTIPLAYER\n" +
+    "              </button>\n" +
+    "              <button class=\"play-button\">SINGLEPLAYER</button>\n" +
+    "              <button class=\"play-button\">SOCIAL</button>\n" +
+    "            </div>\n" +
+    "          </div>\n" +
+    "        </div>\n" +
+    "      </div>"]
 ]);
 let elements = document.querySelectorAll("pong-redirect");
 for(let element of elements)
