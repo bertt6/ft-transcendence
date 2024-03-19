@@ -7,16 +7,6 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       fail-fast: false
       matrix:
@@ -36,10 +26,6 @@ jobs:
       - name: Run Django test
         run: |
           cd Backend
-          export PG_HOST=localhost
-          export PG_USER=${{ secrets.POSTGRES_USER }}
-          export PG_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          export PG_DB=${{ secrets.POSTGRES_DB }}
           pip install -r requirements.txt
           python manage.py makemigrations
           python manage.py migrate
