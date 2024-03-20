@@ -1,10 +1,42 @@
 export const API_URL = 'http://localhost:8000/api/v1';
+function setCookie(name,value,days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i=0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0)===' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
 const routes = new Map([
-    ['login', '/auth/login'],
-    ['register', '/auth/register'],
-    ['email-verification', '/auth/email-verification'],
+    ['login', {
+    auth_required:false,
+    url: "/auth/login",
+    }],
+    ['register', {
+    auth_required: false,
+        url: "/auth/register"
+    }],
+    ['email-verification',
+        {
+            auth_required: false,
+            url: "/auth/email-verification",
+        }],
     ['logout', '/auth/logout'],
-    ['home', '/home'],
+    ['home', {
+    auth_required: false,
+        url: '/'
+    }],
     ['profile', '/profile'],
 ]);
 const pageHTML = new Map([
@@ -132,8 +164,8 @@ const pageHTML = new Map([
     '      </div>'],
     ['home', 'home.html'],
     ['profile', 'profile.html'],
-    ['email-verification', '<h1>asd</h1>'],
-    ['main-page', "      <div\n" +
+    ['email-verification'],
+    ['home', "      <div\n" +
     "        class=\"background container-fluid position-relative\"\n" +
     "        style=\"padding: 0\"\n" +
     "      >\n" +
@@ -181,13 +213,22 @@ for(let element of elements)
         let route = routes.get(fileName);
         if(!route)
             throw new Error('No route found for ' + fileName);
-        history.pushState({to: fileName}, '', window.location.origin + route);
-        loadPage(fileName).catch(console.error);
+        history.pushState({to: fileName}, '', window.location.origin + route.url);
+        loadPage(fileName);
     });
 }
-
-export async function loadPage(fileName)
+function checkAuth()
 {
+    if(!getCookie('access_token'))
+    {
+        history.pushState({to: 'login'}, '', window.location.origin + '/auth/login');
+        loadPage('login');
+    }
+}
+export function loadPage(fileName)
+{
+    if(routes.get(fileName).auth_required === true)
+        checkAuth();
     let pageHtml = pageHTML.get(fileName);
     let content = document.getElementById('main');
     let link = document.createElement('link');
@@ -206,8 +247,8 @@ window.addEventListener('popstate', (event ) => {
     let pathName = window.location.pathname;
     let value = pathName[pathName.length - 1] === '/' ? pathName.slice(0, -1) : pathName;
         for (let [key, val] of routes.entries()) {
-        if (val === value) {
-            loadPage(key).catch(console.error);
+        if (val.url === value) {
+            loadPage(key);
             break;
         }
     }

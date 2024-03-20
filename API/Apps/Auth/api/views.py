@@ -55,12 +55,8 @@ def email_verification(request):
     verification_code = request.data['verification_code']
     cookie_verification_code = request.COOKIES.get('otp', '')
     cookie_code_valid_date = request.COOKIES.get('otp_expired_date', '')
-
     user = User.objects.filter(username=request.data['username']).first()
     profile = user.profile
-
-    print(datetime.now())
-
     if verification_code != cookie_verification_code:
         raise AuthenticationFailed("Wrong verification code!")
     elif datetime.strptime(cookie_code_valid_date, "%Y-%m-%d %H:%M:%S.%f") < datetime.now():
