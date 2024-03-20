@@ -1,3 +1,4 @@
+import time
 from datetime import timezone
 from API.serializers import RegisterSerializer, ChangePasswordSerializer
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
@@ -58,9 +59,11 @@ def email_verification(request):
     user = User.objects.filter(username=request.data['username']).first()
     profile = user.profile
 
+    print(datetime.now())
+
     if verification_code != cookie_verification_code:
         raise AuthenticationFailed("Wrong verification code!")
-    elif cookie_code_valid_date < timezone.now():
+    elif datetime.strptime(cookie_code_valid_date, "%Y-%m-%d %H:%M:%S.%f") < datetime.now():
         raise ValidationError("The code has expired!")
 
     profile.is_verified = True

@@ -37,7 +37,7 @@ def send_email(user):
     response = Response()
     response.data = {'otp': otp_code['otp'], 'otp_expired_date': otp_code['otp_expired_date']}
     response.set_cookie(key='otp', value=str(otp_code['otp']), httponly=True)
-    response.set_cookie(key='otp_expired_date', value=str(otp_code['valid_date']), httponly=True)
+    response.set_cookie(key='otp_expired_date', value=str(otp_code['otp_expired_date']), httponly=True)
     response.status_code = status.HTTP_200_OK
 
     return response
