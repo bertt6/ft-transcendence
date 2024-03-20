@@ -78,8 +78,3 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         return attrs
 
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = '__all__'

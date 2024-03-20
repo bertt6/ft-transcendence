@@ -20,9 +20,9 @@ def token_expired_callback(token):
 def generate_otp():
     totp = pyotp.TOTP(pyotp.random_base32(), interval=60)
     otp = totp.now()
-    valid_date = datetime.now() + timedelta(minutes=1)
+    expired_date = datetime.now() + timedelta(minutes=1)
 
-    return {'otp': otp, 'valid_date': valid_date}
+    return {'otp': otp, 'otp_expired_date': expired_date}
 
 
 def send_email(user):
@@ -35,9 +35,9 @@ def send_email(user):
     send_mail(subject, message, from_email, recipient_list)
 
     response = Response()
-    response.data = {'otp': otp_code['otp'], 'valid_date': otp_code['valid_date']}
+    response.data = {'otp': otp_code['otp'], 'otp_expired_date': otp_code['otp_expired_date']}
     response.set_cookie(key='otp', value=str(otp_code['otp']), httponly=True)
-    response.set_cookie(key='otp_valid_date', value=str(otp_code['valid_date']), httponly=True)
+    response.set_cookie(key='otp_expired_date', value=str(otp_code['otp_expired_date']), httponly=True)
     response.status_code = status.HTTP_200_OK
 
     return response
