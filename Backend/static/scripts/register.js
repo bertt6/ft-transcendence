@@ -12,6 +12,7 @@ const registerSubmit = async (event) => {
     const button = document.getElementById('register-button');
     const spinner = new Spinner({},button);
     spinner.render();
+    button.disabled = true;
 try{
     const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
