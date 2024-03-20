@@ -19,7 +19,7 @@ async function loginForm(event)
         });
         if (response.ok) {
             let data = await response.json();
-            loadPage('email-verification').catch(console.error);
+            loadPage('email-verification');
         } else {
             console.error('Error:', response);
             let data = await response.json();

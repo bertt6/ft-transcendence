@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{% static 'styles/register.css' %}" />
     <link rel="stylesheet" href="{% static 'styles/main.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/utils.css' %}" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -22,7 +23,7 @@
     <title>Login</title>
   </head>
   <body>
-    <main class="main">
+    <main class="main" id="main">
       <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
           <form class="register-wrapper p-5 gap-2" id="register-form">{% csrf_token %}
@@ -73,7 +74,6 @@
                 placeholder="EMAIL"
                 id="email"
                 required
-                oninvalid="this.setCustomValidity('Please enter valid email')"
               />
             </div>
             <div
@@ -86,7 +86,9 @@
               "
             >
               <div>
-                <button class="register-button">REGISTER</button>
+                <button class="register-button" id="register-button">
+                    REGISTER
+                </button>
               </div>
             </div>
           </form>
@@ -94,5 +96,7 @@
       </div>
     </main>
     <script src="{% static 'scripts/register.js' %}" type="module"></script>
+    <script src="{% static 'components/spinner.js' %}" type="module"></script>
+
   </body>
 </html>
