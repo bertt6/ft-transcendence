@@ -55,9 +55,10 @@ def email_verification(request):
     verification_code = request.data['verification_code']
     cookie_verification_code = request.COOKIES.get('otp', '')
     cookie_code_valid_date = request.COOKIES.get('otp_expired_date', '')
-    user = User.objects.filter(username=request.data['username']).first()
+    user = User.objects.get(username=request.data['username'])
     profile = user.profile
     if verification_code != cookie_verification_code:
+        print(verification_code, cookie_verification_code, cookie_code_valid_date)
         raise AuthenticationFailed("Wrong verification code!")
     elif datetime.strptime(cookie_code_valid_date, "%Y-%m-%d %H:%M:%S.%f") < datetime.now():
         raise ValidationError("The code has expired!")

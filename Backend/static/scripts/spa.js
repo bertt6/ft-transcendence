@@ -1,5 +1,5 @@
 export const API_URL = 'http://localhost:8000/api/v1';
-function setCookie(name,value,days) {
+export function setCookie(name,value,days) {
     let expires = "";
     if (days) {
         const date = new Date();
@@ -8,7 +8,7 @@ function setCookie(name,value,days) {
     }
     document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
-function getCookie(name) {
+export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
     for(let i=0; i < ca.length; i++) {
@@ -24,8 +24,7 @@ const routes = new Map([
     url: "/auth/login",
     }],
     ['register', {
-    auth_required: false,
-        url: "/auth/register"
+    auth_required: false, url: "/auth/register"
     }],
     ['email-verification',
         {
@@ -37,7 +36,10 @@ const routes = new Map([
     auth_required: false,
         url: '/'
     }],
-    ['profile', '/profile'],
+    ['profile', {
+    auth_required: true,
+        url: '/profile'
+    }],
 ]);
 const pageHTML = new Map([
     ['login',"    <div class=\"background container-fluid\">\n" +
@@ -162,7 +164,134 @@ const pageHTML = new Map([
     '          </form>\n' +
     '        </div>\n' +
     '      </div>'],
-    ['home', 'home.html'],
+    ['profile', `      <div
+        class="background container-fluid social-background"
+        style="padding: 0"
+      >
+        <div class="profile-wrapper">
+          <div class="profile-info">
+            <div class="profile-info-wrapper">
+              <div class="profile-photo">
+                <img
+                  src="https://picsum.photos/id/237/200/300"
+                  alt=""
+                  class=""
+                />
+              </div>
+              <div>
+                <h1>Name</h1>
+                <span>first last name</span>
+              </div>
+              <div>
+                <p>
+                  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nam
+                  tempora nulla ea corrupti animi consequuntur magnam fugiat,
+                  qui ipsa? Quaerat maxime iure facere necessitatibus
+                  doloremque, vitae non sint ut nobis.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="profile-data">
+            <div class="data-headers">
+              <div class="header-wrapper">
+                <span>MATCH HISTORY</span>
+              </div>
+              <div class="header-wrapper"><span> FRIENDS </span></div>
+            </div>
+            <div class="friends-wrapper" style="display: none">
+              <div class="friend-wrapper">
+                <div class="friend-info">
+                  <div class="friend-image">
+                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                  </div>
+                  <div class="friend-data">
+                    <h6>NAME</h6>
+                    <span>First Last name</span>
+                  </div>
+                </div>
+                <div class="friend-more">
+                  <div><img src="/public/image.svg" alt="" /></div>
+                  <div><img src="/public/chat-bubble.svg" alt="" /></div>
+                  <div><img src="/public/more.svg" alt="" /></div>
+                </div>
+              </div>
+              <div class="friend-wrapper">
+                <div class="friend-info">
+                  <div class="friend-image">
+                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                  </div>
+                  <div class="friend-data">
+                    <h6>NAME</h6>
+                    <span>First Last name</span>
+                  </div>
+                </div>
+                <div class="friend-more">
+                  <div><img src="/public/image.svg" alt="" /></div>
+                  <div><img src="/public/chat-bubble.svg" alt="" /></div>
+                  <div><img src="/public/more.svg" alt="" /></div>
+                </div>
+              </div>
+            </div>
+            <div class="histories-wrapper">
+              <div class="history-wrapper">
+                <div class="friend-info">
+                  <div class="history-type"><h5>1v1</h5></div>
+                </div>
+                <div class="history-data">
+                  <h5>BSAMLI</h5>
+                  <h5>VS</h5>
+                  <h5>OFIRAT</h5>
+                </div>
+                <div class="history-score">
+                  <h5>4</h5>
+                  <h5>-</h5>
+                  <h5>0</h5>
+                </div>
+                <div>
+                  <h5>1 DAY AGO</h5>
+                </div>
+              </div>
+              <div class="history-wrapper">
+                <div class="friend-info">
+                  <div class="history-type"><h5>1v1</h5></div>
+                </div>
+                <div class="history-data">
+                  <h5>BSAMLI</h5>
+                  <h5>VS</h5>
+                  <h5>OFIRAT</h5>
+                </div>
+                <div class="history-score">
+                  <h5>4</h5>
+                  <h5>-</h5>
+                  <h5>0</h5>
+                </div>
+                <div>
+                  <h5>1 DAY AGO</h5>
+                </div>
+              </div>
+              <div class="history-wrapper">
+                <div>
+                  <h5>Tournament</h5>
+                </div>
+                <div class="history-data">
+                  <h5>BSAMLI</h5>
+                  <h5>VS</h5>
+                  <h5>OFIRAT</h5>
+                </div>
+                <div class="history-score">
+                  <h5>4</h5>
+                  <h5>-</h5>
+                  <h5>0</h5>
+                </div>
+                <div>
+                  <h5>1 DAY AGO</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`],
     ['profile', 'profile.html'],
     ['email-verification'],
     ['home', "      <div\n" +
@@ -219,7 +348,7 @@ for(let element of elements)
 }
 function checkAuth()
 {
-    if(!getCookie('access_token'))
+    if(!getCookie('tokens'))
     {
         history.pushState({to: 'login'}, '', window.location.origin + '/auth/login');
         loadPage('login');
@@ -229,6 +358,7 @@ export function loadPage(fileName)
 {
     if(routes.get(fileName).auth_required === true)
         checkAuth();
+    history.pushState({to: fileName}, '', window.location.origin + routes.get(fileName).url);
     let pageHtml = pageHTML.get(fileName);
     let content = document.getElementById('main');
     let link = document.createElement('link');
