@@ -12,9 +12,26 @@ const registerSubmit = async (event) => {
     const button = document.getElementById('register-button');
     const spinner = new Spinner({},button);
     spinner.render();
-    setTimeout(() => {
-        spinner.setState({isError: true});
-    }, 5000);
+try{
+    const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+    });
+    if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        loadPage('login');
+    } else {
+        console.error('Error:', response);
+        const data = await response.json();
+        console.log(data);
+    }
+    } catch (error) {
+        console.error('Error:', error);
+    }
 }
 const App = async () => {
     const form = document.getElementById('register-form');
