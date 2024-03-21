@@ -18,3 +18,4 @@ class Profile(models.Model):
     is_online = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     friends = models.ManyToManyField('Profile', blank=True)
+    bio = models.TextField(blank=True, null=True, default=None)

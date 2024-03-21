@@ -7,7 +7,7 @@ export default class BaseComponent {
     render() {
       console.log(this.html, this.parentElement)
         if(this.parentElement && this.html){
-            this.parentElement.innerHTML += this.html;
+            this.parentElement.innerHTML = this.html;
         }
     }
 

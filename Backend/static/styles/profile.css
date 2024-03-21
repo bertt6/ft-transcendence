@@ -1,9 +1,8 @@
 .profile-wrapper {
   display: flex;
   height: 100%;
-  margin: auto;
   width: 80%;
-  margin-top: 2rem;
+  margin: 2rem auto auto;
   gap: 5rem;
 }
 .profile-photo {
@@ -23,6 +22,7 @@
   flex-direction: column;
   align-items: center;
   max-width: 300px;
+  position: relative;
 }
 .profile-data {
   flex: 1;
@@ -106,10 +106,39 @@
   justify-content: space-between;
   gap: 4rem;
   align-items: center;
-  justify-content: end;
 }
 .history-score {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.profile-edit{
+  position: absolute;
+  right: 0;
+}
+.profile-edit img{
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+}
+.pong-button{
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  color: white;
+  outline: none ;
+  border:none;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+}
+.transparent-input {
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+  padding: 0.5rem;
+  border-bottom: 1px solid white;
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  outline: none;
 }

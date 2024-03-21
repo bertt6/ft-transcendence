@@ -22,7 +22,7 @@ const endpoint = `${API_URL}/token/temp-token`;
             let data = await response.json();
             //loadPage('email-verification'); after finishing html
             loadPage('home');
-            setCookie('tokens', JSON.stringify(data));
+            setCookie('tokens', JSON.stringify(data), 1);
         } else {
             console.error('Error:', response);
             let data = await response.json();
