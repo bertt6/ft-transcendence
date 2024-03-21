@@ -22,7 +22,7 @@ class ProfileInfo extends BaseComponent
                 X
                     </button>
                 </div>
-        <form style="display: flex; flex-direction: column; align-items: center">
+        <form style="display: flex; flex-direction: column; align-items: center" id="update-form">
               <div class="profile-photo">
                 <img
                   src="https://picsum.photos/id/237/200/300"
@@ -31,17 +31,17 @@ class ProfileInfo extends BaseComponent
                 />
               </div>
               <div>
-                <input class="transparent-input" value="${nickname ? nickname: "no nickname is set!"}"/>
-                <input class="transparent-input"  value="${first_name ? first_name: "no first name is set"}">
+                <input class="transparent-input" id="profile-nickname" value="${nickname ? nickname: "no nickname is set!"}"/>
+                <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name: "no first name is set"}">
               </div>
               <div>
-                <textarea cols="30" rows="5"  class="transparent-input">
+                <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">
                 ${bio ? bio : 'No bio available'}
-</textarea>
+    </textarea>
                 
               </div>
+        <button class="pong-button" id="save-button" type="submit">save</button>
             </form>
-        <button class="pong-button" id="save-button">save</button>
         </div>
         `
     }
@@ -72,8 +72,40 @@ class ProfileInfo extends BaseComponent
                 </p>
               </div>`
     }
+    updateProfile = async (formData) => {
+        const tokens = JSON.parse(getCookie('tokens'));
+        try
+        {
+            let response = await fetch(`${API_URL}/profile`,{
+                method:'PUT',
+                headers:{
+                    'Content-Type':'application/json',
+                    'Authorization':`Bearer ${tokens.access}`
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+            this.setState({...this.state, profile:data});
+        }
+        catch(error)
+        {
+            console.error('Error:', error);
+        }
+    }
     render() {
         this.parentElement.innerHTML = this.state.isEditing ? this.handleEditHTML() : this.handleHTML();
+        const updateForm = document.getElementById('update-form');
+        if(updateForm)
+        {
+            updateForm.addEventListener('submit', async (e) => {
+                e.preventDefault()
+                let formData = {
+                    nickname: document.getElementById('profile-nickname').value,
+                    bio: document.getElementById('profile-bio').value
+                }
+                await this.updateProfile(formData);
+            });
+        }
     }
     setState(newState) {
         this.state = { ...this.state, ...newState };

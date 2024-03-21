@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from .Serializers import ProfileGetSerializer, ProfilePostSerializer
 
+
 class ProfileView(APIView):
     def get(self, request):
         profile = Profile.objects.all()
