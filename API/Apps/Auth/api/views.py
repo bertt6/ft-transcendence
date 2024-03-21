@@ -1,5 +1,3 @@
-import time
-from datetime import timezone
 from API.serializers import RegisterSerializer, ChangePasswordSerializer
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.decorators import api_view, permission_classes
@@ -7,7 +5,6 @@ from rest_framework.permissions import *
 from ..utils import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsEmailVerified
-from ...Profile.models import Profile
 
 
 @api_view(['POST'])
@@ -58,8 +55,6 @@ def email_verification(request):
 
     user = User.objects.filter(username=request.data['username']).first()
     profile = user.profile
-
-    print(datetime.now())
 
     if verification_code != cookie_verification_code:
         raise AuthenticationFailed("Wrong verification code!")

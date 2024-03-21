@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from rest_framework.response import Response
-from .serializers import TweetPostSerializer, TweetGetSerializer, CommentGetSerializer, \
+from .serializers import TweetPostSerializer, TweetGetSerializer, \
     CommentPostSerializer, TweetGetWithDetailSerializer
 from ..models import Tweet, Comment
 
