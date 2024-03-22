@@ -37,6 +37,8 @@
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
   padding: 1rem 2rem;
   cursor: pointer;
+  outline: none;
+  border: none;
 }
 .header-wrapper:hover {
   background: linear-gradient(rgba(212, 112, 46, 0.7), rgba(212, 112, 46, 0.7));

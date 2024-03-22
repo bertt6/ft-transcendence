@@ -82,8 +82,8 @@ class ProfileStatsView(APIView):
 
 
 class ProfileGameHistoryView(APIView):
-    def get(self, request,profile_id):
-        profile = Profile.objects.get(id=profile_id)
+    def get(self, request):
+        profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
         history = profile.game_history
@@ -104,4 +104,5 @@ class ProfileGameHistoryView(APIView):
         profile.game_history = request.data
         profile.save()
         return Response(profile.game_history, status=200)
+
 

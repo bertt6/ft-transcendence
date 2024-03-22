@@ -5,11 +5,8 @@ export default class BaseComponent {
     this.html = null;
   }
     render() {
-      console.log(this.html, this.parentElement)
-        if(this.parentElement && this.html){
-            this.parentElement.innerHTML = this.html;
-        }
+    if(this.html === null)
+      throw new Error('Component Should have an html');
+    this.parentElement.innerHTML = this.html;
     }
-
-
 }

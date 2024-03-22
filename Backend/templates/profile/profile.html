@@ -22,7 +22,7 @@
     <title>profile</title>
   </head>
   <body>
-    <main class="main">
+    <main class="main" id="main">
       <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -57,12 +57,13 @@
           </div>
           <div class="profile-data">
             <div class="data-headers">
-              <div class="header-wrapper">
+              <button class="header-wrapper" id="history-button">
                 <span>MATCH HISTORY</span>
-              </div>
-              <div class="header-wrapper"><span> FRIENDS </span></div>
+              </button>
+              <button class="header-wrapper" id="friends-button"><span> FRIENDS </span></button>
             </div>
-            <div class="friends-wrapper" style="display: none">
+          <div id="data-wrapper">
+                <div class="friends-wrapper" style="display: none">
               <div class="friend-wrapper">
                 <div class="friend-info">
                   <div class="friend-image">
@@ -153,9 +154,11 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
     </main>
      <script src="{% static 'scripts/profile.js' %}" type="module"></script>
+    <script src="{% static 'components/Notification.js' %}" type=module></script>
   </body>
 </html>

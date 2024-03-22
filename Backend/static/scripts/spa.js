@@ -374,7 +374,11 @@ export function loadPage(fileName)
 }
 
 window.addEventListener('popstate', (event ) => {
+    if(event === null)
+        return
+    console.log(event)
     let pathName = window.location.pathname;
+    console.log(pathName);
     let value = pathName[pathName.length - 1] === '/' ? pathName.slice(0, -1) : pathName;
         for (let [key, val] of routes.entries()) {
         if (val.url === value) {

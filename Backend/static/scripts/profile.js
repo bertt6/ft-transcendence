@@ -1,10 +1,44 @@
 import BaseComponent from "../components/Component.js";
 import {API_URL, getCookie} from "./spa.js";
+import {notify} from "../components/Notification.js";
 
 class History extends BaseComponent
 {
     constructor(state,parentElement = null) {
         super(state,parentElement);
+        this.handleHTML()
+    }
+    handleHTML()
+    {
+        console.log(this.state.histories)
+        return `
+            <div class="histories-wrapper">
+            ${this.state.histories.map(history => `
+              <div class="history-wrapper">
+                <div class="friend-info">
+                  <div class="history-type"><h5>1v1</h5></div>
+                </div>
+                <div class="history-data">
+                  <h5>BSAMLI</h5>
+                  <h5>VS</h5>
+                  <h5>OFIRAT</h5>
+                </div>
+                <div class="history-score">
+                  <h5>4</h5>
+                  <h5>-</h5>
+                  <h5>0</h5>
+                </div>
+                <div>
+                  <h5>1 DAY AGO</h5>
+                </div>
+              </div>
+            `)}
+            </div>
+          </div>
+`
+    }
+    render() {
+        this.parentElement.innerHTML = this.handleHTML();
     }
 }
 class ProfileInfo extends BaseComponent
@@ -85,11 +119,13 @@ class ProfileInfo extends BaseComponent
                 body: JSON.stringify(formData)
             });
             const data = await response.json();
+            notify('Profile updated', 3, 'success');
             this.setState({...this.state, profile:data});
         }
         catch(error)
         {
             console.error('Error:', error);
+            notify('Error updating profile', 3, 'error')
         }
     }
     render() {
@@ -142,8 +178,35 @@ async function fetchProfile()
         console.error('Error:', error);
     }
 }
+function assignDataRouting()
+{
+    const historyButton = document.getElementById('history-button');
+    const friendsButton  = document.getElementById('friends-button');
+    historyButton.addEventListener('click', (e) => {
+        history.replaceState(null, null, '#history')
+        handleRouting()
+    });
+    friendsButton.addEventListener('click', (e) => {
+        history.replaceState(null, null, '#friends')
+        handleRouting()
+    });
+}
+function handleRouting()
+{
+    const hash = location.hash;
+    const parentElement = document.getElementById('data-wrapper');
+    if(hash === '#history')
+    {
+        const history = new History({histories: [1]},parentElement);
+        history.render();
+    }
+
+}
 const App = async () => {
     await fetchProfile();
+    assignDataRouting();
+    handleRouting();
 }
+
 
 document.addEventListener('DOMContentLoaded', App);
