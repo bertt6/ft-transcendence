@@ -63,12 +63,12 @@ class Friends extends BaseComponent
                 </div>
                 <div class="friend-more">
                   <div><img src="/static/public/image.svg" alt="" /></div>
-                  <div><img src="/static/public/chat-bubble.svg" alt="" /></div>
+                  <div><img src="/static/public/chat-bubble.svg"/></div>
                   <div><img src="/static/public/more.svg" alt="" /></div>
                 </div>
               </div>
-            </div>
-            `)}
+            `).join('')}
+          </div>
         `
     }
     setState(newState) {
