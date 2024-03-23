@@ -2,11 +2,10 @@ from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
 from ..models import Profile
 from rest_framework.response import Response
 
-from .Serializers import ProfileGetSerializer, ProfilePostSerializer
+from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer
 
 
 class ProfileView(APIView):
@@ -80,7 +79,8 @@ class ProfileStatsView(APIView):
         profile.save()
         return Response(profile.stats, status=200)
 
-
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class ProfileGameHistoryView(APIView):
     def get(self, request):
         profile = request.user.profile
@@ -106,3 +106,10 @@ class ProfileGameHistoryView(APIView):
         return Response(profile.game_history, status=200)
 
 
+class ProfileFriendsView(APIView):
+    def get(self, request):
+        profile = request.user.profile
+        if not profile:
+            return Response({"error": "Profile not found"}, status=404)
+        serializer = ProfileFriendsSerializer(profile.friends, many=True)
+        return Response(serializer.data, status=200)

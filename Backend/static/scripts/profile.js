@@ -10,7 +10,6 @@ class History extends BaseComponent
     }
     handleHTML()
     {
-        console.log(this.state.histories)
         return `
             <div class="histories-wrapper">
             ${this.state.histories.map(history => `
@@ -39,6 +38,42 @@ class History extends BaseComponent
     }
     render() {
         this.parentElement.innerHTML = this.handleHTML();
+    }
+}
+class Friends extends BaseComponent
+{
+    constructor(state,parentElement = null) {
+        super(state,parentElement);
+        this.html = this.handleHTML()
+    }
+    handleHTML()
+    {
+        return `
+            <div class="friends-wrapper">
+            ${this.state.friends.map(friend => `
+              <div class="friend-wrapper">
+                <div class="friend-info">
+                  <div class="friend-image">
+                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                  </div>
+                  <div class="friend-data">
+                    <h6>${friend.user.first_name.length  > 0 ?friend.user.first_name : "No name is set for this user" }</h6>
+                    <span>${friend.nickname.length > 0 ? friend.nickname: friend.user.username}</span>
+                  </div>
+                </div>
+                <div class="friend-more">
+                  <div><img src="/static/public/image.svg" alt="" /></div>
+                  <div><img src="/static/public/chat-bubble.svg" alt="" /></div>
+                  <div><img src="/static/public/more.svg" alt="" /></div>
+                </div>
+              </div>
+            </div>
+            `)}
+        `
+    }
+    setState(newState) {
+        this.state = { ...this.state, ...newState };
+        this.render();
     }
 }
 class ProfileInfo extends BaseComponent
@@ -176,9 +211,10 @@ async function fetchProfile()
     catch(error)
     {
         console.error('Error:', error);
+        notify('Error fetching profile', 3, 'error')
     }
 }
-function assignDataRouting()
+async function assignDataRouting()
 {
     const historyButton = document.getElementById('history-button');
     const friendsButton  = document.getElementById('friends-button');
@@ -191,7 +227,27 @@ function assignDataRouting()
         handleRouting()
     });
 }
-function handleRouting()
+async function fetchFriends()
+{
+    try{
+        let response = await fetch(`${API_URL}/profile/friends`,{
+            method:'GET',
+            headers:{
+                'Content-Type':'application/json',
+                'Authorization':`Bearer ${JSON.parse(getCookie('tokens')).access}`
+        }
+    });
+    const data = await response.json();
+    console.log(data);
+    return data;
+    }
+    catch (error)
+    {
+        console.error('Error:', error);
+        notify('Error fetching friends', 3, 'error')
+    }
+}
+async function handleRouting()
 {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
@@ -200,12 +256,18 @@ function handleRouting()
         const history = new History({histories: [1]},parentElement);
         history.render();
     }
+    if(hash === '#friends')
+    {
+        let data = await fetchFriends();
+        const friends = new Friends({friends:data},parentElement);
+        friends.render();
+    }
 
 }
 const App = async () => {
     await fetchProfile();
-    assignDataRouting();
-    handleRouting();
+    await assignDataRouting();
+    await handleRouting();
 }
 
 
