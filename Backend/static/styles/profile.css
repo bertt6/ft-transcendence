@@ -146,13 +146,13 @@
   outline: none;
 }
 
-.profile-data {
+.skeleton.profile-data {
   border-radius: 1rem;
 }
-.profile-data h1 {
+.skeleton.profile-data {
   min-width: 200px;
 }
-.profile-bio {
+ .skeleton.profile-bio {
   min-width: 200px;
   min-height: 100px;
   border-radius: 1rem;
