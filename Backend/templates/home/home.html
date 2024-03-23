@@ -18,6 +18,7 @@
       href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap"
       rel="stylesheet"
     />
+    <title>Home Page</title>
   </head>
   <body>
     <main class="main">
@@ -35,9 +36,9 @@
           </div>
         </div>
         <div class="main-buttons-wrapper">
-          <div class="profile-wrapper">
+          <pong-redirect class="profile-wrapper" href="/profile">
             <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
-          </div>
+          </pong-redirect>
           <div class="play-wrapper">
             <div
               style="
@@ -60,6 +61,7 @@
         </div>
       </div>
       <script src="{% static 'scripts/home.js' %}" type="module"></script>
+        <script src="{% static 'scripts/spa.js' %}" type="module"></script>
     </main>
   </body>
 </html>

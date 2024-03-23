@@ -201,7 +201,6 @@ async function fetchProfile()
     const data = await response.json();
     const profileParentElement = document.getElementById('profile-info');
     const profile = new ProfileInfo({profile:data,isEditing:false},profileParentElement);
-
     profile.render();
     const editButton = document.getElementById('edit-button');
         editButton.addEventListener('click', () => {
@@ -238,7 +237,6 @@ async function fetchFriends()
         }
     });
     const data = await response.json();
-    console.log(data);
     return data;
     }
     catch (error)

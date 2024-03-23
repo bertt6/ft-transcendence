@@ -164,42 +164,36 @@ const pageHTML = new Map([
     '          </form>\n' +
     '        </div>\n' +
     '      </div>'],
-    ['profile', `      <div
+    ['profile', `       <div
         class="background container-fluid social-background"
         style="padding: 0"
       >
         <div class="profile-wrapper">
-          <div class="profile-info">
+          <div class="profile-info" id="profile-info">
             <div class="profile-info-wrapper">
-              <div class="profile-photo">
-                <img
-                  src="https://picsum.photos/id/237/200/300"
-                  alt=""
-                  class=""
-                />
+                <div class="profile-edit">
+                    <button class="pong-button" id="edit-button">
+                        <img src="{% static '/public/edit.svg' %}" alt=""></button>
+                </div>
+              <div class="profile-photo skeleton"></div>
+              <div class="skeleton profile-data">
+                <h1></h1>
+                <span></span>
               </div>
-              <div>
-                <h1>Name</h1>
-                <span>first last name</span>
-              </div>
-              <div>
-                <p>
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nam
-                  tempora nulla ea corrupti animi consequuntur magnam fugiat,
-                  qui ipsa? Quaerat maxime iure facere necessitatibus
-                  doloremque, vitae non sint ut nobis.
-                </p>
+              <div class="profile-bio skeleton">
+                <p></p>
               </div>
             </div>
           </div>
           <div class="profile-data">
             <div class="data-headers">
-              <div class="header-wrapper">
+              <button class="header-wrapper" id="history-button">
                 <span>MATCH HISTORY</span>
-              </div>
-              <div class="header-wrapper"><span> FRIENDS </span></div>
+              </button>
+              <button class="header-wrapper" id="friends-button"><span> FRIENDS </span></button>
             </div>
-            <div class="friends-wrapper" style="display: none">
+          <div id="data-wrapper">
+                <div class="friends-wrapper" style="display: none">
               <div class="friend-wrapper">
                 <div class="friend-info">
                   <div class="friend-image">
@@ -290,62 +284,51 @@ const pageHTML = new Map([
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>`],
     ['profile', 'profile.html'],
     ['email-verification'],
-    ['home', "      <div\n" +
-    "        class=\"background container-fluid position-relative\"\n" +
-    "        style=\"padding: 0\"\n" +
-    "      >\n" +
-    "        <div class=\"multiplayer-menu\">\n" +
-    "          <button class=\"return-to-main\" id=\"multi-close-button\">X</button>\n" +
-    "          <div class=\"find-match\">\n" +
-    "            <img src=\"/public/Clouds 3.png\" alt=\"\" />\n" +
-    "          </div>\n" +
-    "          <div class=\"find-tournement\">\n" +
-    "            <img src=\"/public/Clouds 7.png\" alt=\"\" />\n" +
-    "          </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"main-buttons-wrapper\">\n" +
-    "          <div class=\"profile-wrapper\">\n" +
-    "            <img src=\"https://picsum.photos/seed/picsum/200/300\" alt=\"\" />\n" +
-    "          </div>\n" +
-    "          <div class=\"play-wrapper\">\n" +
-    "            <div\n" +
-    "              style=\"\n" +
-    "                display: flex;\n" +
-    "                align-items: center;\n" +
-    "                justify-content: center;\n" +
-    "              \"\n" +
-    "            >\n" +
-    "              <h1>WELCOME TO PONG</h1>\n" +
-    "            </div>\n" +
-    "            <div class=\"button-wrapper\">\n" +
-    "              <button class=\"play-button\">LEADERBOARD</button>\n" +
-    "              <button class=\"play-button\" id=\"multiplayer-button\">\n" +
-    "                MULTIPLAYER\n" +
-    "              </button>\n" +
-    "              <button class=\"play-button\">SINGLEPLAYER</button>\n" +
-    "              <button class=\"play-button\">SOCIAL</button>\n" +
-    "            </div>\n" +
-    "          </div>\n" +
-    "        </div>\n" +
-    "      </div>"]
+    ['home', `      <div
+        class="background container-fluid position-relative"
+        style="padding: 0"
+      >
+        <div class="multiplayer-menu">
+          <button class="return-to-main" id="multi-close-button">X</button>
+          <div class="find-match">
+            <img src="/public/Clouds 3.png" alt="" />
+          </div>
+          <div class="find-tournement">
+            <img src="/public/Clouds 7.png" alt="" />
+          </div>
+        </div>
+        <div class="main-buttons-wrapper">
+          <pong-redirect class="profile-wrapper">
+            <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+          </pong-redirect>
+          <div class="play-wrapper">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <h1>WELCOME TO PONG</h1>
+            </div>
+            <div class="button-wrapper">
+              <button class="play-button">LEADERBOARD</button>
+              <button class="play-button" id="multiplayer-button">
+                MULTIPLAYER
+              </button>
+              <button class="play-button">SINGLEPLAYER</button>
+              <button class="play-button">SOCIAL</button>
+            </div>
+          </div>
+        </div>
+      </div>`]
 ]);
-let elements = document.querySelectorAll("pong-redirect");
-for(let element of elements)
-{
-    element.addEventListener('click', function(event) {
-        event.preventDefault();
-        let fileName = element.getAttribute('href');
-        let route = routes.get(fileName);
-        if(!route)
-            throw new Error('No route found for ' + fileName);
-        history.pushState({to: fileName}, '', window.location.origin + route.url);
-        loadPage(fileName);
-    });
-}
+
 function checkAuth()
 {
     if(!getCookie('tokens'))
@@ -388,3 +371,42 @@ window.addEventListener('popstate', (event ) => {
     }
     }
 );
+function assignRouting()
+{
+    let elements = document.querySelectorAll("pong-redirect");
+    for(let element of elements)
+    {
+        console.log("here",element)
+        element.addEventListener('click', function(event) {
+            event.preventDefault();
+            let fileName = element.getAttribute('href');
+            let route = routes.get(fileName);
+            if(!route)
+                throw new Error('No route found for ' + fileName);
+            history.pushState({to: fileName}, '', window.location.origin + route.url);
+            loadPage(fileName);
+        });
+    }
+}
+
+function checkForAuth()
+{
+    if(getCookie('tokens'))
+        return;
+    const pathName = window.location.pathname;
+    let value = pathName.replace(/\//g, '');
+
+    let route = routes.get(value);
+    if(!route)
+        return;
+    if(route.auth_required === true)
+        loadPage('login');
+}
+const App = async () => {
+    assignRouting();
+    checkForAuth();
+    assignRouting();
+}
+
+
+document.addEventListener('DOMContentLoaded', App);
