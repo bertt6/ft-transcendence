@@ -40,6 +40,44 @@ class History extends BaseComponent
         this.parentElement.innerHTML = this.handleHTML();
     }
 }
+class Stats extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+        this.html = this.handleHTML();
+    }
+
+    handleHTML() {
+    console.log(this.state.statsInfo)
+    const { totalGamesPlayed, totalWins, totalLosses, points } = this.state.statsInfo;
+
+    return `
+            <div class="stats-wrapper">
+                <div class="stats-item">
+                <h3>Total Games</h3>
+                <p>${totalGamesPlayed}</p>
+            </div>
+            <div class="stats-item">
+                <h3>Total Win</h3>
+                <p>${totalWins}</p>
+            </div>
+            <div class="stats-item">
+                <h3>Total Losses</h3>
+                <p>${totalLosses}</p>
+            </div>
+            <div class="stats-item">
+                <h3>Points</h3>
+                <p>${points}</p>
+            </div>
+        </div>
+    `;
+}
+
+    render() {
+        this.parentElement.innerHTML = this.html;
+    }   
+}
+
+
 class Friends extends BaseComponent
 {
     constructor(state,parentElement = null) {
@@ -76,6 +114,7 @@ class Friends extends BaseComponent
         this.render();
     }
 }
+
 class ProfileInfo extends BaseComponent
 {
     constructor(state,parentElement = null) {
@@ -217,6 +256,7 @@ async function assignDataRouting()
 {
     const historyButton = document.getElementById('history-button');
     const friendsButton  = document.getElementById('friends-button');
+    const statsButton = document.getElementById('stats-button');
     historyButton.addEventListener('click', (e) => {
         history.replaceState(null, null, '#history')
         handleRouting()
@@ -225,7 +265,33 @@ async function assignDataRouting()
         history.replaceState(null, null, '#friends')
         handleRouting()
     });
+    console.log(statsButton)
+    statsButton.addEventListener('click', (e) => {
+        history.replaceState(null, null, '#stats')
+        handleRouting()
+    });
 }
+
+async function fetchStats()
+{
+    try{
+        let response = await fetch(`${API_URL}/profile/stats`,{
+            method:'GET',
+            headers:{
+                'Content-Type':'application/json',
+                'Authorization':`Bearer ${JSON.parse(getCookie('tokens')).access}`
+            }
+        });
+        const data = await response.json();
+        return data;
+    }
+    catch (error)
+    {
+        console.error('Error:', error);
+        notify('Error fetching stats', 3, 'error')
+    }
+}
+
 async function fetchFriends()
 {
     try{
@@ -260,7 +326,12 @@ async function handleRouting()
         const friends = new Friends({friends:data},parentElement);
         friends.render();
     }
-
+    if(hash === '#stats')
+    {
+        let data = await fetchStats();
+        const statsInfo = new Stats({statsInfo:data}, parentElement);
+    }
+    
 }
 const App = async () => {
     await fetchProfile();
