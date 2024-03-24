@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from ..models import Profile
+from ..models import Profile,Stats
 
 
 class ProfileGetSerializer(serializers.ModelSerializer):
@@ -27,3 +27,9 @@ class ProfileFriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['friends','nickname','user']
+
+
+class ProfileStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stats
+        fields = ['total_games', 'total_wins', 'total_losses', 'points']
