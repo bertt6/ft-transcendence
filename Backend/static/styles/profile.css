@@ -157,3 +157,60 @@
   min-height: 100px;
   border-radius: 1rem;
 }
+
+
+.stats-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px; /* Karelere dikey boşluk vermek için */
+}
+
+.stats-item {
+  width: calc(50% - 10px); /* İki karenin yatayda 3 satır şeklinde yer alması için */
+  background-color: rgba(0, 0, 0, 0.5); /* Siyah arka plan, %50 opaklık */
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.stats-item h3 {
+  color: white;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.stats-value {
+  color: white;
+  font-size: 24px;
+  margin: 0;
+  animation: fadeIn 1s ease forwards; /* Animasyon tanımı */
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  0% {
+      opacity: 0;
+  }
+  100% {
+      opacity: 1;
+  }
+}
+
+.stats-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth geçiş için animasyon ekliyoruz */
+}
+
+.stats-button:hover {
+  background-color: rgb(59, 42, 42);
+}

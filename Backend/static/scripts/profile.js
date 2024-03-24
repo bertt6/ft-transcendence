@@ -47,28 +47,40 @@ class Stats extends BaseComponent {
     }
 
     handleHTML() {
-    console.log(this.state.statsInfo)
-    const { totalGamesPlayed, totalWins, totalLosses, points } = this.state.statsInfo;
-
     return `
-            <div class="stats-wrapper">
-                <div class="stats-item">
-                <h3>Total Games</h3>
-                <p>${totalGamesPlayed}</p>
-            </div>
-            <div class="stats-item">
-                <h3>Total Win</h3>
-                <p>${totalWins}</p>
-            </div>
-            <div class="stats-item">
-                <h3>Total Losses</h3>
-                <p>${totalLosses}</p>
-            </div>
-            <div class="stats-item">
-                <h3>Points</h3>
-                <p>${points}</p>
-            </div>
+    <div class="stats-wrapper">
+    <div class="stats-row">
+        <div class="stats-item">
+            <h3>Total Games</h3>
+            <p class="stats-value">${this.state.statsInfo.total_games}</p>
         </div>
+        <div class="stats-item">
+            <h3>Total Win</h3>
+            <p class="stats-value">${this.state.statsInfo.total_wins}</p>
+        </div>
+    </div>
+    <div class="stats-row">
+        <div class="stats-item">
+            <h3>Total Losses</h3>
+            <p class="stats-value">${this.state.statsInfo.total_losses}</p>
+        </div>
+        <div class="stats-item">
+            <h3>Points</h3>
+            <p class="stats-value">${this.state.statsInfo.points}</p>
+        </div>
+    </div>
+    <div class="stats-row">
+        <div class="stats-item">
+            <h3>Win Rate</h3>
+            <p class="stats-value">%${(parseInt(this.state.statsInfo.total_wins) / (parseInt(this.state.statsInfo.total_wins) * parseInt(this.state.statsInfo.total_losses)) * 100).toFixed(2)}</p>
+        </div>
+        <div class="stats-item">
+            <h3>Match History</h3>
+            <button onclick="window.location.href='http://localhost:3000/profile/'" class="stats-button">Go to History</button>
+        </div>
+
+    </div>
+    </div>
     `;
 }
 
@@ -330,6 +342,7 @@ async function handleRouting()
     {
         let data = await fetchStats();
         const statsInfo = new Stats({statsInfo:data}, parentElement);
+        statsInfo.render();
     }
     
 }
