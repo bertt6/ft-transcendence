@@ -1,6 +1,7 @@
 import BaseComponent from "../components/Component.js";
 import {API_URL, getCookie} from "./spa.js";
 import {notify} from "../components/Notification.js";
+import {request} from "./Request.js";
 
 class History extends BaseComponent
 {
@@ -191,14 +192,13 @@ async function fetchProfile()
     const tokens = JSON.parse(getCookie('tokens'));
     try
     {
-    let response = await fetch(`${API_URL}/profile`,{
+    let data = await request(`${API_URL}/profile`,{
         method:'GET',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization':`Bearer ${tokens.access}`
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokens.access}`
         }
     });
-    const data = await response.json();
     const profileParentElement = document.getElementById('profile-info');
     const profile = new ProfileInfo({profile:data,isEditing:false},profileParentElement);
     profile.render();
@@ -229,15 +229,14 @@ async function assignDataRouting()
 async function fetchFriends()
 {
     try{
-        let response = await fetch(`${API_URL}/profile/friends`,{
+        let data = await request(`${API_URL}/profile/friends`,{
             method:'GET',
             headers:{
                 'Content-Type':'application/json',
                 'Authorization':`Bearer ${JSON.parse(getCookie('tokens')).access}`
         }
     });
-    const data = await response.json();
-    return data;
+        return data;
     }
     catch (error)
     {
@@ -263,10 +262,13 @@ async function handleRouting()
 
 }
 const App = async () => {
+    console.log('App loaded exec started')
     await fetchProfile();
     await assignDataRouting();
     await handleRouting();
+    console.log('App loaded exec ended')
 }
 
-
-document.addEventListener('DOMContentLoaded', App);
+App().then(() => {
+    console.log('App loaded')
+}).catch((error) => console.error(error));
