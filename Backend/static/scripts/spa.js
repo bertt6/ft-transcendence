@@ -376,7 +376,6 @@ function assignRouting()
     let elements = document.querySelectorAll("pong-redirect");
     for(let element of elements)
     {
-        console.log("here",element)
         element.addEventListener('click', function(event) {
             event.preventDefault();
             let fileName = element.getAttribute('href');
