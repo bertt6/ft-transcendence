@@ -1,6 +1,6 @@
 .social-background {
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    url("/public/inside.jpg") !important;
+    url("/static/public/inside.jpg") !important;
 }
 .users-wrapper {
   height: 100%;

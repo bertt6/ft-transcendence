@@ -1,4 +1,5 @@
-import {loadPage,API_URL} from "./spa.js";
+import {loadPage, API_URL,getCookie, setCookie} from "./spa.js";
+import {notify} from "../components/Notification.js";
 
 async function loginForm(event)
 {
@@ -9,8 +10,9 @@ async function loginForm(event)
         username: username,
         password: password
     };
+const endpoint = `${API_URL}/token/temp-token`;
     try{
-        let response = await fetch(`${API_URL}/send_email_for_verification`, {
+        let response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -19,7 +21,9 @@ async function loginForm(event)
         });
         if (response.ok) {
             let data = await response.json();
-            loadPage('email-verification').catch(console.error);
+            //loadPage('email-verification'); after finishing html
+            loadPage('home');
+            setCookie('tokens', JSON.stringify(data), 1);
         } else {
             console.error('Error:', response);
             let data = await response.json();
@@ -32,6 +36,12 @@ async function loginForm(event)
 
 
 const App = async () => {
+    if(getCookie("tokens"))
+    {
+        console.log('tokens exist')
+        loadPage('home');
+        notify('Already logged in', 3, 'success')
+    }
     const form = document.getElementById('login-form');
     form.addEventListener('submit', loginForm);
 }
