@@ -159,6 +159,8 @@
 }
 
 
+
+
 .stats-wrapper {
   display: flex;
   flex-direction: column;
@@ -167,15 +169,19 @@
 .stats-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px; /* Karelere dikey boşluk vermek için */
+  align-items: center;
+  margin-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .stats-item {
-  width: calc(50% - 10px); /* İki karenin yatayda 3 satır şeklinde yer alması için */
-  background-color: rgba(0, 0, 0, 0.5); /* Siyah arka plan, %50 opaklık */
+  flex-basis: calc(50% - 10px); 
+  background-color: rgba(0, 0, 0, 0.5); 
   padding: 20px;
   box-sizing: border-box;
   text-align: center;
+  position: relative;
+  margin: 0 5px;
 }
 
 .stats-item h3 {
@@ -188,7 +194,7 @@
   color: white;
   font-size: 24px;
   margin: 0;
-  animation: fadeIn 1s ease forwards; /* Animasyon tanımı */
+  animation: fadeIn 1s ease forwards; 
   opacity: 0;
 }
 
@@ -203,14 +209,20 @@
 
 .stats-button {
   background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
+  color: rgb(0, 0, 0);
+  padding: 8px 14px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease; /* Smooth geçiş için animasyon ekliyoruz */
+  transition: all 0.3s ease; 
 }
 
 .stats-button:hover {
   background-color: rgb(59, 42, 42);
 }
+
+.stats-value img {
+  max-width: 100%; 
+  height: auto; 
+}
+
