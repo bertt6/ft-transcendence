@@ -1,19 +1,5 @@
-import {API_URL} from "./spa.js";
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        let cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            let cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
+import {API_URL, loadPage} from "./spa.js";
+import Spinner from "../components/spinner.js";
 
 const registerSubmit = async (event) => {
     event.preventDefault();
@@ -23,9 +9,11 @@ const registerSubmit = async (event) => {
         password2: document.getElementById('password2').value,
         email: document.getElementById('email').value,
     };
-    let csrftoken = getCookie('csrftoken');
-    try{
-
+    const button = document.getElementById('register-button');
+    const spinner = new Spinner({},button);
+    spinner.render();
+    button.disabled = true;
+try{
     const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: {
@@ -36,6 +24,7 @@ const registerSubmit = async (event) => {
     if (response.ok) {
         const data = await response.json();
         console.log(data);
+        loadPage('login');
     } else {
         console.error('Error:', response);
         const data = await response.json();
@@ -44,12 +33,9 @@ const registerSubmit = async (event) => {
     } catch (error) {
         console.error('Error:', error);
     }
-
-
 }
 const App = async () => {
     const form = document.getElementById('register-form');
     form.addEventListener('submit', registerSubmit);
 }
-
 document.addEventListener('DOMContentLoaded', App);

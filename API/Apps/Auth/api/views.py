@@ -1,9 +1,8 @@
+import time
 from datetime import timezone
-
 from API.serializers import RegisterSerializer, ChangePasswordSerializer
-from API.serializers import ProfileSerializer
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from ..utils import *
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -56,13 +55,12 @@ def email_verification(request):
     verification_code = request.data['verification_code']
     cookie_verification_code = request.COOKIES.get('otp', '')
     cookie_code_valid_date = request.COOKIES.get('otp_expired_date', '')
-
-    user = User.objects.filter(username=request.data['username']).first()
-    profile = Profile.objects.filter(user=user).first()
-
+    user = User.objects.get(username=request.data['username'])
+    profile = user.profile
     if verification_code != cookie_verification_code:
+        print(verification_code, cookie_verification_code, cookie_code_valid_date)
         raise AuthenticationFailed("Wrong verification code!")
-    elif cookie_code_valid_date < timezone.now():
+    elif datetime.strptime(cookie_code_valid_date, "%Y-%m-%d %H:%M:%S.%f") < datetime.now():
         raise ValidationError("The code has expired!")
 
     profile.is_verified = True
