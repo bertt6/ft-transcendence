@@ -1,5 +1,5 @@
 from django.urls import path
-from ..views import create, get_tournaments, join, delete
+from .views import create, get_tournaments, join, delete
 
 
 urlpatterns = [
