@@ -25,6 +25,7 @@ load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '0a4fd7e3567eab20bab2f2d6682ea96d0d865050bfcde9c293aa7f9ec48bce55'
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -37,6 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 # Application definition
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,9 +50,10 @@ INSTALLED_APPS = [
     'corsheaders',
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig",
+    "Apps.Tournament.apps.TournamentConfig",
     'Apps.SocialMedia.apps.SocialmediaConfig'
 ]
-#asdafas
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
