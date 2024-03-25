@@ -1,4 +1,5 @@
 import {loadPage, API_URL,getCookie, setCookie} from "./spa.js";
+import {notify} from "../components/Notification.js";
 
 async function loginForm(event)
 {
@@ -39,6 +40,7 @@ const App = async () => {
     {
         console.log('tokens exist')
         loadPage('home');
+        notify('Already logged in', 3, 'success')
     }
     const form = document.getElementById('login-form');
     form.addEventListener('submit', loginForm);
