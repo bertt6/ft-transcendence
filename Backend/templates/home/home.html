@@ -21,7 +21,7 @@
     <title>Home Page</title>
   </head>
   <body>
-    <main class="main">
+    <main class="main" id="main">
       <div
         class="background container-fluid position-relative"
         style="padding: 0"
@@ -36,7 +36,7 @@
           </div>
         </div>
         <div class="main-buttons-wrapper">
-          <pong-redirect class="profile-wrapper" href="/profile">
+          <pong-redirect class="profile-wrapper" href="profile">
             <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
           </pong-redirect>
           <div class="play-wrapper">
@@ -55,7 +55,9 @@
                 MULTIPLAYER
               </button>
               <button class="play-button">SINGLEPLAYER</button>
-              <button class="play-button">SOCIAL</button>
+              <pong-redirect href="social">
+                  <button class="play-button">SOCIAL</button>
+              </pong-redirect>
             </div>
           </div>
         </div>

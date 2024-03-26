@@ -173,7 +173,7 @@ const pageHTML = new Map([
             <div class="profile-info-wrapper">
                 <div class="profile-edit">
                     <button class="pong-button" id="edit-button">
-                        <img src="{% static '/public/edit.svg' %}" alt=""></button>
+                        <img src="/static/public/edit.svg" alt=""></button>
                 </div>
               <div class="profile-photo skeleton"></div>
               <div class="skeleton profile-data">
@@ -287,7 +287,6 @@ const pageHTML = new Map([
           </div>
         </div>
       </div>`],
-    ['profile', 'profile.html'],
     ['email-verification'],
     ['home', `      <div
         class="background container-fluid position-relative"
@@ -328,7 +327,13 @@ const pageHTML = new Map([
         </div>
       </div>`]
 ]);
+const requiredScripts = [
+    '/static/components/Notification.js',
+    '/static/components/Component.js',
+    '/static/components/spinner.js',
+    '/static/scripts/Request.js'
 
+]
 function checkAuth()
 {
     if(!getCookie('tokens'))
@@ -336,6 +341,16 @@ function checkAuth()
         history.pushState({to: 'login'}, '', window.location.origin + '/auth/login');
         loadPage('login');
     }
+}
+function checkRequiredScripts() {
+    requiredScripts.forEach(script => {
+        if (!document.querySelector(`script[src="${script}"]`)) {
+            let newScript = document.createElement('script');
+            newScript.src = script;
+            newScript.type = 'module';
+            document.body.appendChild(newScript);
+        }
+    });
 }
 export function loadPage(fileName)
 {
@@ -349,22 +364,29 @@ export function loadPage(fileName)
     link.type = 'text/css';
     link.href = '/static/styles/' + fileName + '.css';
     document.head.appendChild(link);
-    let script = document.createElement('script');
+   let script = document.createElement('script');
+    let notificationScript = document.createElement('script');
+    notificationScript.src = '/static/components/Notification.js';
+    notificationScript.type = 'module';
     script.src = '/static/scripts/' + fileName + '.js';
     script.type = 'module';
-    document.head.appendChild(script);
+    document.body.appendChild(script);
+    checkRequiredScripts();
     content.innerHTML = pageHtml;
+    assignRouting();
 }
 
 window.addEventListener('popstate', (event ) => {
     if(event === null)
         return
-    console.log(event)
+    console.log("HERE")
     let pathName = window.location.pathname;
-    console.log(pathName);
-    let value = pathName[pathName.length - 1] === '/' ? pathName.slice(0, -1) : pathName;
+    let value = pathName[pathName.length - 1] === '/' ? pathName.slice(1) : pathName;
+    console.log(value)
         for (let [key, val] of routes.entries()) {
-        if (val.url === value) {
+            console.log(value, val.url)
+            if (val.url === value) {
+            console.log('HER2E')
             loadPage(key);
             break;
         }
@@ -376,7 +398,6 @@ function assignRouting()
     let elements = document.querySelectorAll("pong-redirect");
     for(let element of elements)
     {
-        console.log("here",element)
         element.addEventListener('click', function(event) {
             event.preventDefault();
             let fileName = element.getAttribute('href');
@@ -405,7 +426,7 @@ function checkForAuth()
 const App = async () => {
     assignRouting();
     checkForAuth();
-    assignRouting();
+    checkRequiredScripts()
 }
 
 
