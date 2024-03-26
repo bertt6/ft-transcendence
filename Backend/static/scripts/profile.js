@@ -75,19 +75,10 @@ class Stats extends BaseComponent {
             <p class="stats-value">%${((parseInt(this.state.statsInfo.total_wins) / (parseInt(this.state.statsInfo.total_wins) + parseInt(this.state.statsInfo.total_losses))) * 100).toFixed(2)}</p>
         </div>
         <div class="stats-item">
-            <a href="leaderboard" class="stats-value">Rank</>
+            <h3 href="leaderboard" class="stats-value">Rank</>
             <p class="stats-value">#3</p>
         </div>
     </div>
-    <div class="stats-row">
-    <div class="stats-item" style="width: 100%;">
-        <h3 class="stats-item">Your League</h3>
-        ${this.state.statsInfo.points > 1000 ? 
-        `<img src="/static/public/rank1.png" alt="Image" width="20" height="20">` : 
-        `<p class="stats-value">UNDRANKED</p>`}
-    </div>
-</div>
-
 </div>
 
     `;

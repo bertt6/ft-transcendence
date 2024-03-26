@@ -4,6 +4,7 @@
   width: 80%;
   margin: 2rem auto auto;
   gap: 5rem;
+  overflow: auto;
 }
 .profile-photo {
   aspect-ratio: 1/1;
@@ -33,6 +34,7 @@
 }
 .data-headers {
   display: flex;
+  flex-wrap: wrap;
 }
 .header-wrapper {
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
@@ -164,16 +166,25 @@
 .stats-wrapper {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .stats-row {
+  flex-wrap: wrap;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
   box-sizing: border-box;
+  height: 100%;
+  width: 100%;
 }
+@media (max-width: 780px) {
 
+  .profile-wrapper{
+    justify-content: center;
+  flex-direction: column;
+  }
+}
 .stats-item {
   flex-basis: calc(50% - 10px); 
   background-color: rgba(0, 0, 0, 0.5); 
