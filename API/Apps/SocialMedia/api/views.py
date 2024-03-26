@@ -90,3 +90,42 @@ def delete_comment(request, comment_id):
     comment.delete()
     return Response({"success": True, "message": "Comment deleted successfully"})
 
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def like_tweet(request, tweet_id):
+    profile = request.user.profile
+
+    try:
+        tweet = Tweet.objects.get(id=tweet_id)
+    except Tweet.DoesNotExist:
+        return Response({"error": "Tweet not found"}, status=404)
+
+    if profile in tweet.liked_users.all():
+        tweet.liked_users.remove(profile)
+        message = "Tweet unliked successfully"
+    else:
+        tweet.liked_users.add(profile)
+        message = "Tweet liked successfully"
+
+    return Response({"success": True, "message": message}, status=200)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def like_comment(request, comment_id):
+    profile = request.user.profile
+
+    try:
+        comment = Comment.objects.get(id=comment_id)
+    except Comment.DoesNotExist:
+        return Response({"error": "Comment not found"}, status=404)
+
+    if profile in comment.liked_users.all():
+        comment.liked_users.remove(profile)
+        message = "Comment unliked successfully"
+    else:
+        comment.liked_users.add(profile)
+        message = "Comment liked successfully"
+
+    return Response({"success": True, "message": message}, status=200)
