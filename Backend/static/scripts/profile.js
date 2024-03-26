@@ -82,7 +82,7 @@ class Stats extends BaseComponent {
     <div class="stats-row">
     <div class="stats-item" style="width: 100%;">
         <h3 class="stats-item">Your League</h3>
-        ${this.state.statsInfo.points > 100 ? 
+        ${this.state.statsInfo.points > 1000 ? 
         `<img src="/static/public/rank1.png" alt="Image" width="20" height="20">` : 
         `<p class="stats-value">UNDRANKED</p>`}
     </div>
