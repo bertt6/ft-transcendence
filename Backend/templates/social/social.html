@@ -144,8 +144,7 @@
           </div>
           <div class="social-container py-2">
             <div
-              class="social-wrapper social-wrapper-open"
-              data-selected-post="-1"
+              class="social-wrapper"
             >
               <div class="d-flex flex-column gap-2">
                 <div class="social-send-info">
@@ -169,8 +168,8 @@
                   <img src="{% static '/public/send.svg' %}" alt="" style="width: 25px" />
                 </form>
               </div>
-              <div class="posts-container">
-                <div class="post-container" id="1">
+              <div class="posts-container" id="posts-wrapper">
+                <div class="post-container">
                   <div class="d-flex position-relative">
                     <div class="post-info">
                       <div class="user-pic-wrapper">
@@ -185,7 +184,7 @@
                       </div>
                     </div>
                     <div>
-                      <img  src="{% static '/public/more.svg' %}"alt="" style="width: 50px" />
+                      <img  src="{% static '/public/more.svg' %}" alt="" style="width: 50px" />
                     </div>
                   </div>
                   <div>

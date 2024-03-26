@@ -190,4 +190,4 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_SSL = False
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'media/images'
