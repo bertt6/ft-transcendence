@@ -370,3 +370,13 @@ input {
   outline: none;
   border: none;
 }
+
+
+.loading .lds-ring{
+  width: 36px;
+  height: 36px;
+}
+.loading .lds-ring div{
+  width: 36px;
+  height: 36px;
+}
