@@ -4,6 +4,7 @@
   width: 80%;
   margin: 2rem auto auto;
   gap: 5rem;
+  overflow: auto;
 }
 .profile-photo {
   aspect-ratio: 1/1;
@@ -33,6 +34,7 @@
 }
 .data-headers {
   display: flex;
+  flex-wrap: wrap;
 }
 .header-wrapper {
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
@@ -157,3 +159,81 @@
   min-height: 100px;
   border-radius: 1rem;
 }
+
+
+
+
+.stats-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-row {
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+}
+@media (max-width: 780px) {
+
+  .profile-wrapper{
+    justify-content: center;
+  flex-direction: column;
+  }
+}
+.stats-item {
+  flex-basis: calc(50% - 10px); 
+  background-color: rgba(0, 0, 0, 0.5); 
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+  margin: 0 5px;
+}
+
+.stats-item h3 {
+  color: white;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.stats-value {
+  color: white;
+  font-size: 24px;
+  margin: 0;
+  animation: fadeIn 1s ease forwards; 
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  0% {
+      opacity: 0;
+  }
+  100% {
+      opacity: 1;
+  }
+}
+
+.stats-button {
+  background-color: #4CAF50;
+  color: rgb(0, 0, 0);
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease; 
+}
+
+.stats-button:hover {
+  background-color: rgb(59, 42, 42);
+}
+
+.stats-value img {
+  max-width: 100%; 
+  height: auto; 
+}
+
