@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from ..models import Profile
 from rest_framework.response import Response
 
-from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer
+from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer
 
 
 class ProfileView(APIView):
@@ -61,7 +61,8 @@ class ProfileStatsView(APIView):
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
         stats = profile.stats
-        return Response(stats, status=200)
+        serializer = ProfileStatsSerializer(stats)
+        return Response(serializer.data, status=200)
 
     def post(self, request,profile_id):
         profile = Profile.objects.get(id=profile_id)

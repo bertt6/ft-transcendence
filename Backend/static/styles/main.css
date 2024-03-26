@@ -26,6 +26,8 @@ body {
   background-repeat: no-repeat;
   height: 80%;
   flex: 1;
+  background-size: cover;
+  background-position: center;
 }
 img {
   width: 100%;
