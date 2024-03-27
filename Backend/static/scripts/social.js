@@ -88,7 +88,7 @@ class SocialPostsComponent extends BaseComponent {
                         />
                       </div>
                       <div>
-                        <h6>TEST1</h6>
+                        <h6>${tweet.from_user.nickname}</h6>
                         <span>${this.calculateDate(tweet)}</span>
                       </div>
                     </div>
@@ -110,7 +110,7 @@ class SocialPostsComponent extends BaseComponent {
                   </div>
                   <div class="post-interaction">
                     <div>
-                      <img  src="/static/public/heart.svg" alt="" />
+                      <img  src="/static/public/not-liked.svg" alt="" />
                     </div>
                     <button class="comment-button">
                       <img  src="/static/public/chat-bubble.svg" alt="" />
@@ -222,6 +222,7 @@ const fetchSocialPosts = async () => {
 
             }})
         socialPostsComponent.setState({tweets: response.tweets});
+     console.log(response.tweets)
     }
     catch(error)
         {
@@ -246,7 +247,6 @@ const fetchSocialPosts = async () => {
             body: formData
         });
         notify('Tweet posted successfully', 3, 'success');
-            console.log(data)
         }
         catch(error)
         {
@@ -267,7 +267,7 @@ function assignEventListeners() {
     });
 
 }
-    const App = async () => {
+const App = async () => {
     if(!getCookie("tokens"))
     {
         loadPage('login');
