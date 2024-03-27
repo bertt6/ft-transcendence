@@ -41,7 +41,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         profile = Profile.objects.create(
             user=user,
-            nickname="",
+            nickname=validated_data['username'],
             stats=Stats.objects.create(total_games=0, total_wins=0, total_losses=0, points=0)
         )
         profile.save()
