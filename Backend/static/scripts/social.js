@@ -76,9 +76,7 @@ class SocialPostsComponent extends BaseComponent {
     handleHTML() {
         if(this.state.tweets === undefined)
             return "";
-    let userId = parseInt(localStorage.getItem('userId'))
-
-
+        let userId = this.state.userId;
     return`
     ${this.state.tweets.map(tweet => `
             <div class="post-container">
@@ -225,7 +223,6 @@ const fetchSocialPosts = async () => {
 
             }})
         socialPostsComponent.setState({tweets: response.tweets});
-     console.log(response.tweets)
     }
     catch(error)
         {
@@ -250,6 +247,8 @@ const fetchSocialPosts = async () => {
             body: formData
         });
         notify('Tweet posted successfully', 3, 'success');
+        //find a solution for this
+        //socialPostsComponent.setState({tweets: [data, ...socialPostsComponent.state.tweets]});
         }
         catch(error)
         {
@@ -269,10 +268,8 @@ function assignEventListeners() {
         postTweetFormComponent.setState({imageUrl : url});
     });
     let likeButtons = document.getElementsByClassName('like-button');
-    console.log(likeButtons)
     for(let button of likeButtons)
     {
-
         let tweetId = button.getAttribute('data-tweet-id');
         button.addEventListener('click', async (event) => {
             try{
@@ -282,6 +279,7 @@ function assignEventListeners() {
                         'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
                     }
                 });
+                button.children[0].src = button.children[0].src.includes('not') ?  '/static/public/liked.svg' : '/static/public/not-liked.svg';
             }
             catch(error)
             {
@@ -289,7 +287,6 @@ function assignEventListeners() {
                 notify('Error liking tweet', 3, 'error');
             }
         });
-
     }
 
 }
@@ -304,8 +301,7 @@ async function getProfile()
             }
         });
         //find a better solution for this it's not good
-        localStorage.setItem('userId', data.id);
-        console.log(data)
+        socialPostsComponent.setState({userId: data.id})
         let nickname = document.getElementById('username');
         nickname.innerText = data.nickname;
     }
