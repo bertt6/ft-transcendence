@@ -245,6 +245,7 @@ const fetchSocialPosts = async () => {
             },
             body: formData
         });
+        notify('Tweet posted successfully', 3, 'success');
             console.log(data)
         }
         catch(error)

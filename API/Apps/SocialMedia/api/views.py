@@ -15,6 +15,7 @@ def get_tweets(request):
             tweets, many=True,
         )
         tweets = serializer.data
+        tweets = sorted(tweets, key=lambda x: x['date'], reverse=True)
         return Response({'success': True, 'tweets': tweets})
     except Tweet.DoesNotExist:
         Response({"error": "Tweets not found"}, status=404)
