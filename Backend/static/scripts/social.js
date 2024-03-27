@@ -282,8 +282,6 @@ function assignEventListeners() {
                         'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
                     }
                 });
-                console.log(data);
-                await fetchSocialPosts();
             }
             catch(error)
             {
