@@ -7,7 +7,6 @@ export default class BaseComponent {
     render() {
     if(this.html === null)
       throw new Error('Component Should have an html');
-      console.log("HERE",this.state.tweets)
     this.parentElement.innerHTML = this.html;
     }
 }

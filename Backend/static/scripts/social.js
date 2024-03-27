@@ -76,7 +76,6 @@ class SocialPostsComponent extends BaseComponent {
     handleHTML() {
         if(this.state.tweets === undefined)
             return "";
-        console.log(this.state.tweets,"TWEETS")
     return`
     ${this.state.tweets.map(tweet => `
     <div class="post-container">
@@ -184,8 +183,11 @@ function assignEventListeners()
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         let inputValue = document.getElementById('social-text-input').value;
-
+        let image =  document.getElementById("image-add");
+                console.log(image.files);
     });
+        let image =  document.getElementById("image-add");
+
 }
     const App = async () => {
     if(!getCookie("tokens"))
@@ -193,7 +195,6 @@ function assignEventListeners()
         loadPage('login');
         notify('Please login to continue', 3, 'error')
     }
-    console.log(window.location)
     if(window.location.pathname.includes('tweet'))
         return;
     else

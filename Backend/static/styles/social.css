@@ -180,6 +180,9 @@ input {
 
 .social-send {
   position: relative;
+  display: flex;
+  flex-direction: column;
+    gap: 10px;
   width: 100%;
 }
 .social-send > input {
@@ -415,4 +418,14 @@ input[type="file"] {
 #social-text-input{
   width: 100%;
   background-color: red;
+}
+
+.uploaded-image{
+  min-height: 10rem;
+  position: relative;
+}
+.uploaded-image button{
+  position: absolute;
+  top: 0;
+  right: 0;
 }
