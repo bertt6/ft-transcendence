@@ -76,9 +76,10 @@ class SocialPostsComponent extends BaseComponent {
     handleHTML() {
         if(this.state.tweets === undefined)
             return "";
+        getProfile();
     return`
     ${this.state.tweets.map(tweet => `
-    <div class="post-container">
+            <div class="post-container">
                   <div class="d-flex position-relative">
                     <div class="post-info">
                       <div class="user-pic-wrapper">
@@ -109,8 +110,8 @@ class SocialPostsComponent extends BaseComponent {
                     `: ''}
                   </div>
                   <div class="post-interaction">
-                    <div>
-                      <img  src="/static/public/not-liked.svg" alt="" />
+                    <div class="like-button" data-tweet-id="${tweet.id}">
+                      <img  src="/static/public/${tweet.liked_users.includes(user.Id) ? "liked" :"not-liked"}.svg" alt="" />
                     </div>
                     <button class="comment-button">
                       <img  src="/static/public/chat-bubble.svg" alt="" />
@@ -184,6 +185,7 @@ let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
+let user = undefined;
 const fetchChatFriends = async () => {
     const endpoint = `${API_URL}/profile/friends`;
     try {
@@ -265,7 +267,53 @@ function assignEventListeners() {
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl : url});
     });
+    let likeButtons = document.getElementsByClassName('like-button');
+    console.log(likeButtons)
+    for(let button of likeButtons)
+    {
 
+        let tweetId = button.getAttribute('data-tweet-id');
+        button.addEventListener('click', async (event) => {
+            try{
+                let data = await request(`${API_URL}/like_tweet/${tweetId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+                    }
+                });
+                console.log(data);
+                await fetchSocialPosts();
+            }
+            catch(error)
+            {
+                console.error('Error:', error);
+                notify('Error liking tweet', 3, 'error');
+            }
+        });
+
+    }
+
+}
+async function getProfile()
+{
+    try{
+        let data = await request(`${API_URL}/profile`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+            }
+        });
+        user = data;
+        console.log(data)
+        let nickname = document.getElementById('username');
+        nickname.innerText = data.nickname;
+    }
+    catch(error)
+    {
+        console.error('Error:', error);
+        notify('Error fetching profile', 3, 'error');
+    }
 }
 const App = async () => {
     if(!getCookie("tokens"))
@@ -277,6 +325,7 @@ const App = async () => {
         return;
     else
     {
+        await getProfile();
         await fetchChatFriends();
         await fetchSocialPosts();
         await assignEventListeners();
