@@ -128,6 +128,29 @@ class SocialPostsComponent extends BaseComponent {
         this.render()
     }
 }
+class PostTweetFormComponent extends  BaseComponent
+{
+    constructor(state,parentElement = null) {
+        super(state,parentElement);
+        this.html = this.handleHTML();
+    }
+    handleHTML()
+    {
+            return `
+                <div class="uploaded-image">
+                    <button class="image-close-button">
+                        X
+                    </button>
+                <img src="{% static '/public/Clouds4.png' %}" alt=""  />
+                </div>
+        `
+    }
+    render()
+    {
+        super.render();
+    }
+
+}
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 
@@ -177,17 +200,26 @@ const fetchSocialPosts = async () => {
         }
 
     }
-function assignEventListeners()
-{
-    let form = document.getElementById('social-send-form');
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    async function submitTweet(event) {
+     event.preventDefault();
         let inputValue = document.getElementById('social-text-input').value;
-        let image =  document.getElementById("image-add");
-                console.log(image.files);
-    });
-        let image =  document.getElementById("image-add");
+        let image = document.getElementById("image-add");
+        let formData = new FormData();
+        formData.append('content', inputValue);
+        formData.append('image', image.files[0]);
+        let data = await request(`${API_URL}/post_tweet`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+            },
+            body: formData
+        });
+        notify('Post sent', 3, 'success');
+}
 
+function assignEventListeners() {
+    let form = document.getElementById('social-send-form');
+    form.addEventListener('submit', submitTweet);
 }
     const App = async () => {
     if(!getCookie("tokens"))

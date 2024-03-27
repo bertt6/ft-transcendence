@@ -166,16 +166,14 @@
                   />
                     <div class="form-input-wrapper">
                     <label for="image-add" class="custom-file-upload"></label>
-                    <input type="file" id="image-add" src="{% static '/public/image.svg' %}" alt="" style="width: 35px">
+                    <input 
+                    type="file" id="image-add" 
+                    src="{% static '/public/image.svg' %}" alt="" style="width: 35px"
+                    accept="image/jpeg,image/png,image/gif"
+                    >
                 <button type="submit" id="send-button">
                     <img src="{% static '/public/send.svg' %}" alt="" />
                 </button>
-                    </div>
-                    <div class="uploaded-image">
-                        <button class="image-close-button">
-                            X
-                        </button>
-                    <img src="{% static '/public/Clouds4.png' %}" alt=""  />
                     </div>
                 </form>
               </div>
