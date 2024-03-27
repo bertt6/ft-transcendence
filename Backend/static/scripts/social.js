@@ -44,9 +44,39 @@ class ChatFriendsComponent extends  BaseComponent{
 class SocialPostsComponent extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
-        this.html = this.handleHTML();
+        this.html = "";
     }
+    calculateDate(tweet)
+    {
+    let tweetDate = new Date(tweet.date);
+    let currentDate = new Date();
+    let differenceInSeconds = Math.floor((currentDate - tweetDate) / 1000);
+
+    let minute = 60;
+    let hour = minute * 60;
+    let day = hour * 24;
+    let week = day * 7;
+    if (differenceInSeconds < minute) {
+        return `${differenceInSeconds} seconds ago`;
+    }
+    else if (differenceInSeconds < hour) {
+        return `${Math.floor(differenceInSeconds / minute)} minutes ago`;
+    }
+    else if (differenceInSeconds < day) {
+        return `${Math.floor(differenceInSeconds / hour)} hours ago`;
+        }
+    else if (differenceInSeconds < week) {
+        return `${Math.floor(differenceInSeconds / day)} days ago`;
+    }
+    else {
+        return `${Math.floor(differenceInSeconds / week)} weeks ago`;
+        }
+    }
+
     handleHTML() {
+        if(this.state.tweets === undefined)
+            return "";
+        console.log(this.state.tweets,"TWEETS")
     return`
     ${this.state.tweets.map(tweet => `
     <div class="post-container">
@@ -60,7 +90,7 @@ class SocialPostsComponent extends BaseComponent {
                       </div>
                       <div>
                         <h6>TEST1</h6>
-                        <span>20 MINUTE AGO</span>
+                        <span>${this.calculateDate(tweet)}</span>
                       </div>
                     </div>
                     <div>
@@ -86,23 +116,22 @@ class SocialPostsComponent extends BaseComponent {
                     <button class="comment-button">
                       <img  src="/static/public/chat-bubble.svg" alt="" />
                     </button>
-                    <div>
-                      <input
-                        type="text"
-                        name=""
-                        id=""
-                        placeholder="WRITE A COMMENT..."
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
             `).join('')}
             `
-
     }
-
+    setState(newState)
+    {
+        this.state = {...this.state, ...newState};
+        this.html = this.handleHTML()
+        this.render()
+    }
 }
+let parentElement = document.getElementById('posts-wrapper');
+let socialPostsComponent = new SocialPostsComponent({}, parentElement);
+
 const fetchChatFriends = async () => {
     const endpoint = `${API_URL}/profile/friends`;
     try {
@@ -119,9 +148,9 @@ const fetchChatFriends = async () => {
         input.addEventListener('keyup', async (event) => {
             let value = event.target.value;
                let filteredFriends = response.filter(friend => {
-        let nameToCheck = friend.nickname.length > 0 ? friend.nickname : friend.user.username;
+        let nameToCheck = friend.user.username;
         return nameToCheck.toLowerCase().includes(value.toLowerCase());
-    });
+           });
             chatFriendsComponent.setState({friends: filteredFriends});
         });
         chatFriendsComponent.render();
@@ -130,7 +159,6 @@ const fetchChatFriends = async () => {
     catch (error) {
         console.error('Error:', error);
     }
-
 }
 const fetchSocialPosts = async () => {
  try{
@@ -141,12 +169,8 @@ const fetchSocialPosts = async () => {
                 'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`,
 
             }})
-     console.log(response.tweets);
-        let parentElement = document.getElementById('posts-wrapper');
-        let socialPostsComponent = new SocialPostsComponent({tweets: response.tweets}, parentElement);
-        socialPostsComponent.render();
+        socialPostsComponent.setState({tweets: response.tweets});
     }
-
     catch(error)
         {
             console.error('Error:', error);
@@ -154,15 +178,30 @@ const fetchSocialPosts = async () => {
         }
 
     }
+function assignEventListeners()
+{
+    let form = document.getElementById('social-send-form');
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        let inputValue = document.getElementById('social-text-input').value;
 
-const App = async () => {
+    });
+}
+    const App = async () => {
     if(!getCookie("tokens"))
     {
         loadPage('login');
         notify('Please login to continue', 3, 'error')
     }
-    await fetchChatFriends();
-    await fetchSocialPosts();
+    console.log(window.location)
+    if(window.location.pathname.includes('tweet'))
+        return;
+    else
+    {
+        await fetchChatFriends();
+        await fetchSocialPosts();
+        await assignEventListeners();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', App);

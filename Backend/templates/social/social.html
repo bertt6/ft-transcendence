@@ -156,66 +156,25 @@
                   </div>
                   <h6>Test1</h6>
                 </div>
-                <form class="social-send">
+                <form class="social-send" id="social-send-form">
                   <input
                     type="text"
                     name=""
-                    id=""
+                    id="social-text-input"
                     style="background-color: rgba(126, 126, 126, 0.397)"
                     placeholder="What do you think"
                   />
-                  <img  src="{% static '/public/image.svg' %}" alt="" style="width: 25px" />
-                  <img src="{% static '/public/send.svg' %}" alt="" style="width: 25px" />
+                    <div class="form-input-wrapper">
+                    <label for="image-add" class="custom-file-upload"></label>
+                    <input type="file" id="image-add" src="{% static '/public/image.svg' %}" alt="" style="width: 35px">
+                <button type="submit" id="send-button">
+                    <img src="{% static '/public/send.svg' %}" alt="" />
+                </button>
+                    </div>
                 </form>
               </div>
               <div class="posts-container" id="posts-wrapper">
-                <div class="post-container">
-                  <div class="d-flex position-relative">
-                    <div class="post-info">
-                      <div class="user-pic-wrapper">
-                        <img
-                          src="https://picsum.photos/seed/picsum/200/300"
-                          alt=""
-                        />
-                      </div>
-                      <div>
-                        <h6>TEST1</h6>
-                        <span>20 MINUTE AGO</span>
-                      </div>
-                    </div>
-                    <div>
-                      <img  src="{% static '/public/more.svg' %}" alt="" style="width: 50px" />
-                    </div>
-                  </div>
-                  <div>
-                    <div class="post-text">
-                      <p>
-                        Lorem ipsum dolor, sit amet consectetur adipisicing
-                        elit. Neque, consequatur adipisci. A, provident dolores,
-                        aut quae sequi quis blanditiis optio unde esse obcaecati
-                        expedita repellat quo. Voluptates eos amet maxime.
-                      </p>
-                    </div>
-                    <div class="post-image">
-                      <img  src="{% static '/public/Clouds4.png' %}" alt="" />
-                    </div>
-                  </div>
-                  <div class="post-interaction">
-                    <div>
-                      <img  src="{% static '/public/heart.svg' %}" alt="" />
-                    </div>
-                    <button class="comment-button">
-                      <img  src="{% static '/public/chat-bubble.svg' %}" alt="" />
-                    </button>
-                    <div>
-                      <input
-                        type="text"
-                        name=""
-                        id=""
-                        placeholder="WRITE A COMMENT..."
-                      />
-                    </div>
-                  </div>
+                <div class="post-container skeleton">
                 </div>
               </div>
             </div>

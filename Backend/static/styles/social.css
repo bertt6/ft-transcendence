@@ -1,6 +1,9 @@
 .social-background {
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
     url("/static/public/inside.jpg") !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-position: center;
 }
 .users-wrapper {
   height: 100%;
@@ -240,15 +243,43 @@ input {
 }
 .social-send img:nth-of-type(2) {
   position: absolute;
-  top: 0px;
+  top: 0;
   right: 15px;
   cursor: pointer;
 }
-.social-send img:nth-of-type(1) {
+#image-add{
   position: absolute;
-  top: 0px;
-  right: 40px;
+  outline: none;
+    top: 0;
+  right: 50px;
   cursor: pointer;
+}
+input[type="file"] {
+  display: none;
+}
+.custom-file-upload{
+    cursor: pointer;
+  width: 25px;
+  height: 25px;
+  background: url("/static/public/image.svg") no-repeat;
+}
+.form-input-wrapper{
+  position: absolute;
+  top: 10px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#send-button{
+    cursor: pointer;
+  width: 35px;
+  background: transparent;
+  outline: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .posts-container {
   display: flex;
@@ -379,4 +410,9 @@ input {
 .loading .lds-ring div{
   width: 36px;
   height: 36px;
+}
+
+#social-text-input{
+  width: 100%;
+  background-color: red;
 }
