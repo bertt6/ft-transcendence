@@ -16,7 +16,6 @@ class ChatConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name, self.channel_name
         )
-
         self.accept()
 
     def disconnect(self, close_code):
@@ -31,7 +30,7 @@ class ChatConsumer(WebsocketConsumer):
         message = text_data_json["message"]
         user = self.scope['user']
 
-        Message.objects.create(message=message, user=user.profile, room_name=self.room_name)
+        Message.objects.create(content=message, user=user.profile, room_name=self.room_name)
 
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
