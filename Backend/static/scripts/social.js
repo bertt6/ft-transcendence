@@ -136,24 +136,54 @@ class PostTweetFormComponent extends  BaseComponent
     }
     handleHTML()
     {
-            return `
-                <div class="uploaded-image">
-                    <button class="image-close-button">
-                        X
-                    </button>
-                <img src="{% static '/public/Clouds4.png' %}" alt=""  />
-                </div>
+        if(this.state.imageUrl === undefined)
+            return '';
+        return `
+            <div class="uploaded-image">
+
+                <button class="image-close-button" id="preview-close-button" type="button">
+                    X
+                </button>
+            <img src=${this.state.imageUrl} alt=""  />
+         </div>
+
         `
     }
-    render()
+ render() {
+        if(this.state.imageUrl === undefined)
+        {
+            document.getElementById('image-preview')?.remove();
+            return;
+        }
+        if(document.getElementById('image-preview'))
+        {
+            document.getElementById('image-preview').remove();
+        }
+     let div = document.createElement('div');
+    div.innerHTML = this.html;
+    this.parentElement.appendChild(div);
+    div.id = 'image-preview';
+    let previewCloseButton = document.getElementById('preview-close-button');
+    if(previewCloseButton)
     {
-        super.render();
+        previewCloseButton.addEventListener('click', (event) => {
+            postTweetFormComponent.setState({imageUrl: undefined});
+        });
+    }
+}
+
+    setState(newState)
+    {
+        this.state = {...this.state, ...newState};
+        this.html = this.handleHTML();
+        this.render();
     }
 
 }
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
-
+let parentFormElement = document.getElementById('social-send-form');
+let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
 const fetchChatFriends = async () => {
     const endpoint = `${API_URL}/profile/friends`;
     try {
@@ -207,6 +237,7 @@ const fetchSocialPosts = async () => {
         let formData = new FormData();
         formData.append('content', inputValue);
         formData.append('image', image.files[0]);
+        try{
         let data = await request(`${API_URL}/post_tweet`, {
             method: 'POST',
             headers: {
@@ -214,12 +245,26 @@ const fetchSocialPosts = async () => {
             },
             body: formData
         });
-        notify('Post sent', 3, 'success');
+            console.log(data)
+        }
+        catch(error)
+        {
+            console.error('Error:', error);
+            notify('Error posting tweet', 3, 'error');
+        }
 }
 
 function assignEventListeners() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
+    let imageAdd = document.getElementById('image-add');
+    imageAdd.addEventListener('change', (event) => {
+        let file = event.target.files[0];
+        console.log(event.target.files)
+        let url = URL.createObjectURL(file);
+        postTweetFormComponent.setState({imageUrl : url});
+    });
+
 }
     const App = async () => {
     if(!getCookie("tokens"))
