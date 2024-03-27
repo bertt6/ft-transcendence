@@ -76,7 +76,9 @@ class SocialPostsComponent extends BaseComponent {
     handleHTML() {
         if(this.state.tweets === undefined)
             return "";
-        getProfile();
+    let userId = parseInt(localStorage.getItem('userId'))
+
+
     return`
     ${this.state.tweets.map(tweet => `
             <div class="post-container">
@@ -111,7 +113,7 @@ class SocialPostsComponent extends BaseComponent {
                   </div>
                   <div class="post-interaction">
                     <div class="like-button" data-tweet-id="${tweet.id}">
-                      <img  src="/static/public/${tweet.liked_users.includes(user.Id) ? "liked" :"not-liked"}.svg" alt="" />
+                      <img  src="/static/public/${tweet.liked_users.includes(userId) ? "liked" :"not-liked"}.svg" alt="" />
                     </div>
                     <button class="comment-button">
                       <img  src="/static/public/chat-bubble.svg" alt="" />
@@ -185,7 +187,6 @@ let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
-let user = undefined;
 const fetchChatFriends = async () => {
     const endpoint = `${API_URL}/profile/friends`;
     try {
@@ -304,7 +305,8 @@ async function getProfile()
                 'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
             }
         });
-        user = data;
+        //find a better solution for this it's not good
+        localStorage.setItem('userId', data.id);
         console.log(data)
         let nickname = document.getElementById('username');
         nickname.innerText = data.nickname;
