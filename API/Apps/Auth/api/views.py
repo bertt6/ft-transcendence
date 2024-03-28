@@ -1,10 +1,16 @@
+from datetime import timezone
+
+from rest_framework_simplejwt.exceptions import TokenError
+
 from API.serializers import RegisterSerializer, ChangePasswordSerializer
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from ..utils import *
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from .permissions import IsEmailVerified
+from django.dispatch import receiver
+from rest_framework_simplejwt.tokens import BlacklistedToken
 
 
 @api_view(['POST'])

@@ -2,8 +2,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from rest_framework.response import Response
 from .serializers import TweetPostSerializer, TweetGetSerializer, \
-    CommentPostSerializer, TweetGetWithDetailSerializer
+    CommentPostSerializer, TweetGetWithDetailSerializer, CommentGetSerializer
 from ..models import Tweet, Comment
+from rest_framework.pagination import PageNumberPagination
 
 
 @api_view(['GET'])
@@ -11,28 +12,30 @@ from ..models import Tweet, Comment
 def get_tweets(request):
     try:
         tweets = Tweet.objects.all()
-        serializer = TweetGetSerializer(
-            tweets, many=True,
-        )
-        tweets = serializer.data
-        tweets = sorted(tweets, key=lambda x: x['date'], reverse=True)
-        return Response({'success': True, 'tweets': tweets})
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+        paginated_data = paginator.paginate_queryset(tweets, request)
+        serializer = TweetGetSerializer(paginated_data, many=True)
+        tweets = sorted(serializer.data, key=lambda x: x['date'], reverse=True)
+        return paginator.get_paginated_response({'success': True, 'tweets': tweets})
     except Tweet.DoesNotExist:
         Response({"error": "Tweets not found"}, status=404)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_tweet_with_details(request, tweet_id):
+def get_tweet_and_comments(request, tweet_id):
     try:
         tweet = Tweet.objects.get(id=tweet_id)
-        serializer = TweetGetWithDetailSerializer(
-            tweet, many=False
-        )
-        tweet = serializer.data
-        return Response({'success': True, 'tweet': tweet})
-    except Tweet.DoesNotExist:
-        Response({"error": "Tweet not found"}, status=404)
+        tweet = TweetGetSerializer(tweet)
+        comments = Comment.objects.filter(tweet=tweet_id)
+        paginator = PageNumberPagination()
+        paginator.page_size = 1
+        paginated_data = paginator.paginate_queryset(comments, request)
+        serializer = CommentGetSerializer(paginated_data, many=True)
+        return paginator.get_paginated_response({'success': True, 'tweet': tweet.data, 'comments': serializer.data})
+    except Comment.DoesNotExist:
+        Response({"error": "Data not found"}, status=404)
 
 
 @api_view(["POST"])

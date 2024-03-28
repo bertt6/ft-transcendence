@@ -40,6 +40,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,7 +52,8 @@ INSTALLED_APPS = [
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig",
     "Apps.Tournament.apps.TournamentConfig",
-    'Apps.SocialMedia.apps.SocialmediaConfig'
+    'Apps.SocialMedia.apps.SocialmediaConfig',
+    "Apps.Chat.apps.ChatConfig",
 ]
 
 MIDDLEWARE = [
@@ -84,6 +86,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'API.wsgi.application'
+ASGI_APPLICATION = 'API.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -171,7 +183,7 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
     'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
-    'TOKEN_EXPIRED_CALLBACK': 'API.apps.Auth.token_expired_callback',
+    'TOKEN_EXPIRED_CALLBACK': 'token_expired_callback',
 
     'JTI_CLAIM': 'jti',
 

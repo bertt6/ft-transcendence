@@ -10,11 +10,11 @@ from Apps.Profile.models import Profile
 
 
 def token_expired_callback(token):
+    print('girdiiii!')
     user_id = token['user_id']
     user = User.objects.get(id=user_id)
-    profile = Profile.objects.get(user=user)
-    profile.is_verified = False
-    profile.save()
+    user.profile.is_verified = False
+    user.save()
 
 
 def generate_otp():
