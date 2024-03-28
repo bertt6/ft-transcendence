@@ -231,7 +231,6 @@ input {
 .selected-post {
   flex-basis: 450px;
   overflow: hidden;
-  display: none;
   animation: fadeOutAndHide 1s ease;
 }
 .selected-post-open {

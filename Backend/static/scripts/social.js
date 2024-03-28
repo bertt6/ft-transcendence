@@ -113,8 +113,8 @@ class SocialPostsComponent extends BaseComponent {
                     <div class="like-button" data-tweet-id="${tweet.id}">
                       <img  src="/static/public/${tweet.liked_users.includes(userId) ? "liked" :"not-liked"}.svg" alt="" />
                     </div>
-                    <button class="comment-button">
-                      <img  src="/static/public/chat-bubble.svg" alt="" />
+                    <button class="comment-button" data-tweet-id="${tweet.id}"">
+                      <img  src="/static/public/chat-bubble.svg"  alt="" />
                     </button>
                   </div>
                 </div>
@@ -180,6 +180,90 @@ class PostTweetFormComponent extends  BaseComponent
         this.render();
     }
 
+}
+class SelectedPostComponent extends BaseComponent{
+    constructor(state, parentElement = null)
+    {
+        super(state, parentElement);
+        this.html = this.handleHTML();
+    }
+    handleHTML()
+    {
+        return `
+            <div class="selected-post">
+              <div class="post-container">
+                <div class="d-flex position-relative">
+                  <div class="post-info">
+                    <div class="user-pic-wrapper">
+                      <img
+                        src="https://picsum.photos/seed/picsum/200/300"
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <h6>TEST1</h6>
+                      <span>20 MINUTE AGO</span>
+                    </div>
+                  </div>
+                  <div>
+                    <img src="/public/more.svg" alt="" style="width: 50px" />
+                  </div>
+                  <div id="comment-back-button" style="cursor: pointer">
+                    <img src="/public/go-back.svg" alt="" />
+                  </div>
+                </div>
+                <div>
+                  <div class="post-text">
+                    <p>
+                      Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                      Neque, consequatur adipisci. A, provident dolores, aut
+                      quae sequi quis blanditiis optio unde esse obcaecati
+                      expedita repellat quo. Voluptates eos amet maxime.
+                    </p>
+                  </div>
+                  <div class="post-image">
+                    <img src="/public/Clouds 1.png" alt="" />
+                  </div>
+                </div>
+                <div class="post-interaction">
+                  <div>
+                    <img src="/public/heart.svg" alt="" />
+                  </div>
+                  <div>
+                    <img src="/public/chat-bubble.svg" alt="" />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      name=""
+                      id=""
+                      placeholder="WRITE A COMMENT..."
+                    />
+                  </div>
+                </div>
+                <div class="post-comments">
+                  <div class="post-comment">
+                    <div class="user-pic-wrapper" style="height: 3rem">
+                      <img
+                        src="https://picsum.photos/seed/picsum/200/300"
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <h6>username</h6>
+                      <p>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Ad quo cum accusamus veritatis itaque est, possimus quia
+                        nostrum deleniti incidunt, molestiae facere officia vel,
+                        ipsum blanditiis? Voluptatibus corporis nesciunt veniam!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        `
+    }
 }
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
@@ -257,7 +341,7 @@ const fetchSocialPosts = async () => {
         }
 }
 
-function assignEventListeners() {
+async function assignEventListeners() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
     let imageAdd = document.getElementById('image-add');
@@ -267,28 +351,43 @@ function assignEventListeners() {
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl : url});
     });
-    let likeButtons = document.getElementsByClassName('like-button');
-    for(let button of likeButtons)
+    async function assignLikeButtons()
     {
-        let tweetId = button.getAttribute('data-tweet-id');
-        button.addEventListener('click', async (event) => {
-            try{
-                let data = await request(`${API_URL}/like_tweet/${tweetId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-                    }
-                });
-                button.children[0].src = button.children[0].src.includes('not') ?  '/static/public/liked.svg' : '/static/public/not-liked.svg';
-            }
-            catch(error)
-            {
-                console.error('Error:', error);
-                notify('Error liking tweet', 3, 'error');
-            }
-        });
+        let likeButtons = document.getElementsByClassName('like-button');
+        for(let button of likeButtons)
+        {
+            let tweetId = button.getAttribute('data-tweet-id');
+            button.addEventListener('click', async (event) => {
+                try{
+                    let data = await request(`${API_URL}/like_tweet/${tweetId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+                        }
+                    });
+                    button.children[0].src = button.children[0].src.includes('not') ?  '/static/public/liked.svg' : '/static/public/not-liked.svg';
+                }
+                catch(error)
+                {
+                    console.error('Error:', error);
+                    notify('Error liking tweet', 3, 'error');
+                }
+            });
+        }
     }
-
+    async function assignCommentButtons()
+    {
+        let commentButtons = document.getElementsByClassName('comment-button');
+        for(let button of commentButtons)
+        {
+            let tweetId = button.getAttribute('data-tweet-id');
+            button.addEventListener('click', async (event) => {
+                history.pushState({}, '', `/socialmedia/tweet/${tweetId}`);
+            });
+        }
+    }
+    await assignLikeButtons();
+    await assignCommentButtons();
 }
 async function getProfile()
 {
@@ -316,16 +415,23 @@ const App = async () => {
     {
         loadPage('login');
         notify('Please login to continue', 3, 'error')
-    }
-    if(window.location.pathname.includes('tweet'))
         return;
-    else
-    {
+    }
+if(window.location.pathname.includes('/tweet/'))
+{
+    let regex = /\/tweet\/(\d+)/;
+    let match = window.location.pathname.match(regex);
+    if (match) {
+        let tweetId = match[1]; // The first group in the regex contains the tweetId
+        console.log("Tweet ID: ", tweetId);
+    } else {
+        console.log("URL does not match the pattern");
+    }
+}
         await getProfile();
         await fetchChatFriends();
         await fetchSocialPosts();
         await assignEventListeners();
-    }
 }
 
 document.addEventListener('DOMContentLoaded', App);
