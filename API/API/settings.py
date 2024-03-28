@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "Apps.Profile.apps.ProfileConfig",
     "Apps.Tournament.apps.TournamentConfig",
     'Apps.SocialMedia.apps.SocialmediaConfig',
-    "Apps.Chat.apps.ChatConfig"
+    "Apps.Chat.apps.ChatConfig",
 ]
 
 MIDDLEWARE = [
@@ -183,7 +183,7 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
     'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
-    'TOKEN_EXPIRED_CALLBACK': 'API.apps.Auth.token_expired_callback',
+    'TOKEN_EXPIRED_CALLBACK': 'token_expired_callback',
 
     'JTI_CLAIM': 'jti',
 
