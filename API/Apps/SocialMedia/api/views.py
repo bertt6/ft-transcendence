@@ -30,11 +30,11 @@ def get_tweet_and_comments(request, tweet_id):
         tweet = TweetGetSerializer(tweet)
         comments = Comment.objects.filter(tweet=tweet_id)
         paginator = PageNumberPagination()
-        paginator.page_size = 1
+        paginator.page_size = 10
         paginated_data = paginator.paginate_queryset(comments, request)
         serializer = CommentGetSerializer(paginated_data, many=True)
         return paginator.get_paginated_response({'success': True, 'tweet': tweet.data, 'comments': serializer.data})
-    except Comment.DoesNotExist:
+    except Comment.DoesNotExist or Tweet.DoesNotExist:
         Response({"error": "Data not found"}, status=404)
 
 

@@ -46,33 +46,6 @@ class SocialPostsComponent extends BaseComponent {
         super(state, parentElement);
         this.html = "";
     }
-    calculateDate(tweet)
-    {
-    let tweetDate = new Date(tweet.date);
-    let currentDate = new Date();
-    let differenceInSeconds = Math.floor((currentDate - tweetDate) / 1000);
-
-    let minute = 60;
-    let hour = minute * 60;
-    let day = hour * 24;
-    let week = day * 7;
-    if (differenceInSeconds < minute) {
-        return `${differenceInSeconds} seconds ago`;
-    }
-    else if (differenceInSeconds < hour) {
-        return `${Math.floor(differenceInSeconds / minute)} minutes ago`;
-    }
-    else if (differenceInSeconds < day) {
-        return `${Math.floor(differenceInSeconds / hour)} hours ago`;
-        }
-    else if (differenceInSeconds < week) {
-        return `${Math.floor(differenceInSeconds / day)} days ago`;
-    }
-    else {
-        return `${Math.floor(differenceInSeconds / week)} weeks ago`;
-        }
-    }
-
     handleHTML() {
         if(this.state.tweets === undefined)
             return "";
@@ -90,7 +63,7 @@ class SocialPostsComponent extends BaseComponent {
                       </div>
                       <div>
                         <h6>${tweet.from_user.nickname}</h6>
-                        <span>${this.calculateDate(tweet)}</span>
+                        <span>${calculateDate(tweet)}</span>
                       </div>
                     </div>
                     <div>
@@ -105,7 +78,7 @@ class SocialPostsComponent extends BaseComponent {
                     </div>
                     ${tweet.image ? `
                     <div class="post-image">
-                      <img  src="${BASE_URL}/${tweet.image_url}" alt="" />
+                      <img  src="${BASE_URL}${tweet.image_url}" alt="" />
                     </div>
                     `: ''}
                   </div>
@@ -189,6 +162,8 @@ class SelectedPostComponent extends BaseComponent{
     }
     handleHTML()
     {
+        const {results} = this.state.tweet;
+        const {tweet, comments} = results;
         return `
             <div class="selected-post">
               <div class="post-container">
@@ -202,35 +177,32 @@ class SelectedPostComponent extends BaseComponent{
                     </div>
                     <div>
                       <h6>TEST1</h6>
-                      <span>20 MINUTE AGO</span>
+                      <span>${calculateDate(tweet)}</span>
                     </div>
                   </div>
                   <div>
-                    <img src="/public/more.svg" alt="" style="width: 50px" />
+                    <img src="/static/public/more.svg" alt="" style="width: 50px" />
                   </div>
                   <div id="comment-back-button" style="cursor: pointer">
-                    <img src="/public/go-back.svg" alt="" />
+                    <img src="/static/public/go-back.svg" alt="" />
                   </div>
                 </div>
                 <div>
                   <div class="post-text">
                     <p>
-                      Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                      Neque, consequatur adipisci. A, provident dolores, aut
-                      quae sequi quis blanditiis optio unde esse obcaecati
-                      expedita repellat quo. Voluptates eos amet maxime.
+                    ${tweet.content}
                     </p>
                   </div>
                   <div class="post-image">
-                    <img src="/public/Clouds 1.png" alt="" />
+                    <img src="${BASE_URL}${tweet.image_url}" alt="" />
                   </div>
                 </div>
                 <div class="post-interaction">
                   <div>
-                    <img src="/public/heart.svg" alt="" />
+                    <img src="/static/public/liked.svg" alt="" />
                   </div>
                   <div>
-                    <img src="/public/chat-bubble.svg" alt="" />
+                    <img src="/static/public/chat-bubble.svg" alt="" />
                   </div>
                   <div>
                     <input
@@ -242,23 +214,26 @@ class SelectedPostComponent extends BaseComponent{
                   </div>
                 </div>
                 <div class="post-comments">
-                  <div class="post-comment">
-                    <div class="user-pic-wrapper" style="height: 3rem">
-                      <img
-                        src="https://picsum.photos/seed/picsum/200/300"
-                        alt=""
-                      />
-                    </div>
-                    <div>
-                      <h6>username</h6>
-                      <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Ad quo cum accusamus veritatis itaque est, possimus quia
-                        nostrum deleniti incidunt, molestiae facere officia vel,
-                        ipsum blanditiis? Voluptatibus corporis nesciunt veniam!
-                      </p>
-                    </div>
-                  </div>
+            ${comments.map(comment => `
+          <div class="post-comment">
+                <div class="user-pic-wrapper" style="height: 3rem">
+                  <img
+                    src="https://picsum.photos/seed/picsum/200/300"
+                    alt=""
+                  />
+                </div>
+                <div style="flex: 1">
+                <div style="display: flex;justify-content: space-between">          
+              <h6>${comment.from_user.nickname}</h6>
+                <span>${calculateDate(comment)}</span>
+</div>
+                  <p>
+                    ${comment.content}
+                  </p>
+                </div>
+              </div>
+        `).join('')}
+        
                 </div>
               </div>
             </div>
@@ -269,7 +244,34 @@ let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
+function   calculateDate(tweet)
+    {
+    let tweetDate = new Date(tweet.date);
+    let currentDate = new Date();
+    let differenceInSeconds = Math.floor((currentDate - tweetDate) / 1000);
+
+    let minute = 60;
+    let hour = minute * 60;
+    let day = hour * 24;
+    let week = day * 7;
+    if (differenceInSeconds < minute) {
+        return `${differenceInSeconds} seconds ago`;
+    }
+    else if (differenceInSeconds < hour) {
+        return `${Math.floor(differenceInSeconds / minute)} minutes ago`;
+    }
+    else if (differenceInSeconds < day) {
+        return `${Math.floor(differenceInSeconds / hour)} hours ago`;
+        }
+    else if (differenceInSeconds < week) {
+        return `${Math.floor(differenceInSeconds / day)} days ago`;
+    }
+    else {
+        return `${Math.floor(differenceInSeconds / week)} weeks ago`;
+        }
+    }
 const fetchChatFriends = async () => {
+
     const endpoint = `${API_URL}/profile/friends`;
     try {
         let response = await request(endpoint, {
@@ -306,7 +308,7 @@ const fetchSocialPosts = async () => {
                 'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`,
 
             }})
-        socialPostsComponent.setState({tweets: response.tweets});
+        socialPostsComponent.setState({tweets: response.results.tweets});
     }
     catch(error)
         {
@@ -347,7 +349,6 @@ async function assignEventListeners() {
     let imageAdd = document.getElementById('image-add');
     imageAdd.addEventListener('change', (event) => {
         let file = event.target.files[0];
-        console.log(event.target.files)
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl : url});
     });
@@ -417,21 +418,30 @@ const App = async () => {
         notify('Please login to continue', 3, 'error')
         return;
     }
-if(window.location.pathname.includes('/tweet/'))
-{
+
     let regex = /\/tweet\/(\d+)/;
     let match = window.location.pathname.match(regex);
     if (match) {
         let tweetId = match[1]; // The first group in the regex contains the tweetId
-        console.log("Tweet ID: ", tweetId);
-    } else {
-        console.log("URL does not match the pattern");
+        let response = await request(`${API_URL}/get-tweet-and-comments/${tweetId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+            }
+        });
+        console.log(response)
+        let parentElement = document.getElementById('social-container');
+        let selectedPostComponent = new SelectedPostComponent({tweet: response}, parentElement);
+        selectedPostComponent.render();
     }
-}
+else
+    {
         await getProfile();
         await fetchChatFriends();
         await fetchSocialPosts();
         await assignEventListeners();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', App);

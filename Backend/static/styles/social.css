@@ -296,7 +296,7 @@ input[type="file"] {
 .post-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   height: 100%;
 }
 .post-info {
@@ -378,6 +378,7 @@ input[type="file"] {
   gap: 5px;
   overflow-y: auto;
   overflow-x: hidden;
+  margin-top: 20px;
 }
 .post-comment {
   display: flex;
