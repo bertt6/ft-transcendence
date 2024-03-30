@@ -11,6 +11,8 @@ myenv
 # Icon must end with two \r
 Icon
 
+/media
+media/*
 
 # Thumbnails
 ._*

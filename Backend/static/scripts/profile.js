@@ -89,8 +89,6 @@ class Stats extends BaseComponent {
         this.parentElement.innerHTML = this.html;
     }   
 }
-
-
 class Friends extends BaseComponent
 {
     constructor(state,parentElement = null) {
@@ -277,7 +275,6 @@ async function assignDataRouting()
         history.replaceState(null, null, '#friends')
         handleRouting()
     });
-    console.log(statsButton)
     statsButton.addEventListener('click', (e) => {
         history.replaceState(null, null, '#stats')
         handleRouting()

@@ -1,4 +1,5 @@
 export const API_URL = 'http://localhost:8000/api/v1';
+export const BASE_URL = 'http://localhost:8000';
 export function setCookie(name,value,days) {
     let expires = "";
     if (days) {
@@ -164,7 +165,7 @@ const pageHTML = new Map([
     '          </form>\n' +
     '        </div>\n' +
     '      </div>'],
-    ['profile', `       <div
+    ['profile', `           <div
         class="background container-fluid social-background"
         style="padding: 0"
       >
@@ -173,7 +174,7 @@ const pageHTML = new Map([
             <div class="profile-info-wrapper">
                 <div class="profile-edit">
                     <button class="pong-button" id="edit-button">
-                        <img src="/static/public/edit.svg" alt=""></button>
+                        <img src="{% static '/public/edit.svg' %}" alt=""></button>
                 </div>
               <div class="profile-photo skeleton"></div>
               <div class="skeleton profile-data">
@@ -187,10 +188,9 @@ const pageHTML = new Map([
           </div>
           <div class="profile-data">
             <div class="data-headers">
-              <button class="header-wrapper" id="history-button">
-                <span>MATCH HISTORY</span>
-              </button>
+              <button class="header-wrapper" id="history-button"><span>MATCH HISTORY</span></button>
               <button class="header-wrapper" id="friends-button"><span> FRIENDS </span></button>
+              <button class="header-wrapper" id="stats-button"><span>STATS</span></button>
             </div>
           <div id="data-wrapper">
                 <div class="friends-wrapper" style="display: none">
