@@ -33,7 +33,8 @@ def get_tweet_and_comments(request, tweet_id):
         paginator.page_size = 10
         paginated_data = paginator.paginate_queryset(comments, request)
         serializer = CommentGetSerializer(paginated_data, many=True)
-        return paginator.get_paginated_response({'success': True, 'tweet': tweet.data, 'comments': serializer.data})
+        sorted_comments = sorted(serializer.data, key=lambda x: x['date'], reverse=True)
+        return paginator.get_paginated_response({'success': True, 'tweet': tweet.data, 'comments': sorted_comments})
     except Comment.DoesNotExist or Tweet.DoesNotExist:
         Response({"error": "Data not found"}, status=404)
 
@@ -73,7 +74,6 @@ def post_comment(request):
         serializer = CommentPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(from_user=request.user.profile)
-
         return Response(serializer.data)
     except Tweet.DoesNotExist:
         return Response({"error": "Tweet not found"}, status=404)

@@ -204,14 +204,14 @@ class SelectedPostComponent extends BaseComponent{
                   <div>
                     <img src="/static/public/chat-bubble.svg" alt="" />
                   </div>
-                  <div>
+                  <form id="comment-send-form">
                     <input
                       type="text"
                       name=""
-                      id=""
+                      id="comment-input"
                       placeholder="WRITE A COMMENT..."
                     />
-                  </div>
+                  </form>
                 </div>
                 <div class="post-comments">
             ${comments.map(comment => `
@@ -239,7 +239,14 @@ class SelectedPostComponent extends BaseComponent{
             </div>
         `
     }
+    setState(newState)
+    {
+        this.state = {...this.state, ...newState};
+        this.html = this.handleHTML();
+        this.render();
+    }
 }
+
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
@@ -384,9 +391,12 @@ async function assignEventListeners() {
             let tweetId = button.getAttribute('data-tweet-id');
             button.addEventListener('click', async (event) => {
                 history.pushState({}, '', `/socialmedia/tweet/${tweetId}`);
+                console.log(tweetId,"HERE")
+                await renderIndividualPost(tweetId);
             });
         }
     }
+
     await assignLikeButtons();
     await assignCommentButtons();
 }
@@ -411,6 +421,101 @@ async function getProfile()
         notify('Error fetching profile', 3, 'error');
     }
 }
+const renderIndividualPost = async (tweetId) => {
+    let response = await request(`${API_URL}/get-tweet-and-comments/${tweetId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+        }
+    });
+    let parentElement = document.getElementById('social-container');
+    let selectedPostComponent = new SelectedPostComponent({tweet: response}, parentElement);
+    selectedPostComponent.render();
+    console.log(selectedPostComponent.state.tweet.results.comments)
+    let form = document.getElementById('comment-send-form');
+    form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    let inputValue = document.getElementById('comment-input').value;
+        try {
+            let data = await request(`${API_URL}/post-comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+                },
+                body: JSON.stringify({content: inputValue, tweet: tweetId})
+            });
+            notify('Comment posted successfully', 3, 'success');
+            console.log(data)
+        let newComments = [ data, ...selectedPostComponent.state.tweet.results.comments];
+    selectedPostComponent.setState({tweet: {results: {tweet: selectedPostComponent.state.tweet.results.tweet, comments: newComments}}});
+
+        }
+        catch(error)
+        {
+            console.error('Error:', error);
+            notify('Error posting comment', 3, 'error');
+        }
+    }
+    );
+    let backButton = document.getElementById('comment-back-button');
+    backButton.addEventListener('click', (event) => {
+        history.pushState({}, '', `/socialmedia`);
+        renderAllPosts()
+    });
+}
+const renderAllPosts = async () => {
+    document.getElementById('social-container').innerHTML = `
+                <div
+              class="social-wrapper"
+              id="social-wrapper"
+            >
+              <div class="d-flex flex-column gap-2">
+                <div class="social-send-info">
+                  <div class="user-pic-wrapper">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                  <h6 id="username">Test1</h6>
+                </div>
+                <form class="social-send" id="social-send-form">
+                  <input
+                    type="text"
+                    name=""
+                    id="social-text-input"
+                    style="background-color: rgba(126, 126, 126, 0.397)"
+                    placeholder="What do you think"
+                  />
+                    <div class="form-input-wrapper">
+                    <label for="image-add" class="custom-file-upload"></label>
+                    <input
+                    type="file" id="image-add"
+                    src="{% static '/public/image.svg' %}" alt="" style="width: 35px"
+                    accept="image/jpeg,image/png,image/gif"
+                    >
+                <button type="submit" id="send-button">
+                    <img src="/static/public/send.svg" alt="" />
+                </button>
+                    </div>
+                </form>
+              </div>
+              <div class="posts-container" id="posts-wrapper">
+                <div class="post-container skeleton" id="post-wrapper">
+                </div>
+              </div>
+            </div>
+    `;
+    socialPostsComponent.parentElement = document.getElementById('posts-wrapper');
+    postTweetFormComponent.parentElement = document.getElementById('social-send-form');
+    await fetchChatFriends();
+    await fetchSocialPosts();
+    await getProfile();
+    await assignEventListeners();
+
+}
 const App = async () => {
     if(!getCookie("tokens"))
     {
@@ -418,30 +523,13 @@ const App = async () => {
         notify('Please login to continue', 3, 'error')
         return;
     }
-
-    let regex = /\/tweet\/(\d+)/;
+  let regex = /\/tweet\/(\d+)/;
     let match = window.location.pathname.match(regex);
     if (match) {
-        let tweetId = match[1]; // The first group in the regex contains the tweetId
-        let response = await request(`${API_URL}/get-tweet-and-comments/${tweetId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-            }
-        });
-        console.log(response)
-        let parentElement = document.getElementById('social-container');
-        let selectedPostComponent = new SelectedPostComponent({tweet: response}, parentElement);
-        selectedPostComponent.render();
+        await renderIndividualPost(match[1]);
     }
-else
-    {
-        await getProfile();
-        await fetchChatFriends();
-        await fetchSocialPosts();
-        await assignEventListeners();
-    }
+    else
+        await renderAllPosts();
 }
 
 document.addEventListener('DOMContentLoaded', App);
