@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "Apps.Tournament.apps.TournamentConfig",
     'Apps.SocialMedia.apps.SocialmediaConfig',
     "Apps.Chat.apps.ChatConfig",
+    "Apps.OnlineUsers.apps.OnlineusersConfig"
 ]
 
 MIDDLEWARE = [
@@ -200,3 +201,11 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_SSL = False
+
+
+CACHES = {
+    'default': {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        'LOCATION': 'unique-snowflake',
+    }
+}
