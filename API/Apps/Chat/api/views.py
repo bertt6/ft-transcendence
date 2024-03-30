@@ -11,7 +11,6 @@ from Apps.Chat.models import Room
 @permission_classes([IsAuthenticated])
 def start_chat(request):
     username = request.data["username"]
-
     try:
         second_user = User.objects.get(username=username)
     except User.DoesNotExist:

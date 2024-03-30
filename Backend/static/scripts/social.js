@@ -228,9 +228,9 @@ class SelectedPostComponent extends BaseComponent{
                 <div style="display: flex;justify-content: space-between">          
               <h6>${comment.from_user.nickname}</h6>
                 <span>${calculateDate(comment)}</span>
-</div>
+                </div>
                   <p>
-                    ${escapeHTML(tweet.content)}
+                    ${escapeHTML(comment.content)}
                   </p>
                 </div>
               </div>
@@ -533,6 +533,33 @@ const renderAllPosts = async () => {
     await assignEventListeners();
 
 }
+const connectToChat = async () => {
+
+let body = {
+    username:'test'
+}
+    const response = await request(`${API_URL}/start-chat`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+    },
+    body: JSON.stringify(body)
+    })
+    console.log(response);
+    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${response.room.id}/`);
+    chatSocket.addEventListener('open', (event) => {
+        console.log('Connected to chat',event);
+    });
+    chatSocket.onmessage = (e) =>
+    {
+        console.log(e)
+    }
+    chatSocket.addEventListener('close', (event) => {
+        console.log('Disconnected from chat');
+    });
+}
+
 const App = async () => {
     if(!getCookie("tokens"))
     {
@@ -540,13 +567,14 @@ const App = async () => {
         notify('Please login to continue', 3, 'error')
         return;
     }
-  let regex = /\/tweet\/(\d+)/;
+    let regex = /\/tweet\/(\d+)/;
     let match = window.location.pathname.match(regex);
     if (match) {
         await renderIndividualPost(match[1]);
     }
     else
         await renderAllPosts();
+    await connectToChat();
 }
 
 document.addEventListener('DOMContentLoaded', App);

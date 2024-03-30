@@ -379,7 +379,6 @@ export function loadPage(fileName)
 window.addEventListener('popstate', (event ) => {
     if(event === null)
         return
-    console.log("HERE")
     let pathName = window.location.pathname;
     let value = pathName[pathName.length - 1] === '/' ? pathName.slice(1) : pathName;
     console.log(value)
