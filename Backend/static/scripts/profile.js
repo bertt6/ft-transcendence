@@ -154,8 +154,7 @@ class ProfileInfo extends BaseComponent
                 <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name: "no first name is set"}">
               </div>
               <div>
-                <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">${bio ? bio : 'No bio available'}</textarea>
-                
+                <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">${bio ? bio : 'No bio available'}</textarea>  
               </div>
         <button class="pong-button" id="save-button" type="submit">save</button>
             </form>
@@ -338,7 +337,6 @@ async function handleRouting()
         const statsInfo = new Stats({statsInfo:data}, parentElement);
         statsInfo.render();
     }
-    
 }
 const App = async () => {
     await fetchProfile();
