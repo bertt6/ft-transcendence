@@ -194,9 +194,10 @@ class SelectedPostComponent extends BaseComponent{
                     ${tweet.content}
                     </p>
                   </div>
-                  <div class="post-image">
+                  ${tweet.image ? 
+            `<div class="post-image">
                     <img src="${BASE_URL}${tweet.image}" alt="" />
-                  </div>
+              </div>`: ''}
                 </div>
                 <div class="post-interaction">
                   <div class="like-button" data-tweet-id="${tweet.id}">
