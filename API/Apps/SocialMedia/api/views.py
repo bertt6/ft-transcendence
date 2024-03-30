@@ -11,16 +11,14 @@ from rest_framework.pagination import PageNumberPagination
 @permission_classes([IsAuthenticated])
 def get_tweets(request):
     try:
-        tweets = Tweet.objects.all()
+        tweets = Tweet.objects.all().order_by('-date')  # Sort tweets by date in descending order
         paginator = PageNumberPagination()
-        paginator.page_size = 20
+        paginator.page_size = 10
         paginated_data = paginator.paginate_queryset(tweets, request)
         serializer = TweetGetSerializer(paginated_data, many=True)
-        tweets = sorted(serializer.data, key=lambda x: x['date'], reverse=True)
-        return paginator.get_paginated_response({'success': True, 'tweets': tweets})
+        return paginator.get_paginated_response({'success': True, 'tweets': serializer.data})
     except Tweet.DoesNotExist:
-        Response({"error": "Tweets not found"}, status=404)
-
+        return Response({"error": "Tweets not found"}, status=404)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -28,7 +26,7 @@ def get_tweet_and_comments(request, tweet_id):
     try:
         tweet = Tweet.objects.get(id=tweet_id)
         tweet = TweetGetSerializer(tweet)
-        comments = Comment.objects.filter(tweet=tweet_id)
+        comments = Comment.objects.filter(tweet=tweet_id).order_by('-date')
         paginator = PageNumberPagination()
         paginator.page_size = 10
         paginated_data = paginator.paginate_queryset(comments, request)

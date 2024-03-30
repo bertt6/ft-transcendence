@@ -25,7 +25,6 @@ class CommentPostSerializer(serializers.ModelSerializer):
 class TweetGetSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     from_user = ProfileGetSerializer(read_only=True)
-    image_url = serializers.SerializerMethodField()
     date = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     content = serializers.CharField(
         required=True,

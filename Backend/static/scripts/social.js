@@ -78,7 +78,7 @@ class SocialPostsComponent extends BaseComponent {
                     </div>
                     ${tweet.image ? `
                     <div class="post-image">
-                      <img  src="${BASE_URL}${tweet.image_url}" alt="" />
+                      <img  src="${BASE_URL}${tweet.image}" alt="" />
                     </div>
                     `: ''}
                   </div>
@@ -164,6 +164,7 @@ class SelectedPostComponent extends BaseComponent{
     {
         const {results} = this.state.tweet;
         const {tweet, comments} = results;
+        const {userId} = this.state;
         return `
             <div class="selected-post">
               <div class="post-container">
@@ -194,12 +195,12 @@ class SelectedPostComponent extends BaseComponent{
                     </p>
                   </div>
                   <div class="post-image">
-                    <img src="${BASE_URL}${tweet.image_url}" alt="" />
+                    <img src="${BASE_URL}${tweet.image}" alt="" />
                   </div>
                 </div>
                 <div class="post-interaction">
-                  <div>
-                    <img src="/static/public/liked.svg" alt="" />
+                  <div class="like-button" data-tweet-id="${tweet.id}">
+                    <img src="/static/public/${tweet.liked_users.includes(userId) ? "liked" :"not-liked"}.svg" alt="" />
                   </div>
                   <div>
                     <img src="/static/public/chat-bubble.svg" alt="" />
@@ -245,8 +246,16 @@ class SelectedPostComponent extends BaseComponent{
         this.html = this.handleHTML();
         this.render();
     }
+    render()
+    {
+        super.render();
+        let backButton = document.getElementById('comment-back-button');
+        backButton.addEventListener('click', (event) => {
+            history.pushState({}, '', '/socialmedia');
+            renderAllPosts();
+        });
+    }
 }
-
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
@@ -324,13 +333,14 @@ const fetchSocialPosts = async () => {
         }
 
     }
-    async function submitTweet(event) {
+async function submitTweet(event) {
      event.preventDefault();
         let inputValue = document.getElementById('social-text-input').value;
         let image = document.getElementById("image-add");
         let formData = new FormData();
         formData.append('content', inputValue);
-        formData.append('image', image.files[0]);
+        if(image.files.length > 0)
+            formData.append('image', image.files[0]);
         try{
         let data = await request(`${API_URL}/post_tweet`, {
             method: 'POST',
@@ -340,8 +350,8 @@ const fetchSocialPosts = async () => {
             body: formData
         });
         notify('Tweet posted successfully', 3, 'success');
-        //find a solution for this
-        //socialPostsComponent.setState({tweets: [data, ...socialPostsComponent.state.tweets]});
+        let {tweet}= data;
+        socialPostsComponent.setState({tweets: [tweet, ...socialPostsComponent.state.tweets]});
         }
         catch(error)
         {
@@ -349,17 +359,7 @@ const fetchSocialPosts = async () => {
             notify('Error posting tweet', 3, 'error');
         }
 }
-
-async function assignEventListeners() {
-    let form = document.getElementById('social-send-form');
-    form.addEventListener('submit', submitTweet);
-    let imageAdd = document.getElementById('image-add');
-    imageAdd.addEventListener('change', (event) => {
-        let file = event.target.files[0];
-        let url = URL.createObjectURL(file);
-        postTweetFormComponent.setState({imageUrl : url});
-    });
-    async function assignLikeButtons()
+async function assignLikeButtons()
     {
         let likeButtons = document.getElementsByClassName('like-button');
         for(let button of likeButtons)
@@ -373,6 +373,7 @@ async function assignEventListeners() {
                             'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
                         }
                     });
+                    console.log(data);
                     button.children[0].src = button.children[0].src.includes('not') ?  '/static/public/liked.svg' : '/static/public/not-liked.svg';
                 }
                 catch(error)
@@ -383,6 +384,15 @@ async function assignEventListeners() {
             });
         }
     }
+async function assignEventListeners() {
+    let form = document.getElementById('social-send-form');
+    form.addEventListener('submit', submitTweet);
+    let imageAdd = document.getElementById('image-add');
+    imageAdd.addEventListener('change', (event) => {
+        let file = event.target.files[0];
+        let url = URL.createObjectURL(file);
+        postTweetFormComponent.setState({imageUrl : url});
+    });
     async function assignCommentButtons()
     {
         let commentButtons = document.getElementsByClassName('comment-button');
@@ -410,7 +420,6 @@ async function getProfile()
                 'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
             }
         });
-        //find a better solution for this it's not good
         socialPostsComponent.setState({userId: data.id})
         let nickname = document.getElementById('username');
         nickname.innerText = data.nickname;
@@ -429,10 +438,19 @@ const renderIndividualPost = async (tweetId) => {
             'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
         }
     });
+
+        let data = await request(`${API_URL}/profile`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+            }
+        });
     let parentElement = document.getElementById('social-container');
-    let selectedPostComponent = new SelectedPostComponent({tweet: response}, parentElement);
+    let selectedPostComponent = new SelectedPostComponent({tweet: response,userId:data.id}, parentElement);
     selectedPostComponent.render();
-    console.log(selectedPostComponent.state.tweet.results.comments)
+    await assignLikeButtons();
+    await fetchChatFriends()
     let form = document.getElementById('comment-send-form');
     form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -446,11 +464,9 @@ const renderIndividualPost = async (tweetId) => {
                 },
                 body: JSON.stringify({content: inputValue, tweet: tweetId})
             });
-            notify('Comment posted successfully', 3, 'success');
-            console.log(data)
+        notify('Comment posted successfully', 3, 'success');
         let newComments = [ data, ...selectedPostComponent.state.tweet.results.comments];
-    selectedPostComponent.setState({tweet: {results: {tweet: selectedPostComponent.state.tweet.results.tweet, comments: newComments}}});
-
+        selectedPostComponent.setState({tweet: {results: {tweet: selectedPostComponent.state.tweet.results.tweet, comments: newComments}}});
         }
         catch(error)
         {
@@ -459,11 +475,6 @@ const renderIndividualPost = async (tweetId) => {
         }
     }
     );
-    let backButton = document.getElementById('comment-back-button');
-    backButton.addEventListener('click', (event) => {
-        history.pushState({}, '', `/socialmedia`);
-        renderAllPosts()
-    });
 }
 const renderAllPosts = async () => {
     document.getElementById('social-container').innerHTML = `
