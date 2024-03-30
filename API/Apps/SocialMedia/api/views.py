@@ -20,6 +20,7 @@ def get_tweets(request):
     except Tweet.DoesNotExist:
         return Response({"error": "Tweets not found"}, status=404)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_tweet_and_comments(request, tweet_id):

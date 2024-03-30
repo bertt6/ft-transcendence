@@ -73,7 +73,7 @@ class SocialPostsComponent extends BaseComponent {
                   <div>
                     <div class="post-text">
                       <p>
-                        ${tweet.content}
+                        ${escapeHTML(tweet.content)}
                       </p>
                     </div>
                     ${tweet.image ? `
@@ -191,7 +191,7 @@ class SelectedPostComponent extends BaseComponent{
                 <div>
                   <div class="post-text">
                     <p>
-                    ${tweet.content}
+                    ${escapeHTML(tweet.content)}
                     </p>
                   </div>
                   ${tweet.image ? 
@@ -230,7 +230,7 @@ class SelectedPostComponent extends BaseComponent{
                 <span>${calculateDate(comment)}</span>
 </div>
                   <p>
-                    ${comment.content}
+                    ${escapeHTML(tweet.content)}
                   </p>
                 </div>
               </div>
@@ -287,6 +287,11 @@ function   calculateDate(tweet)
         return `${Math.floor(differenceInSeconds / week)} weeks ago`;
         }
     }
+function escapeHTML(str) {
+    let  div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
 const fetchChatFriends = async () => {
 
     const endpoint = `${API_URL}/profile/friends`;
