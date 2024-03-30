@@ -546,8 +546,15 @@ let body = {
     },
     body: JSON.stringify(body)
     })
-    console.log(response);
-    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${response.room.id}/`);
+    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${response.room.id}/?token=${JSON.parse(getCookie('tokens')).access}`);
+    let sendForm = document.getElementById('chat-send');
+    sendForm.addEventListener('submit', (event) => {
+       event.preventDefault();
+        let message = document.getElementById('chat-input').value;
+        chatSocket.send(JSON.stringify({
+            message: message
+        }));
+    });
     chatSocket.addEventListener('open', (event) => {
         console.log('Connected to chat',event);
     });
@@ -555,9 +562,6 @@ let body = {
     {
         console.log(e)
     }
-    chatSocket.addEventListener('close', (event) => {
-        console.log('Disconnected from chat');
-    });
 }
 
 const App = async () => {
