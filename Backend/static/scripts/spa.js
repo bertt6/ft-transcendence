@@ -22,7 +22,7 @@ export function getCookie(name) {
 const routes = new Map([
     ['login', {
     auth_required:false,
-    url: "/auth/login",
+    url: "/auth/login/",
     html: `
     <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
@@ -80,7 +80,7 @@ const routes = new Map([
     }],
     ['register', {
         auth_required: false,
-        url: "/auth/register",
+        url: "/auth/register/",
         html: `
               <div class="background container-fluid">
             <div class="d-flex align-items-center justify-content-center h-100">
@@ -156,7 +156,7 @@ const routes = new Map([
     }],
     ['profile', {
         auth_required: true,
-        url: '/profile',
+        url: '/profile/',
         html: `
               <div
         class="background container-fluid social-background"
@@ -282,9 +282,9 @@ const routes = new Map([
       </div>
 `
     }],
-    ['socialmedia',{
+    ['social',{
     auth_required: true,
-    url: '/socialmedia',
+    url: '/social/',
     html: `
           <div
         class="background container-fluid social-background"
@@ -455,7 +455,7 @@ const routes = new Map([
         auth_required: true,
         url: '/',
         html: `
-                    <div
+     <div
         class="background container-fluid position-relative"
         style="padding: 0"
       >
@@ -549,27 +549,13 @@ function loadRequiredScripts() {
 }
 export function loadPage(fileName)
 {
-
     const route = routes.get(fileName);
-    history.pushState({}, '', window.location.origin + route.url);
+    if(!window.location.pathname.includes(route.url))
+        history.pushState({}, '', window.location.origin + route.url);
     let content = document.getElementById('main');
     content.innerHTML = route.html;
     App();
 }
-
-window.addEventListener('popstate', (event ) => {
-    if(event === null)
-        return
-    let pathName = window.location.pathname;
-    let value = pathName[pathName.length - 1] === '/' ? pathName.slice(1) : pathName;
-        for (let [key, val] of routes.entries()) {
-            if (val.url === value) {
-            loadPage(key);
-            break;
-        }
-    }
-    }
-);
 function assignRouting()
 {
     let elements = document.querySelectorAll("pong-redirect");
@@ -605,6 +591,13 @@ const App = async () => {
     assignRouting();
     checkForAuth();
 }
-
+window.addEventListener('popstate', (event ) => {
+    let pathName = window.location.pathname;
+    let value = pathName.split('/').filter(Boolean).pop();
+    if(value === undefined)
+        value = 'home';
+    loadPage(value);
+    }
+);
 
 document.addEventListener('DOMContentLoaded', App);

@@ -45,7 +45,6 @@ def get_tournaments(request, profile_id, tournament_id):
     if request.method == 'GET':
         serializer = TournamentGetSerializer(tournament)
         return Response(serializer.data)
-
     elif request.method == 'PUT':
         serializert = TournamentPostSerializer(tournament, data=request.data)
         if serializert.is_valid():

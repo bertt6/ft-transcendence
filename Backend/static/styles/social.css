@@ -297,7 +297,6 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  height: 100%;
 }
 .post-info {
   display: flex;
