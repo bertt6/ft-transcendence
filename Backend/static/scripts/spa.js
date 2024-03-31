@@ -455,19 +455,10 @@ const routes = new Map([
         auth_required: true,
         url: '/',
         html: `
-     <div
+      <div
         class="background container-fluid position-relative"
         style="padding: 0"
       >
-        <div class="multiplayer-menu">
-          <button class="return-to-main" id="multi-close-button">X</button>
-          <div class="find-match">
-            <img src="/public/Clouds 3.png" alt="" />
-          </div>
-          <div class="find-tournement">
-            <img src="/public/Clouds 7.png" alt="" />
-          </div>
-        </div>
         <div class="main-buttons-wrapper">
           <pong-redirect class="profile-wrapper" href="profile">
             <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
@@ -495,6 +486,7 @@ const routes = new Map([
           </div>
         </div>
       </div>
+
               `
     }],
 ]);
@@ -513,6 +505,17 @@ function checkAuth()
         loadPage('login');
     }
 }
+function handleStyles(value)
+{
+    let style = document.getElementById('style');
+    if(style)
+        style.remove();
+    let newStyle = document.createElement('link');
+    newStyle.rel = 'stylesheet';
+    newStyle.href = '/static/styles/' + value + '.css';
+    newStyle.id = 'style';
+    document.head.appendChild(newStyle);
+}
 function loadRequiredScripts() {
     requiredScripts.forEach(script => {
         if (!document.getElementById(script)) {
@@ -524,28 +527,22 @@ function loadRequiredScripts() {
         }
     });
     let pathName = window.location.pathname;
-    let value = pathName.split('/')[1];
+    let value = pathName.split('/').filter(Boolean);
+    value = value[value.length - 1]
     if(value === '')
         value = 'home';
     let route = routes.get(value);
     if(!route)
         return;
-    if(!document.getElementById(`${value}Script`))
-    {
-        let script = document.createElement('script');
-        script.src = '/static/scripts/' + value + '.js';
-        script.type = 'module';
-        script.id = value + 'Script';
-        document.body.appendChild(script);
-    }
-    if(!document.getElementById(`${value}Style`))
-    {
-        let link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = '/static/styles/' + value + '.css';
-        document.head.appendChild(link);
-    }
+    if(document.getElementById('script'))
+        document.getElementById('script').remove();
+    let script = document.createElement('script');
+    script.src = '/static/scripts/' + value + '.js?ts=' + new Date().getTime();
+    script.type = 'module';
+    script.id = "script";
+    document.body.appendChild(script);
+    handleStyles(value)
+
 }
 export function loadPage(fileName)
 {

@@ -1,5 +1,3 @@
-const App = async () => {
 
-}
+    console.log('Home page loaded')
 
-document.addEventListener('DOMContentLoaded', App);

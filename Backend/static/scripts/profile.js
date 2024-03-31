@@ -339,11 +339,10 @@ async function handleRouting()
     }
 }
 const App = async () => {
+    console.log('App loaded');
     await fetchProfile();
     await assignDataRouting();
     await handleRouting();
 }
 
-App().then(() => {
-    console.log('App loaded')
-}).catch((error) => console.error(error));
+App().catch((error) => console.error(error));
