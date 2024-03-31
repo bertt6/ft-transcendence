@@ -22,5 +22,5 @@ urlpatterns = [
     path('auth/', include('Apps.Auth.urls')),
     path('', include('Apps.Home.urls')),
     path('profile/', include('Apps.Profile.urls')),
-    path('socialmedia/', include('Apps.SocialMedia.urls')),
+    path('social/', include('Apps.SocialMedia.urls')),
 ]

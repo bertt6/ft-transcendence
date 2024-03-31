@@ -15,7 +15,7 @@ class Stats(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,null=True)
-    nickname = models.CharField(max_length=100, blank=True, null=True, default=None)
+    nickname = models.CharField(max_length=100, blank=True, null=True, default=None, unique=True)
     stats = models.OneToOneField(Stats, on_delete=models.CASCADE, null=True)
     profile_picture = models.ImageField(upload_to='profile-pictures/',  default="profile-pictures/default.svg")
     is_online = models.BooleanField(default=False)
