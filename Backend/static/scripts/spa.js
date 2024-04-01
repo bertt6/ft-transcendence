@@ -453,7 +453,7 @@ const routes = new Map([
     }],
     ['home', {
         auth_required: true,
-        url: '/',
+        url: '/home/',
         html: `
       <div
         class="background container-fluid position-relative"
@@ -497,14 +497,7 @@ const requiredScripts = [
     '/static/scripts/Request.js',
     '/static/scripts/utils.js'
 ]
-function checkAuth()
-{
-    if(!getCookie('tokens'))
-    {
-        history.pushState({to: 'login'}, '', window.location.origin + '/auth/login');
-        loadPage('login');
-    }
-}
+
 function handleStyles(value)
 {
     let style = document.getElementById('style');
@@ -515,6 +508,15 @@ function handleStyles(value)
     newStyle.href = '/static/styles/' + value + '.css';
     newStyle.id = 'style';
     document.head.appendChild(newStyle);
+}
+function findRouteKey(pathName) {
+    for (let [key, value] of routes) {
+        console.log(key, value.url, pathName);
+        if (value.url === pathName) {
+            return key;
+        }
+    }
+    return null;
 }
 function loadRequiredScripts() {
     requiredScripts.forEach(script => {
@@ -527,12 +529,8 @@ function loadRequiredScripts() {
         }
     });
     let pathName = window.location.pathname;
-    let value = pathName.split('/').filter(Boolean);
-    value = value[value.length - 1]
-    if(value === '')
-        value = 'home';
-    let route = routes.get(value);
-    if(!route)
+    let value = findRouteKey(pathName);
+    if(!value)
         return;
     if(document.getElementById('script'))
         document.getElementById('script').remove();
