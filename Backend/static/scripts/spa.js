@@ -331,7 +331,8 @@ const requiredScripts = [
     '/static/components/Notification.js',
     '/static/components/Component.js',
     '/static/components/spinner.js',
-    '/static/scripts/Request.js'
+    '/static/scripts/Request.js',
+    '/static/scripts/spotify.js'
 
 ]
 function checkAuth()

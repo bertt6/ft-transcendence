@@ -2,6 +2,7 @@ import BaseComponent from "../components/Component.js";
 import {API_URL, getCookie} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
+import {getProfile} from "./spotify.js";
 
 class History extends BaseComponent
 {
@@ -41,6 +42,12 @@ class History extends BaseComponent
         this.parentElement.innerHTML = this.handleHTML();
     }
 }
+
+function calculateWinRate(wins, losses)
+{
+    return ((wins / (wins + losses)) * 100).toFixed(2);
+}
+
 class Stats extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -73,12 +80,13 @@ class Stats extends BaseComponent {
     <div class="stats-row">
         <div class="stats-item">
             <h3>Win Rate</h3>
-            <p class="stats-value">%${((parseInt(this.state.statsInfo.total_wins) / (parseInt(this.state.statsInfo.total_wins) + parseInt(this.state.statsInfo.total_losses))) * 100).toFixed(2)}</p>
+            ${calculateWinRate(this.state.statsInfo.total_wins, this.state.statsInfo.total_losses) == 'NaN' ? '<p class="stats-value">0.00%</p>' : `<p class="stats-value">${calculateWinRate(this.state.statsInfo.total_wins, this.state.statsInfo.total_losses) + '%'}</p>`}
         </div>
         <div class="stats-item">
             <h3 href="leaderboard" class="stats-value">Rank</>
             <p class="stats-value">#3</p>
         </div>
+        <button id="spotifyButton" class="">SPOTIFY</button>
     </div>
 </div>
 
@@ -350,9 +358,11 @@ const App = async () => {
     await fetchProfile();
     await assignDataRouting();
     await handleRouting();
+    await getProfile();
     console.log('App loaded exec ended')
 }
 
 App().then(() => {
     console.log('App loaded')
 }).catch((error) => console.error(error));
+

@@ -1,8 +1,3 @@
 server.name: kibana
 server.host: "0"
 elasticsearch.url: http://elasticsearch:9200
-
-#Oluşturacağımız Stack’de sunucunun adını hostunu ve Kibana’nın 
-#Elasticsearch’e ulaşması için url’sini yazdıktan sonra 
-#logstash için de küçük bir konfigurasyon dosyası oluşturuyoruz.
-

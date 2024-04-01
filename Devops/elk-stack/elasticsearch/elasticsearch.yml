@@ -3,10 +3,3 @@ network.host: 0.0.0.0
 discovery.zen.minimum_master_nodes: 1
 discovery.type: single-node
 xpack.security.enabled: false
-
-#Kolaylıkla anlaşılacağı üzere ilk iki tanım, 
-#dinleyeceğimiz cluster’ın adı ve herhangi bir IP’ den 
-#bilgi alabilmesi için 0.0.0.0 olarak ayarlandı. 
-#Single-node konfigurasyonunu bootstrap checklerden kaçınmak 
-#için ekliyoruz. Xpack security opsiyonunu kapatıp login 
-#olmadan elasticsearch’e ulaşmamızı sağlayacak.
