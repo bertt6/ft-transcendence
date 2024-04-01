@@ -20,7 +20,7 @@ export function getCookie(name) {
     return null;
 }
 const routes = new Map([
-    ['login', {
+    ['auth/login/', {
     auth_required:false,
     url: "/auth/login/",
     html: `
@@ -78,7 +78,7 @@ const routes = new Map([
         </div>
     </div>`
     }],
-    ['register', {
+    ['auth/register/', {
         auth_required: false,
         url: "/auth/register/",
         html: `
@@ -154,7 +154,7 @@ const routes = new Map([
           </div>
     `
     }],
-    ['profile', {
+    ['profile/', {
         auth_required: true,
         url: '/profile/',
         html: `
@@ -282,7 +282,7 @@ const routes = new Map([
       </div>
 `
     }],
-    ['social',{
+    ['social/',{
     auth_required: true,
     url: '/social/',
     html: `
@@ -451,7 +451,7 @@ const routes = new Map([
       </div>
 `
     }],
-    ['home', {
+    ['home/', {
         auth_required: true,
         url: '/',
         html: `
@@ -527,11 +527,12 @@ function loadRequiredScripts() {
         }
     });
     let pathName = window.location.pathname;
-    let value = pathName.split('/').filter(Boolean);
-    value = value[value.length - 1]
-    if(value === '')
-        value = 'home';
-    let route = routes.get(value);
+    pathName = pathName.replace('/', '');
+    console.log(pathName);
+
+
+
+    let route = routes.get(pathName);
     if(!route)
         return;
     if(document.getElementById('script'))
