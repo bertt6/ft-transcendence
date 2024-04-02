@@ -230,7 +230,7 @@ class SelectedPostComponent extends BaseComponent{
                 <span>${calculateDate(comment)}</span>
 </div>
                   <p>
-                    ${escapeHTML(tweet.content)}
+                    ${escapeHTML(comment.content)}
                   </p>
                 </div>
               </div>

@@ -511,7 +511,6 @@ function handleStyles(value)
 }
 function findRouteKey(pathName) {
     for (let [key, value] of routes) {
-        console.log(key, value.url, pathName);
         if (value.url === pathName) {
             return key;
         }
