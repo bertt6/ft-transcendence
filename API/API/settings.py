@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "Apps.Tournament.apps.TournamentConfig",
     'Apps.SocialMedia.apps.SocialmediaConfig',
     "Apps.Chat.apps.ChatConfig",
-    "Apps.OnlineUsers.apps.OnlineusersConfig"
+    "Apps.UserStatus.apps.OnlineusersConfig"
 ]
 
 MIDDLEWARE = [

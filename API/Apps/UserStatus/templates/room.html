@@ -13,12 +13,11 @@
     <script>
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
         console.log(window.location.host)
+        user_id = Math.floor(Math.random() * 1000000)
         const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
-            + '/ws/chat/'
-            + roomName
-            + '/'
+            + '/ws/online/' + user_id
         );
 
         chatSocket.onmessage = function(e) {

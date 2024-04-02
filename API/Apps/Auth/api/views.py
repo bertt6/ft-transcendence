@@ -1,16 +1,14 @@
-from datetime import timezone
-
-from rest_framework_simplejwt.exceptions import TokenError
+import os
 
 from API.serializers import RegisterSerializer, ChangePasswordSerializer
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from ..utils import *
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsEmailVerified
-from django.dispatch import receiver
-from rest_framework_simplejwt.tokens import BlacklistedToken
+from requests_oauthlib import OAuth2Session
+
 
 
 @api_view(['POST'])
@@ -91,3 +89,14 @@ def change_password(request):
         user.save()
         return Response({'success': 'password changed successfully'}, status=200)
 
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_with_42(request):
+    client42 = OAuth2Session(os.getenv('42_UID'), redirect_uri='https://www.google.com/')
+    authorization_url, state = client42.authorization_url('https://api.intra.42.fr/oauth/authorize')
+    client42.fetch_token('https://api.intra.42.fr/oauth/token', 'fb124e183cbfa8fb7bb948ec2b09928e65efb4c0a85638476f0d0a25ee958b3b', client_secret=os.getenv('42_SECRET'))
+
+    response = client42.get('https://api.intra.42.fr/v2/cursus/42/users')
+    return Response(data=response.json(), status=200)
