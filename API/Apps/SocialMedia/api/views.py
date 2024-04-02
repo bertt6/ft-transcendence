@@ -6,14 +6,15 @@ from .serializers import TweetPostSerializer, TweetGetSerializer, \
 from ..models import Tweet, Comment
 from rest_framework.pagination import PageNumberPagination
 
+paginator = PageNumberPagination()
+paginator.page_size = 20
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_tweets(request):
     try:
         tweets = Tweet.objects.all()
-        paginator = PageNumberPagination()
-        paginator.page_size = 20
         paginated_data = paginator.paginate_queryset(tweets, request)
         serializer = TweetGetSerializer(paginated_data, many=True)
         return paginator.get_paginated_response({'success': True, 'tweets': serializer.data})
@@ -28,8 +29,6 @@ def get_tweet_and_comments(request, tweet_id):
         tweet = Tweet.objects.get(id=tweet_id)
         tweet = TweetGetSerializer(tweet)
         comments = Comment.objects.filter(tweet=tweet_id)
-        paginator = PageNumberPagination()
-        paginator.page_size = 1
         paginated_data = paginator.paginate_queryset(comments, request)
         serializer = CommentGetSerializer(paginated_data, many=True)
         return paginator.get_paginated_response({'success': True, 'tweet': tweet.data, 'comments': serializer.data})
