@@ -100,3 +100,7 @@ button{
   color: black ;
   font-size: larger;
 }
+
+pong-redirect{
+  cursor: pointer;
+}

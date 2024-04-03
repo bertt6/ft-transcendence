@@ -1,8 +1,8 @@
 import BaseComponent from "../components/Component.js";
-import {API_URL, getCookie} from "./spa.js";
+import {API_URL, BASE_URL, getCookie, loadPage} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
-
+import {escapeHTML} from "./utils.js";
 class History extends BaseComponent
 {
     constructor(state,parentElement = null) {
@@ -106,7 +106,7 @@ class Friends extends BaseComponent
                     <img src="https://picsum.photos/id/237/200/300" alt="" />
                   </div>
                   <div class="friend-data">
-                    <h6>${friend.user.first_name.length  > 0 ?friend.user.first_name : "No name is set for this user" }</h6>
+                    <h6>${friend.user.first_name.length  > 0 ?escapeHTML(friend.user.first_name) : "No name is set for this user" }</h6>
                     <span>${friend.nickname.length > 0 ? friend.nickname: friend.user.username}</span>
                   </div>
                 </div>
@@ -133,7 +133,7 @@ class ProfileInfo extends BaseComponent
     }
     handleEditHTML()
     {
-        const {nickname, first_name, last_name,bio} = this.state.profile;
+        const {nickname, first_name, last_name,bio,profile_picture} = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -144,7 +144,7 @@ class ProfileInfo extends BaseComponent
         <form style="display: flex; flex-direction: column; align-items: center" id="update-form">
               <div class="profile-photo">
                 <img
-                  src="https://picsum.photos/id/237/200/300"
+                  src="${BASE_URL}${profile_picture}"
                   alt=""
                   class=""
                 />
@@ -154,10 +154,7 @@ class ProfileInfo extends BaseComponent
                 <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name: "no first name is set"}">
               </div>
               <div>
-                <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">
-                ${bio ? bio : 'No bio available'}
-    </textarea>
-                
+                <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">${bio ? bio : 'No bio available'}</textarea>  
               </div>
         <button class="pong-button" id="save-button" type="submit">save</button>
             </form>
@@ -166,7 +163,7 @@ class ProfileInfo extends BaseComponent
     }
     handleHTML()
     {
-        const {nickname, first_name, last_name,bio} = this.state.profile;
+        const {nickname, first_name, last_name,bio,profile_picture} = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -176,18 +173,18 @@ class ProfileInfo extends BaseComponent
                 </div>
               <div class="profile-photo">
                 <img
-                  src="https://picsum.photos/id/237/200/300"
+                  src="${BASE_URL}${profile_picture}"
                   alt=""
                   class=""
                 />
               </div>
               <div>
-                <h1>${nickname ? nickname: "no nickname is set!"}</h1>
-                <span>${first_name ? first_name: "no first name is set"}</span>
+                <h1>${nickname ? escapeHTML(nickname): "no nickname is set!"}</h1>
+                <span>${first_name ? escapeHTML(first_name): "no first name is set"}</span>
               </div>
               <div>
                 <p>
-                ${bio ? bio : 'No bio available'}
+                ${bio ? escapeHTML(bio): 'No bio available'}
                 </p>
               </div>`
     }
@@ -340,16 +337,12 @@ async function handleRouting()
         const statsInfo = new Stats({statsInfo:data}, parentElement);
         statsInfo.render();
     }
-    
 }
+
 const App = async () => {
-    console.log('App loaded exec started')
     await fetchProfile();
     await assignDataRouting();
     await handleRouting();
-    console.log('App loaded exec ended')
 }
 
-App().then(() => {
-    console.log('App loaded')
-}).catch((error) => console.error(error));
+App().catch((error) => console.error(error));

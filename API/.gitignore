@@ -11,9 +11,9 @@ myenv
 # Icon must end with two \r
 Icon
 
-/media
-media/*
-
+media/images/*
+!media/images/profile-pictures/
+!media/images/profile-pictures/default.svg
 # Thumbnails
 ._*
 

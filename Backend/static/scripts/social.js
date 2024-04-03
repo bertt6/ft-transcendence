@@ -230,7 +230,7 @@ class SelectedPostComponent extends BaseComponent{
                 <span>${calculateDate(comment)}</span>
 </div>
                   <p>
-                    ${escapeHTML(tweet.content)}
+                    ${escapeHTML(comment.content)}
                   </p>
                 </div>
               </div>
@@ -406,8 +406,7 @@ async function assignEventListeners() {
         {
             let tweetId = button.getAttribute('data-tweet-id');
             button.addEventListener('click', async (event) => {
-                history.pushState({}, '', `/socialmedia/tweet/${tweetId}`);
-                console.log(tweetId,"HERE")
+                history.pushState({}, '', `/social/tweet/${tweetId}`);
                 await renderIndividualPost(tweetId);
             });
         }
@@ -483,8 +482,9 @@ const renderIndividualPost = async (tweetId) => {
     );
 }
 const renderAllPosts = async () => {
-    document.getElementById('social-container').innerHTML = `
-                <div
+    let container =    document.getElementById('social-container');
+    container.innerHTML = `
+                  <div
               class="social-wrapper"
               id="social-wrapper"
             >
@@ -524,7 +524,8 @@ const renderAllPosts = async () => {
                 </div>
               </div>
             </div>
-    `;
+
+    `
     socialPostsComponent.parentElement = document.getElementById('posts-wrapper');
     postTweetFormComponent.parentElement = document.getElementById('social-send-form');
     await fetchChatFriends();
@@ -534,6 +535,7 @@ const renderAllPosts = async () => {
 
 }
 const App = async () => {
+
     if(!getCookie("tokens"))
     {
         loadPage('login');
@@ -549,4 +551,17 @@ const App = async () => {
         await renderAllPosts();
 }
 
-document.addEventListener('DOMContentLoaded', App);
+App().catch(error => console.error('Error:', error));
+
+window.addEventListener('popstate', async (event) => {
+    if(window.location.pathname === '/social/')
+        await renderAllPosts();
+    else
+    {
+        let regex = /\/tweet\/(\d+)/;
+        let match = window.location.pathname.match(regex);
+        if (match) {
+            await renderIndividualPost(match[1]);
+        }
+    }
+});

@@ -36,9 +36,9 @@ const endpoint = `${API_URL}/token/temp-token`;
 
 
 const App = async () => {
+    console.log('Login page loaded')
     if(getCookie("tokens"))
     {
-        console.log('tokens exist')
         loadPage('home');
         notify('Already logged in', 3, 'success')
     }
