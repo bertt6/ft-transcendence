@@ -1,4 +1,4 @@
-import {API_URL, getCookie, loadPage, BASE_URL} from "./spa.js";
+import {API_URL, getCookie, loadPage, BASE_URL,assignRouting} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
@@ -11,7 +11,7 @@ class ChatFriendsComponent extends  BaseComponent{
     {
         return `
               ${this.state.friends.map(friend => `
-                <div class="user-wrapper">
+                <pong-redirect class="user-wrapper" href="/profile/${friend.nickname}">
                   <div class="user-pic-wrapper">
                     <img
                       src="https://picsum.photos/seed/picsum/200/300"
@@ -27,7 +27,7 @@ class ChatFriendsComponent extends  BaseComponent{
                     </div>
                     <span>Active Now</span>
             </div>
-            </div>
+            </pong-redirect>
               `).join('')}
 `
     }
@@ -54,7 +54,7 @@ class SocialPostsComponent extends BaseComponent {
     ${this.state.tweets.map(tweet => `
             <div class="post-container">
                   <div class="d-flex position-relative">
-                    <div class="post-info">
+                    <pong-redirect class="post-info" href="/profile/${tweet.from_user.nickname}">
                       <div class="user-pic-wrapper">
                         <img
                           src="https://picsum.photos/seed/picsum/200/300"
@@ -65,7 +65,7 @@ class SocialPostsComponent extends BaseComponent {
                         <h6>${tweet.from_user.nickname}</h6>
                         <span>${calculateDate(tweet)}</span>
                       </div>
-                    </div>
+                    </pong-redirect>
                     <div>
                       <img  src="/static/public/more.svg" alt="" style="width: 50px" />
                     </div>
@@ -549,6 +549,7 @@ const App = async () => {
     }
     else
         await renderAllPosts();
+    assignRouting();
 }
 
 App().catch(error => console.error('Error:', error));

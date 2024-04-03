@@ -13,18 +13,18 @@ async function handleRouting()
                 'Authorization': `Bearer ${tokens.access}`
             }
         });
-        console.log(data)
-            document.getElementById('profile-photo').href = `/profile/${data.id}`;
+        let profilePhoto = document.getElementById('profile-photo');
+        profilePhoto.setAttribute('href', `/profile/${data.nickname}`)
     }
     catch (error)
     {
         console.error(error)
     }
-
-
 }
 async function App()
 {
     await handleRouting();
 }
-document.addEventListener('DOMContentLoaded', App);
+App().catch((error) => {
+    console.error(error)
+});
