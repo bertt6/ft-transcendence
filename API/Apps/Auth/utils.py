@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
 
+from Apps.Auth.models import VerificationCode
 from Apps.Profile.models import Profile
 
 
@@ -34,10 +35,5 @@ def send_email(user):
     recipient_list = [receiver]
     send_mail(subject, message, from_email, recipient_list)
 
-    response = Response()
-    response.data = {'otp': otp_code['otp'], 'otp_expired_date': otp_code['otp_expired_date']}
-    response.set_cookie(key='otp', value=str(otp_code['otp']), httponly=True)
-    response.set_cookie(key='otp_expired_date', value=str(otp_code['otp_expired_date']), httponly=True)
-    response.status_code = status.HTTP_200_OK
+    VerificationCode.objects.create(code=otp_code['otp'], expired_date=otp_code['otp'], username=user)
 
-    return response

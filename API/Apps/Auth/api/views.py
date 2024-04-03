@@ -1,5 +1,7 @@
 import os
 
+from pytz import timezone
+
 from API.serializers import RegisterSerializer, ChangePasswordSerializer
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.decorators import api_view, permission_classes
@@ -46,27 +48,44 @@ def send_email_for_verification(request):
 
     if user is None or not user.check_password(password):
         raise AuthenticationFailed("Wrong Password or Username!")
-    response = send_email(user)
-    return response
+    send_email(user)
+    return Response(data={'message': 'Email sent successfully!'}, status=200)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def email_verification(request):
-    verification_code = request.data['verification_code']
-    cookie_verification_code = request.COOKIES.get('otp', '')
-    cookie_code_valid_date = request.COOKIES.get('otp_expired_date', '')
-    user = User.objects.get(username=request.data['username'])
-    profile = user.profile
-    if verification_code != cookie_verification_code:
-        print(verification_code, cookie_verification_code, cookie_code_valid_date)
-        raise AuthenticationFailed("Wrong verification code!")
-    elif datetime.strptime(cookie_code_valid_date, "%Y-%m-%d %H:%M:%S.%f") < datetime.now():
-        raise ValidationError("The code has expired!")
+    try:
+        username = request.data['username']
+        verification_code = request.data['verification_code']
+        db_verification_code = VerificationCode.objects.get(code=verification_code, username=username)
+        user = User.objects.get(username=username)
+    except VerificationCode.DoesNotExist:
+        return Response(data={'message': 'Invalid verification code!'}, status=400)
+    except User.DoesNotExist:
+        return Response(data={'message': 'User not found!'}, status=400)
 
+    if verification_code != db_verification_code.code:
+        return Response(data={'message': 'Incorrect verification code!'}, status=400)
+
+    expiration_time = timedelta(minutes=15)
+    if (datetime.now().astimezone(timezone('UTC')) - db_verification_code.expired_date) > expiration_time:
+        return Response(data={'message': 'Verification code expired!'}, status=400)
+    db_verification_code.delete()
+
+    profile = user.profile
     profile.is_verified = True
     profile.save()
-    return Response({'email': user.email}, status=200)
+
+    tokens = RefreshToken.for_user(user)
+
+    response = Response()
+    response.data = {
+        'tokens': {'access': str(tokens.access_token), 'refresh': str(tokens)},
+        'user_id': user.pk,
+        'username': user.username
+    }
+    return response
 
 
 @api_view(['POST'])
