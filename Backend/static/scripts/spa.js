@@ -286,6 +286,10 @@ const routes = new Map([
     auth_required: true,
     url: ['/social/',  '/social/\\w+/g'],
     html: `
+      <ul class="chat-options" id="chat-options">
+        <li>Invite to Pong</li>
+        <li>Go To Profile</li>
+      </ul>
           <div
         class="background container-fluid social-background"
         style="padding: 0"
