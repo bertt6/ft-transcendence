@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  frontend:
+    build:
+      context: Backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Backend/frontendVol:/app/frontend
+    command: python3 manage.py runserver 0.0.0.0:3000
+
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: API
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgres://postgres:123@db:5432/transcendenceDB
+    volumes:
+      - ./API/backendVol:/app/backend
+    command: sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"

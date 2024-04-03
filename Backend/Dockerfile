@@ -1,10 +1,10 @@
 FROM python:3.9
 
-WORKDIR /app/API
+WORKDIR /app/Backend
 
-COPY . /app/API
+COPY . /app/Backend
 RUN pip install --upgrade pip
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8000
+EXPOSE 3000
