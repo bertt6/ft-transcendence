@@ -612,7 +612,7 @@ function checkForAuth()
     if(route.auth_required === true)
         loadPage('login');
 }
-function assignRouting()
+export function assignRouting()
 {
     let elements = document.querySelectorAll("pong-redirect");
     for(let element of elements)
