@@ -156,7 +156,7 @@ const routes = new Map([
     }],
     ['profile', {
         auth_required: true,
-        url: [/\/profile\/\w+/g],
+        url: [/profile\/[A-Za-z]+/],
         html: `
               <div
         class="background container-fluid social-background"
@@ -460,7 +460,7 @@ const routes = new Map([
         style="padding: 0"
       >
         <div class="main-buttons-wrapper">
-          <pong-redirect class="profile-wrapper" href="/profile">
+          <pong-redirect class="profile-wrapper" href="/profile" id="profile-photo">
             <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
           </pong-redirect>
           <div class="play-wrapper">
@@ -479,7 +479,7 @@ const routes = new Map([
                 MULTIPLAYER
               </button>
               <button class="play-button">SINGLEPLAYER</button>
-              <pong-redirect href="social">
+              <pong-redirect href="/social/">
                   <button class="play-button">SOCIAL</button>
               </pong-redirect>
             </div>
@@ -490,6 +490,13 @@ const routes = new Map([
               `
     }],
 ]);
+const routeToFile = [
+    [["/auth/login/"], 'login'],
+    [["/auth/register/"], 'register'],
+    [[/profile\/[A-Za-z]+/], 'profile'],
+    [['/social/',  '/social/\\w+/g'], 'social'],
+    [['/home/'], 'home']
+]
 const requiredScripts = [
     '/static/components/Notification.js',
     '/static/components/Component.js',
@@ -516,7 +523,10 @@ function findRouteKey(pathName) {
             if(url instanceof RegExp)
             {
                 if(url.test(pathName))
-                    return key;
+                {
+                      return key;
+                }
+
             }
             else if(pathName.includes(url))
                 return key;
@@ -548,18 +558,41 @@ function loadRequiredScripts() {
     handleStyles(value)
 
 }
+function findRouteFile(pathName) {
+    const route = routeToFile.find(route => route[0].some(url => {
+        if (url instanceof RegExp) {
+            return url.test(pathName);
+        } else {
+            console.log(url, pathName)
+            return pathName.includes(url);
+        }
+    }));
+
+    return route ? route[1] : null;
+}
 export function loadPage(fileName) {
-    const route = routes.get(fileName);
+    let data = findRouteFile(fileName);
+    const route = routes.get(data);
     let isMatch = false;
 
-    if (route.url instanceof RegExp) {
-        isMatch = route.url.test(window.location.pathname);
-    } else {
-        isMatch = window.location.pathname.includes(route.url);
-    }
-    if (!isMatch) {
-        history.pushState({}, '', window.location.origin + route.url);
-    }
+if (Array.isArray(route.url)) {
+    isMatch = route.url.some(url => {
+        if (url instanceof RegExp) {
+            return url.test(window.location.pathname);
+        } else {
+            return window.location.pathname.includes(url);
+        }
+    });
+} else if (route.url instanceof RegExp) {
+    isMatch = route.url.test(window.location.pathname);
+} else {
+    isMatch = window.location.pathname.includes(route.url);
+}
+
+if (!isMatch) {
+    history.pushState({}, '', window.location.origin + route.url);
+}
+    console.log("Loading page: ", fileName);
     let content = document.getElementById('main');
     content.innerHTML = route.html;
     App();
@@ -579,16 +612,28 @@ function checkForAuth()
     if(route.auth_required === true)
         loadPage('login');
 }
+function assignRouting()
+{
+    let elements = document.querySelectorAll("pong-redirect");
+    for(let element of elements)
+    {
+        element.addEventListener('click', function(event) {
+            event.preventDefault();
+            let fileName = element.getAttribute('href');
+            history.pushState({to: fileName}, '', window.location.origin + fileName);
+            loadPage(fileName);
+        });
+    }
+}
 const App = async () => {
     loadRequiredScripts();
     checkForAuth();
+    assignRouting()
 }
 window.addEventListener('popstate', (event ) => {
     let pathName = window.location.pathname;
-    let value = pathName.split('/').filter(Boolean).pop();
-    if(value === undefined)
-        value = 'home';
-    loadPage(value);
+
+    loadPage(pathName);
     }
 );
 

@@ -48,6 +48,7 @@ class Stats extends BaseComponent {
     }
 
     handleHTML() {
+    console.log(this.state)
     return `
     <div class="stats-wrapper">
     <div class="stats-row">
@@ -192,7 +193,7 @@ class ProfileInfo extends BaseComponent
         const tokens = JSON.parse(getCookie('tokens'));
         try
         {
-            let response = await fetch(`${API_URL}/profile`,{
+            let response = await request(`${API_URL}/profile`,{
                 method:'PUT',
                 headers:{
                     'Content-Type':'application/json',
@@ -200,9 +201,8 @@ class ProfileInfo extends BaseComponent
                 },
                 body: JSON.stringify(formData)
             });
-            const data = await response.json();
             notify('Profile updated', 3, 'success');
-            this.setState({...this.state, profile:data});
+            this.setState({...this.state, profile:response});
         }
         catch(error)
         {
@@ -281,15 +281,14 @@ async function assignDataRouting()
 async function fetchStats()
 {
     try{
-        let response = await fetch(`${API_URL}/profile/stats`,{
+        let response = await request(`${API_URL}/profile/stats`,{
             method:'GET',
             headers:{
                 'Content-Type':'application/json',
                 'Authorization':`Bearer ${JSON.parse(getCookie('tokens')).access}`
             }
         });
-        const data = await response.json();
-        return data;
+        return response;
     }
     catch (error)
     {
