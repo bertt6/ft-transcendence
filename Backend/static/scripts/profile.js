@@ -1,5 +1,5 @@
 import BaseComponent from "../components/Component.js";
-import {API_URL, BASE_URL, getCookie} from "./spa.js";
+import {API_URL, BASE_URL, getCookie, loadPage} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
 import {escapeHTML} from "./utils.js";
@@ -338,8 +338,8 @@ async function handleRouting()
         statsInfo.render();
     }
 }
+
 const App = async () => {
-    console.log('App loaded');
     await fetchProfile();
     await assignDataRouting();
     await handleRouting();

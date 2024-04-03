@@ -22,7 +22,7 @@ export function getCookie(name) {
 const routes = new Map([
     ['login', {
     auth_required:false,
-    url: "/auth/login/",
+    url:["/auth/login/"],
     html: `
     <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
@@ -80,7 +80,7 @@ const routes = new Map([
     }],
     ['register', {
         auth_required: false,
-        url: "/auth/register/",
+        url: ["/auth/register/"],
         html: `
               <div class="background container-fluid">
             <div class="d-flex align-items-center justify-content-center h-100">
@@ -156,7 +156,7 @@ const routes = new Map([
     }],
     ['profile', {
         auth_required: true,
-        url: '/profile/',
+        url: [/\/profile\/\w+/g],
         html: `
               <div
         class="background container-fluid social-background"
@@ -284,7 +284,7 @@ const routes = new Map([
     }],
     ['social',{
     auth_required: true,
-    url: '/social/',
+    url: ['/social/',  '/social/\\w+/g'],
     html: `
           <div
         class="background container-fluid social-background"
@@ -453,14 +453,14 @@ const routes = new Map([
     }],
     ['home', {
         auth_required: true,
-        url: '/home/',
+        url: ['/home/'],
         html: `
       <div
         class="background container-fluid position-relative"
         style="padding: 0"
       >
         <div class="main-buttons-wrapper">
-          <pong-redirect class="profile-wrapper" href="profile">
+          <pong-redirect class="profile-wrapper" href="/profile">
             <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
           </pong-redirect>
           <div class="play-wrapper">
@@ -511,8 +511,15 @@ function handleStyles(value)
 }
 function findRouteKey(pathName) {
     for (let [key, value] of routes) {
-        if (value.url === pathName) {
-            return key;
+        for(let url of value.url)
+        {
+            if(url instanceof RegExp)
+            {
+                if(url.test(pathName))
+                    return key;
+            }
+            else if(pathName.includes(url))
+                return key;
         }
     }
     return null;
@@ -541,31 +548,23 @@ function loadRequiredScripts() {
     handleStyles(value)
 
 }
-export function loadPage(fileName)
-{
+export function loadPage(fileName) {
     const route = routes.get(fileName);
-    if(!window.location.pathname.includes(route.url))
+    let isMatch = false;
+
+    if (route.url instanceof RegExp) {
+        isMatch = route.url.test(window.location.pathname);
+    } else {
+        isMatch = window.location.pathname.includes(route.url);
+    }
+    if (!isMatch) {
         history.pushState({}, '', window.location.origin + route.url);
+    }
     let content = document.getElementById('main');
     content.innerHTML = route.html;
     App();
 }
-function assignRouting()
-{
-    let elements = document.querySelectorAll("pong-redirect");
-    for(let element of elements)
-    {
-        element.addEventListener('click', function(event) {
-            event.preventDefault();
-            let fileName = element.getAttribute('href');
-            let route = routes.get(fileName);
-            if(!route)
-                throw new Error('No route found for ' + fileName);
-            history.pushState({to: fileName}, '', window.location.origin + route.url);
-            loadPage(fileName);
-        });
-    }
-}
+
 
 function checkForAuth()
 {
@@ -582,7 +581,6 @@ function checkForAuth()
 }
 const App = async () => {
     loadRequiredScripts();
-    assignRouting();
     checkForAuth();
 }
 window.addEventListener('popstate', (event ) => {
