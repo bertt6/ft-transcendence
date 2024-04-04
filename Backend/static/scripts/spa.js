@@ -567,7 +567,6 @@ function findRouteFile(pathName) {
         if (url instanceof RegExp) {
             return url.test(pathName);
         } else {
-            console.log(url, pathName)
             return pathName.includes(url);
         }
     }));
@@ -575,6 +574,7 @@ function findRouteFile(pathName) {
     return route ? route[1] : null;
 }
 export function loadPage(fileName) {
+    debugger
     let data = findRouteFile(fileName);
     const route = routes.get(data);
     let isMatch = false;
@@ -596,7 +596,6 @@ if (Array.isArray(route.url)) {
 if (!isMatch) {
     history.pushState({}, '', window.location.origin + route.url);
 }
-    console.log("Loading page: ", fileName);
     let content = document.getElementById('main');
     content.innerHTML = route.html;
     App();
@@ -608,13 +607,14 @@ function checkForAuth()
     if(getCookie('tokens'))
         return;
     const pathName = window.location.pathname;
-    let value = pathName.replace(/\//g, '');
-
-    let route = routes.get(value);
-    if(!route)
+    let value = findRouteKey(pathName);
+    if(!value)
         return;
+    const route = routes.get(value);
+    console.log(route)
     if(route.auth_required === true)
-        loadPage('login');
+        loadPage('/auth/login/');
+
 }
 export function assignRouting()
 {

@@ -22,7 +22,7 @@ const endpoint = `${API_URL}/token/temp-token`;
         if (response.ok) {
             let data = await response.json();
             //loadPage('email-verification'); after finishing html
-            loadPage('home');
+            loadPage('/home/');
             setCookie('tokens', JSON.stringify(data), 1);
         } else {
             console.error('Error:', response);
@@ -36,14 +36,13 @@ const endpoint = `${API_URL}/token/temp-token`;
 
 
 const App = async () => {
-    console.log('Login page loaded')
     if(getCookie("tokens"))
     {
-        loadPage('home');
+        loadPage('/home/');
         notify('Already logged in', 3, 'success')
     }
     const form = document.getElementById('login-form');
-    form.addEventListener('submit', loginForm);
+   form.addEventListener('submit', loginForm);
 }
 
 document.addEventListener('DOMContentLoaded', App);

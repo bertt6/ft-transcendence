@@ -8,21 +8,15 @@ from rest_framework.response import Response
 from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer
 
 
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class ProfileView(APIView):
-    def get(self, request):
-        profile = Profile.objects.all()
-        profile_serializer = ProfileGetSerializer(profile, many=True)
-        return Response(profile_serializer.data, status=200)
-
-    def post(self, request,profile_id):
-        profile = Profile.objects.get(id=profile_id)
+    def get(self, request, profile_nickname):
+        profile = Profile.objects.get(nickname=profile_nickname)
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
-        profile_serializer = ProfilePostSerializer(profile, data=request.data)
-        if not profile_serializer.is_valid():
-            return Response(profile_serializer.errors, status=400)
-        profile_serializer.save()
-        return Response(profile_serializer.data, status=201)
+        profile_serializer = ProfileGetSerializer(profile)
+        return Response(profile_serializer.data, status=200)
 
 
 @authentication_classes([JWTAuthentication])
