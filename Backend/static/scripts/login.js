@@ -10,7 +10,7 @@ async function loginForm(event)
         username: username,
         password: password
     };
-const endpoint = `${API_URL}/token/temp-token`;
+    const endpoint = `${API_URL}/send-email-for-verification`;
     try{
         let response = await fetch(endpoint, {
             method: 'POST',
@@ -24,6 +24,7 @@ const endpoint = `${API_URL}/token/temp-token`;
             //loadPage('email-verification'); after finishing html
             loadPage('/home/');
             setCookie('tokens', JSON.stringify(data), 1);
+
         } else {
             console.error('Error:', response);
             let data = await response.json();

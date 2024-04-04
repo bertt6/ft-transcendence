@@ -8,3 +8,6 @@ def login(request):
 
 def register(request):
     return render(request, 'auth/register.html')
+
+def verification(request):
+    return render(request, 'auth/verification.html')

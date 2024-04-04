@@ -6,6 +6,9 @@ from .serializers import TweetPostSerializer, TweetGetSerializer, \
 from ..models import Tweet, Comment
 from rest_framework.pagination import PageNumberPagination
 
+paginator = PageNumberPagination()
+paginator.page_size = 20
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
