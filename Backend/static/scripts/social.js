@@ -11,7 +11,7 @@ class ChatFriendsComponent extends  BaseComponent{
     {
         return `
               ${this.state.friends.map(friend => `
-                <pong-redirect class="user-wrapper" href="/profile/${friend.nickname}">
+                <div class="user-wrapper">
                   <div class="user-pic-wrapper">
                     <img
                       src="https://picsum.photos/seed/picsum/200/300"
@@ -27,7 +27,7 @@ class ChatFriendsComponent extends  BaseComponent{
                     </div>
                     <span>Active Now</span>
             </div>
-            </pong-redirect>
+            </div>
               `).join('')}
 `
     }
@@ -534,6 +534,33 @@ const renderAllPosts = async () => {
     await assignEventListeners();
 
 }
+function handleChatEvents() {
+  let elements = document.getElementsByClassName("user-wrapper");
+  console.log(elements);
+  for (let element of elements) {
+    element.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      let mouseX = event.clientX;
+      let mouseY = event.clientY;
+      let chatOptions = document.getElementById("chat-options");
+      chatOptions.style.top = `${mouseY}px`;
+      chatOptions.style.left = `${mouseX}px`;
+      chatOptions.classList.add("chat-options-open");
+      chatOptions.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+      document.addEventListener(
+        "click",
+        function closeMenu(event) {
+          chatOptions.classList.remove("chat-options-open");
+
+          document.removeEventListener("click", closeMenu);
+        },
+        { once: true }
+      );
+    });
+  }
+}
 const App = async () => {
 
     if(!getCookie("tokens"))
@@ -550,6 +577,7 @@ const App = async () => {
     else
         await renderAllPosts();
     assignRouting();
+    handleChatEvents();
 }
 
 App().catch(error => console.error('Error:', error));

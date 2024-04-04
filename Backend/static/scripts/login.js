@@ -21,9 +21,10 @@ async function loginForm(event)
         });
         if (response.ok) {
             let data = await response.json();
-            //loadPage('email-verification'); // after finishing html
-            console.log(data)
-            localStorage.setItem('username', username)
+            //loadPage('email-verification'); after finishing html
+            loadPage('/home/');
+            setCookie('tokens', JSON.stringify(data), 1);
+
         } else {
             console.error('Error:', response);
             let data = await response.json();
@@ -36,14 +37,13 @@ async function loginForm(event)
 
 
 const App = async () => {
-    console.log('Login page loaded')
     if(getCookie("tokens"))
     {
-        loadPage('home');
+        loadPage('/home/');
         notify('Already logged in', 3, 'success')
     }
     const form = document.getElementById('login-form');
-    form.addEventListener('submit', loginForm);
+   form.addEventListener('submit', loginForm);
 }
 
 document.addEventListener('DOMContentLoaded', App);

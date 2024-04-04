@@ -428,3 +428,31 @@ input[type="file"] {
   top: 0;
   right: 0;
 }
+.chat-options {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  color: white;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 10;
+  border: 1px solid white;
+  user-select: none;
+}
+.chat-options li {
+  cursor: pointer;
+  padding: 10px;
+}
+.chat-options li:hover {
+  background: linear-gradient(
+    rgba(185, 185, 185, 0.897),
+    rgba(185, 185, 185, 0.897)
+  );
+    color: black;
+}
+
+.chat-options-open {
+  visibility: visible;
+}

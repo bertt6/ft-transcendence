@@ -235,16 +235,20 @@ class ProfileInfo extends BaseComponent
 }
 async function fetchProfile()
 {
+    const pathName = window.location.pathname;
+    const pathParts = pathName.split('/');
+    const nickname = pathParts[pathParts.length - 1];
     const tokens = JSON.parse(getCookie('tokens'));
     try
     {
-    let data = await request(`${API_URL}/profile`,{
+    let data = await request(`${API_URL}/profile/`,{
         method:'GET',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${tokens.access}`
         }
     });
+        console.log(data)
     const profileParentElement = document.getElementById('profile-info');
     const profile = new ProfileInfo({profile:data,isEditing:false},profileParentElement);
     profile.render();
@@ -257,6 +261,7 @@ async function fetchProfile()
     {
         console.error('Error:', error);
         notify('Error fetching profile', 3, 'error')
+        loadPage('/home');
     }
 }
 async function assignDataRouting()
