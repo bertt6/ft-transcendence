@@ -42,6 +42,9 @@
   gap: 15rem;
   margin-right: 5rem;
 }
+.button-wrapper button {
+  color: white;
+}
 .chat-wrapper {
   height: 100%;
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));

@@ -36,9 +36,9 @@ async function loginForm(event)
 
 
 const App = async () => {
+    console.log('Login page loaded')
     if(getCookie("tokens"))
     {
-        console.log('tokens exist')
         loadPage('home');
         notify('Already logged in', 3, 'success')
     }
