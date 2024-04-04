@@ -1,5 +1,6 @@
-import {API_URL, getCookie, setCookie} from "./spa.js";
+import {API_URL, getCookie, setCookie,loadPage} from "./spa.js";
 import {request} from "./Request.js";
+import {notify} from "../components/Notification";
 
 let inputs = document.querySelectorAll('.row input[type="number"]');
 document.getElementById('singleDigitInput1').addEventListener('paste', function() {
@@ -48,8 +49,11 @@ async function postVerificationCode(value) {
                 verification_code: value,
             }),
         });
+        console.log(response)
         if (response.ok) {
             setCookie('tokens', response.tokens)
+            loadPage('/home/')
+            notify('Successfully verified', 3, 'success')
         }
     }
     catch (e) {

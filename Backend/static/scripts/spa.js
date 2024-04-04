@@ -493,13 +493,47 @@ const routes = new Map([
 
               `
     }],
+    ['verification',{
+        auth_required: false,
+        url: ['/verification/'],
+        html: `
+            <div class="background container-fluid">
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <div class="verification-wrapper">
+                <h2>E-mail Verification</h2>
+                
+                <p>Please type verification code sent to your e-mail address</p>
+                
+                <p>The verification code will expire in 15 minutes</p>
+                
+                <div class="row">
+                    <input type="number" id="singleDigitInput1">
+                    <input type="number" id="singleDigitInput2">
+                    <input type="number" id="singleDigitInput3">
+                    <input type="number" id="singleDigitInput4">
+                    <input type="number" id="singleDigitInput5">
+                    <input type="number" id="singleDigitInput6">
+                </div>
+                
+                <button type="button" id="verify">Verify</button>
+                
+                <p>
+                    Didn't receive code? 
+                    <a id="request">Send again!</a>
+                </p>
+            </div>
+        </div>
+    </div>
+        `
+    }]
 ]);
 const routeToFile = [
     [["/auth/login/"], 'login'],
     [["/auth/register/"], 'register'],
     [[/profile\/[A-Za-z]+/], 'profile'],
     [['/social/',  '/social/\\w+/g'], 'social'],
-    [['/home/'], 'home']
+    [['/home/'], 'home'],
+    [['/verification/'], 'verification']
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -636,7 +670,6 @@ const App = async () => {
 }
 window.addEventListener('popstate', (event ) => {
     let pathName = window.location.pathname;
-
     loadPage(pathName);
     }
 );

@@ -21,10 +21,7 @@ async function loginForm(event)
         });
         if (response.ok) {
             let data = await response.json();
-            //loadPage('email-verification'); after finishing html
-            loadPage('/home/');
-            setCookie('tokens', JSON.stringify(data), 1);
-
+            loadPage('/auth/verification/');
         } else {
             console.error('Error:', response);
             let data = await response.json();
