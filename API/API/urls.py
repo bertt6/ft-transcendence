@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/v1/', include('Apps.SocialMedia.api.urls')),
 
     path("api/v1/", include("Apps.Chat.api.urls")),
+    path("chat/", include("Apps.UserStatus.urls")),
 ]
 
 if settings.DEBUG:
