@@ -44,6 +44,7 @@ def get_tweet_and_comments(request, tweet_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def post_tweet(request):
+    print(request.data)
     profile = request.user.profile
     tweet_data = request.data.copy()
     tweet_data['from_user'] = profile.pk
@@ -72,6 +73,7 @@ def delete_tweet(request, tweet_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def post_comment(request):
+    print(request.data)
     try:
         serializer = CommentPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
