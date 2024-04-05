@@ -1,3 +1,6 @@
+import {request} from "./Request.js";
+import {notify} from "../components/Notification.js";
+
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
 export function setCookie(name,value,days) {
@@ -634,9 +637,36 @@ if (!isMatch) {
     App();
 }
 
-
-function checkForAuth()
+async function tryRefreshToken()
 {
+    let refresh_token = getCookie('refresh_token');
+    console.log(refresh_token)
+    if(!refresh_token)
+        return;
+    try{
+
+    let data = await request(`${API_URL}/token/refresh`, {
+        method: 'POST',
+        body: JSON.stringify({
+            refresh: refresh_token
+        }),
+    });
+        setCookie('access_token', data.access, 1);
+        setCookie('refresh_token', data.refresh, 1);
+        return true;
+    }
+    catch (error)
+    {
+        notify('Please login again', 3, 'error')
+        return false
+    }
+}
+async function checkForAuth()
+{
+    debugger
+    if(getCookie('access_token'))
+        return;
+    await tryRefreshToken();
     if(getCookie('access_token'))
         return;
     const pathName = window.location.pathname;
@@ -663,7 +693,7 @@ export function assignRouting()
 }
 const App = async () => {
     loadRequiredScripts();
-    checkForAuth();
+    await checkForAuth();
     assignRouting()
 }
 window.addEventListener('popstate', (event ) => {
