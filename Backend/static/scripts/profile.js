@@ -237,7 +237,6 @@ class ProfileInfo extends BaseComponent {
             });
 
             document.getElementById('profile-photo').addEventListener('change', function () {
-                console.log('BERATI GOTTEN SIKETIM')
                 document.getElementById('profile-photoo').src = URL.createObjectURL(document.getElementById('profile-photo').files[0])
             })
         }
