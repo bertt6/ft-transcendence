@@ -6,13 +6,13 @@
   gap: 5rem;
   overflow: auto;
 }
-.profile-photo {
+.profile-photoo {
   aspect-ratio: 1/1;
   border-radius: 50%;
   height: 15rem;
   width: 15rem;
 }
-.profile-photo > img {
+.profile-photoo > img {
   width: 100%;
   height: 100%;
   border-radius: 50%;

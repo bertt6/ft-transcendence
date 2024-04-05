@@ -148,8 +148,9 @@ class ProfileInfo extends BaseComponent {
                     </button>
                 </div>
         <form style="display: flex; flex-direction: column; align-items: center" id="update-form">
-              <div class="profile-photo">
+              <div class="profile-photoo">
                 <img
+                    id='profile-photoo'
                   src="${BASE_URL}${profile_picture}"
                   alt=""
                   class=""
@@ -181,7 +182,7 @@ class ProfileInfo extends BaseComponent {
                     <img src="/static/public/edit.svg" alt="">
                     </button>
                 </div>
-              <div class="profile-photo">
+              <div class="profile-photoo">
                 <img
                   src="${BASE_URL}${profile_picture}"
                   alt=""
@@ -233,11 +234,17 @@ class ProfileInfo extends BaseComponent {
                 let image = document.getElementById('profile-photo')
                 if (image.files.length > 0) {
                     formData.append('profile_picture', image.files[0]);
+                    console.log(image.files[0])
                 }
                 formData.append('nickname', document.getElementById('profile-nickname').value)
                 formData.append('bio', document.getElementById('profile-bio').value)
                 await this.updateProfile(formData);
             });
+
+            document.getElementById('profile-photo').addEventListener('change', function () {
+                console.log('BERATI GOTTEN SIKETIM')
+                document.getElementById('profile-photoo').src = URL.createObjectURL(document.getElementById('profile-photo').files[0])
+            })
         }
 
     }
