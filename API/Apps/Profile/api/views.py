@@ -12,6 +12,8 @@ from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFri
 @permission_classes([IsAuthenticated])
 class ProfileView(APIView):
     def get(self, request, profile_nickname):
+        if(not profile_nickname):
+            return Response({"error": "Profile not found"}, status=404)
         profile = Profile.objects.get(nickname=profile_nickname)
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
@@ -101,6 +103,8 @@ class ProfileGameHistoryView(APIView):
         return Response(profile.game_history, status=200)
 
 
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class ProfileFriendsView(APIView):
     def get(self, request):
         profile = request.user.profile

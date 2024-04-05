@@ -190,14 +190,14 @@ class ProfileInfo extends BaseComponent
               </div>`
     }
     updateProfile = async (formData) => {
-        const tokens = JSON.parse(getCookie('tokens'));
+        const access_token = JSON.parse(getCookie('access'));
         try
         {
             let response = await request(`${API_URL}/profile`,{
                 method:'PUT',
                 headers:{
                     'Content-Type':'application/json',
-                    'Authorization':`Bearer ${tokens.access}`
+                    'Authorization':`Bearer ${access_token}`
                 },
                 body: JSON.stringify(formData)
             });
@@ -238,17 +238,12 @@ async function fetchProfile()
     const pathName = window.location.pathname;
     const pathParts = pathName.split('/');
     const nickname = pathParts[pathParts.length - 1];
-    const tokens = JSON.parse(getCookie('tokens'));
+    const access_token = getCookie('access_token');
     try
     {
-    let data = await request(`${API_URL}/profile/`,{
+    let data = await request(`${API_URL}/profile-with-nickname/${nickname}`,{
         method:'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tokens.access}`
-        }
     });
-        console.log(data)
     const profileParentElement = document.getElementById('profile-info');
     const profile = new ProfileInfo({profile:data,isEditing:false},profileParentElement);
     profile.render();

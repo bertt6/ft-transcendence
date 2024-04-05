@@ -608,7 +608,6 @@ function findRouteFile(pathName) {
     return route ? route[1] : null;
 }
 export function loadPage(fileName) {
-    debugger
     let data = findRouteFile(fileName);
     const route = routes.get(data);
     let isMatch = false;
@@ -638,14 +637,13 @@ if (!isMatch) {
 
 function checkForAuth()
 {
-    if(getCookie('tokens'))
+    if(getCookie('access_token'))
         return;
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
     if(!value)
         return;
     const route = routes.get(value);
-    console.log(route)
     if(route.auth_required === true)
         loadPage('/auth/login/');
 

@@ -21,6 +21,7 @@ async function loginForm(event)
         });
         if (response.ok) {
             let data = await response.json();
+            localStorage.setItem('username', username);
             loadPage('/auth/verification/');
         } else {
             console.error('Error:', response);
