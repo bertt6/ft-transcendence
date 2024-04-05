@@ -219,7 +219,7 @@ class ProfileInfo extends BaseComponent
                 e.preventDefault()
                 let formData = {
                     nickname: document.getElementById('profile-nickname').value,
-                    bio: document.getElementById('profile-bio').value
+                    bio: document.getElementById('profile-bio').value,
                 }
                 await this.updateProfile(formData);
             });
@@ -256,7 +256,7 @@ async function fetchProfile()
     {
         console.error('Error:', error);
         notify('Error fetching profile', 3, 'error')
-        loadPage('/home');
+        loadPage('/home/');
     }
 }
 async function assignDataRouting()
