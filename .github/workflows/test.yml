@@ -36,7 +36,7 @@ jobs:
       - name: Run Django test
         run: |
           cd API
-          export PG_HOST=localhost
+          export PG_HOST=${{ secrets.POSTGRES_HOST }}
           export PG_USER=${{ secrets.POSTGRES_USER }}
           export PG_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           export PG_DB=${{ secrets.POSTGRES_DB }}

@@ -2,6 +2,7 @@ import {getCookie} from "./spa.js";
 
 const responses = new Map()
 export async function request(url, options = {}) {
+
     const defaultOptions = {
         headers: {
             'Content-Type': 'application/json',
@@ -24,7 +25,6 @@ export async function request(url, options = {}) {
         delete mergedOptions.headers['Content-Type'];
     }
 
-    console.log("url",url, "options", mergedOptions)
     if(options.method === 'GET' && responses.has(url)) {
         return responses.get(url)
     }

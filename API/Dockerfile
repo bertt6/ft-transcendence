@@ -1,11 +1,9 @@
-# Dockerfile
+FROM python:3.12.2-bullseye
 
-# PostgreSQL'in resmi imajını kullan
-FROM postgres:latest
+WORKDIR /app/API
 
-# Ortam değişkenlerini ayarla
-ENV POSTGRES_USER='postgres'
-ENV POSTGRES_PASSWORD='123'
-ENV POSTGRES_DB='transcendenceDB'
+COPY . /app/API
 
-VOLUME /var/lib/postgresql/data
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 8000

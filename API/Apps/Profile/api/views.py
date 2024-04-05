@@ -12,6 +12,7 @@ from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFri
 @permission_classes([IsAuthenticated])
 class ProfileView(APIView):
     def get(self, request, profile_nickname):
+
         if(not profile_nickname):
             return Response({"error": "Profile not found"}, status=404)
         profile = Profile.objects.get(nickname=profile_nickname)

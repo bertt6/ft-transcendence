@@ -252,6 +252,7 @@ class SelectedPostComponent extends BaseComponent{
         super.render();
         let backButton = document.getElementById('comment-back-button');
         backButton.addEventListener('click', (event) => {
+
             history.pushState({}, '', '/social');
             renderAllPosts();
         });
@@ -293,6 +294,7 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 const fetchChatFriends = async () => {
+
     const endpoint = `${API_URL}/profile/friends`;
     try {
         let response = await request(endpoint, {
@@ -318,8 +320,8 @@ const fetchChatFriends = async () => {
 }
 const fetchSocialPosts = async () => {
  try{
-        let response = await request(`${API_URL}/tweets`, {method: 'GET'})
-     console.log("response",response)
+      let response = await request(`${API_URL}/tweets`, {method: 'GET'})
+      console.log("response",response)
         socialPostsComponent.setState({tweets: response.results.tweets});
 
  }
@@ -353,7 +355,8 @@ async function submitTweet(event) {
         catch(error)
         {
             console.error('Error:', error);
-            notify('Error posting tweet', 3, 'error');
+
+        notify('Error posting tweet', 3, 'error');
         }
 }
 async function assignLikeButtons()
@@ -529,6 +532,7 @@ function handleChatEvents() {
         function closeMenu(event) {
           chatOptions.classList.remove("chat-options-open");
 
+
           document.removeEventListener("click", closeMenu);
         },
         { once: true }
@@ -547,7 +551,6 @@ const App = async () => {
     assignRouting();
     handleChatEvents();
 }
-
 App().catch(error => console.error('Error:', error));
 
 window.addEventListener('popstate', async (event) => {

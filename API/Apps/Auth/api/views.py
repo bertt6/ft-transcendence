@@ -82,6 +82,7 @@ def email_verification(request):
         'user_id': user.pk,
         'username': user.username
     }
+
     response.status_code = 200
     return response
 

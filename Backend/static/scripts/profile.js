@@ -50,6 +50,7 @@ class Stats extends BaseComponent {
     }
 
     handleHTML() {
+
         console.log(this.state)
         return `
     <div class="stats-wrapper">
@@ -84,7 +85,6 @@ class Stats extends BaseComponent {
         </div>
     </div>
 </div>
-
     `;
     }
 
@@ -92,6 +92,7 @@ class Stats extends BaseComponent {
         this.parentElement.innerHTML = this.html;
     }
 }
+
 
 class Friends extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -136,6 +137,7 @@ class ProfileInfo extends BaseComponent {
         super(state, parentElement);
     }
 
+
     handleEditHTML() {
         const {nickname, first_name, last_name, bio, profile_picture} = this.state.profile;
         return `
@@ -170,7 +172,6 @@ class ProfileInfo extends BaseComponent {
         </div>
         `
     }
-
     handleHTML() {
         const {nickname, first_name, last_name, bio, profile_picture} = this.state.profile;
         return `
@@ -188,6 +189,7 @@ class ProfileInfo extends BaseComponent {
                 />
               </div>
               <div>
+
                 <h1>${nickname ? escapeHTML(nickname) : "no nickname is set!"}</h1>
                 <span>${first_name ? escapeHTML(first_name) : "no first name is set"}</span>
               </div>
@@ -199,6 +201,7 @@ class ProfileInfo extends BaseComponent {
     }
 
     updateProfile = async (formData) => {
+
         const access_token = JSON.parse(getCookie('access'));
         try {
             let response = await request(`${API_URL}/profile/`, {
@@ -209,8 +212,10 @@ class ProfileInfo extends BaseComponent {
                 body: formData
             });
             notify('Profile updated', 3, 'success');
+
             this.setState({...this.state, profile: response});
-        } catch (error) {
+        } 
+      catch (error) {
             console.error('Error:', error);
             notify('Error updating profile', 3, 'error')
         }
@@ -245,6 +250,7 @@ class ProfileInfo extends BaseComponent {
         });
     }
 }
+
 
 async function fetchProfile() {
     const pathName = window.location.pathname;
