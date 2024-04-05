@@ -252,7 +252,8 @@ class SelectedPostComponent extends BaseComponent{
         super.render();
         let backButton = document.getElementById('comment-back-button');
         backButton.addEventListener('click', (event) => {
-            history.pushState({}, '', '/socialmedia');
+
+            history.pushState({}, '', '/social');
             renderAllPosts();
         });
     }
@@ -298,10 +299,6 @@ const fetchChatFriends = async () => {
     try {
         let response = await request(endpoint, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-            }
         });
         let parentElement = document.getElementById('user-data-wrapper');
         let chatFriendsComponent = new ChatFriendsComponent({friends: response},parentElement);
@@ -323,15 +320,11 @@ const fetchChatFriends = async () => {
 }
 const fetchSocialPosts = async () => {
  try{
-        let response = await request(`${API_URL}/tweets`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`,
-
-            }})
+      let response = await request(`${API_URL}/tweets`, {method: 'GET'})
+      console.log("response",response)
         socialPostsComponent.setState({tweets: response.results.tweets});
-    }
+
+ }
     catch(error)
         {
             console.error('Error:', error);
@@ -348,21 +341,22 @@ async function submitTweet(event) {
         if(image.files.length > 0)
             formData.append('image', image.files[0]);
         try{
-        let data = await request(`${API_URL}/post_tweet`, {
+        let data = await request(`${API_URL}/post-tweet`, {
             method: 'POST',
+            body: formData,
             headers: {
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-            },
-            body: formData
+                'Content-Type': '',
+            }
         });
         notify('Tweet posted successfully', 3, 'success');
-        let {tweet}= data;
+        let {tweet} = data;
         socialPostsComponent.setState({tweets: [tweet, ...socialPostsComponent.state.tweets]});
         }
         catch(error)
         {
             console.error('Error:', error);
-            notify('Error posting tweet', 3, 'error');
+
+        notify('Error posting tweet', 3, 'error');
         }
 }
 async function assignLikeButtons()
@@ -419,11 +413,7 @@ async function getProfile()
 {
     try{
         let data = await request(`${API_URL}/profile`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-            }
+            method: 'GET'
         });
         socialPostsComponent.setState({userId: data.id})
         let nickname = document.getElementById('username');
@@ -438,18 +428,10 @@ async function getProfile()
 const renderIndividualPost = async (tweetId) => {
     let response = await request(`${API_URL}/get-tweet-and-comments/${tweetId}`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-        }
     });
 
         let data = await request(`${API_URL}/profile`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-            }
         });
     let parentElement = document.getElementById('social-container');
     let selectedPostComponent = new SelectedPostComponent({tweet: response,userId:data.id}, parentElement);
@@ -463,10 +445,6 @@ const renderIndividualPost = async (tweetId) => {
         try {
             let data = await request(`${API_URL}/post-comment`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-                },
                 body: JSON.stringify({content: inputValue, tweet: tweetId})
             });
         notify('Comment posted successfully', 3, 'success');
@@ -554,6 +532,7 @@ function handleChatEvents() {
         function closeMenu(event) {
           chatOptions.classList.remove("chat-options-open");
 
+
           document.removeEventListener("click", closeMenu);
         },
         { once: true }
@@ -562,13 +541,6 @@ function handleChatEvents() {
   }
 }
 const App = async () => {
-
-    if(!getCookie("tokens"))
-    {
-        loadPage('login');
-        notify('Please login to continue', 3, 'error')
-        return;
-    }
   let regex = /\/tweet\/(\d+)/;
     let match = window.location.pathname.match(regex);
     if (match) {
@@ -579,7 +551,6 @@ const App = async () => {
     assignRouting();
     handleChatEvents();
 }
-
 App().catch(error => console.error('Error:', error));
 
 window.addEventListener('popstate', async (event) => {

@@ -1,7 +1,7 @@
 import {API_URL, getCookie, setCookie,loadPage} from "./spa.js";
 import {request} from "./Request.js";
-import {notify} from "../components/Notification";
 
+import {notify} from "../components/Notification.js";
 let inputs = document.querySelectorAll('.row input[type="number"]');
 document.getElementById('singleDigitInput1').addEventListener('paste', function() {
     let pastedData = (event.clipboardData || window.clipboardData).getData('text');
@@ -49,32 +49,14 @@ async function postVerificationCode(value) {
                 verification_code: value,
             }),
         });
-        console.log(response)
-        if (response.ok) {
-            setCookie('tokens', response.tokens)
-            loadPage('/home/')
-            notify('Successfully verified', 3, 'success')
-        }
+
+         console.log(response.tokens)
+        setCookie('access_token', response.tokens.access, 1);
+        setCookie('refresh_token', response.tokens.refresh, 1);
+        loadPage('/home/')
+        notify('Successfully verified', 3, 'success')
     }
     catch (e) {
         console.log(e.json())
-    }
-}
-
-async function login(value) {
-    try {
-        return await fetch(`${API_URL}/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: '',
-                password: '',
-            })
-        })
-    }
-    catch (e) {
-        console.log(e)
     }
 }

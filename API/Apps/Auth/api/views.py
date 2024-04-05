@@ -62,7 +62,6 @@ def email_verification(request):
         return Response(data={'message': 'Invalid verification code!'}, status=400)
     except User.DoesNotExist:
         return Response(data={'message': 'User not found!'}, status=400)
-
     if verification_code != db_verification_code.code:
         return Response(data={'message': 'Incorrect verification code!'}, status=400)
 
@@ -83,6 +82,8 @@ def email_verification(request):
         'user_id': user.pk,
         'username': user.username
     }
+
+    response.status_code = 200
     return response
 
 

@@ -21,6 +21,7 @@ async function loginForm(event)
         });
         if (response.ok) {
             let data = await response.json();
+            localStorage.setItem('username', username);
             loadPage('/auth/verification/');
         } else {
             console.error('Error:', response);
@@ -34,7 +35,7 @@ async function loginForm(event)
 
 
 const App = async () => {
-    if(getCookie("tokens"))
+    if(getCookie("access_token"))
     {
         loadPage('/home/');
         notify('Already logged in', 3, 'success')
@@ -43,4 +44,6 @@ const App = async () => {
    form.addEventListener('submit', loginForm);
 }
 
-document.addEventListener('DOMContentLoaded', App);
+App().catch((error) => {
+    console.error(error)
+});
