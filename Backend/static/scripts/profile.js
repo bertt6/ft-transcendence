@@ -265,7 +265,7 @@ async function fetchProfile() {
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching profile', 3, 'error')
-        loadPage('/home');
+        loadPage('/home/');
     }
 }
 
