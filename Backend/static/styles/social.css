@@ -1,6 +1,9 @@
 .social-background {
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
     url("/static/public/inside.jpg") !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-position: center;
 }
 .users-wrapper {
   height: 100%;
@@ -177,6 +180,9 @@ input {
 
 .social-send {
   position: relative;
+  display: flex;
+  flex-direction: column;
+    gap: 10px;
   width: 100%;
 }
 .social-send > input {
@@ -225,7 +231,6 @@ input {
 .selected-post {
   flex-basis: 450px;
   overflow: hidden;
-  display: none;
   animation: fadeOutAndHide 1s ease;
 }
 .selected-post-open {
@@ -240,15 +245,43 @@ input {
 }
 .social-send img:nth-of-type(2) {
   position: absolute;
-  top: 0px;
+  top: 0;
   right: 15px;
   cursor: pointer;
 }
-.social-send img:nth-of-type(1) {
+#image-add{
   position: absolute;
-  top: 0px;
-  right: 40px;
+  outline: none;
+    top: 0;
+  right: 50px;
   cursor: pointer;
+}
+input[type="file"] {
+  display: none;
+}
+.custom-file-upload{
+    cursor: pointer;
+  width: 25px;
+  height: 25px;
+  background: url("/static/public/image.svg") no-repeat;
+}
+.form-input-wrapper{
+  position: absolute;
+  top: 10px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#send-button{
+    cursor: pointer;
+  width: 35px;
+  background: transparent;
+  outline: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .posts-container {
   display: flex;
@@ -263,8 +296,7 @@ input {
 .post-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  height: 100%;
+  gap: 10px;
 }
 .post-info {
   display: flex;
@@ -345,6 +377,7 @@ input {
   gap: 5px;
   overflow-y: auto;
   overflow-x: hidden;
+  margin-top: 20px;
 }
 .post-comment {
   display: flex;
@@ -369,4 +402,57 @@ input {
   background-color: transparent;
   outline: none;
   border: none;
+}
+
+
+.loading .lds-ring{
+  width: 36px;
+  height: 36px;
+}
+.loading .lds-ring div{
+  width: 36px;
+  height: 36px;
+}
+
+#social-text-input{
+  width: 100%;
+  background-color: red;
+}
+
+.uploaded-image{
+  min-height: 10rem;
+  position: relative;
+}
+.uploaded-image button{
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.chat-options {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  color: white;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 10;
+  border: 1px solid white;
+  user-select: none;
+}
+.chat-options li {
+  cursor: pointer;
+  padding: 10px;
+}
+.chat-options li:hover {
+  background: linear-gradient(
+    rgba(185, 185, 185, 0.897),
+    rgba(185, 185, 185, 0.897)
+  );
+    color: black;
+}
+
+.chat-options-open {
+  visibility: visible;
 }

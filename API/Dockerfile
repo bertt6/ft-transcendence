@@ -1,10 +1,11 @@
-FROM python:3.9
+# Dockerfile
 
-WORKDIR /app/API
+# PostgreSQL'in resmi imajını kullan
+FROM postgres:latest
 
-COPY . /app/API
-RUN pip install --upgrade pip
+# Ortam değişkenlerini ayarla
+ENV POSTGRES_USER='postgres'
+ENV POSTGRES_PASSWORD='123'
+ENV POSTGRES_DB='transcendenceDB'
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-EXPOSE 8000
+VOLUME /var/lib/postgresql/data

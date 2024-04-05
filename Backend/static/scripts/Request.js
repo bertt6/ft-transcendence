@@ -1,7 +1,7 @@
 const responses = new Map()
 
 export async function request(url, options = {}) {
-    if (responses.has(url)) {
+    if(options.method === 'GET' && responses.has(url)) {
         return responses.get(url)
     }
     const response = await fetch(url, options)

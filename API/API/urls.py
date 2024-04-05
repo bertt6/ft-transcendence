@@ -24,7 +24,10 @@ urlpatterns = [
     path('api/v1/', include('Apps.Profile.api.urls')),
     path('api/v1/', include('Apps.Auth.api.urls')),
     path('api/v1/', include('Apps.Tournament.api.urls')),
-    path('api/v1/', include('Apps.SocialMedia.api.urls'))
+    path('api/v1/', include('Apps.SocialMedia.api.urls')),
+
+    path("api/v1/", include("Apps.Chat.api.urls")),
+    path("chat/", include("Apps.UserStatus.urls")),
 ]
 
 if settings.DEBUG:
