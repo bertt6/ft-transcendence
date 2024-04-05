@@ -12,7 +12,7 @@ class ProfileGetSerializer(serializers.ModelSerializer):
 class ProfilePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['nickname', 'bio']
+        fields = ['nickname', 'bio', 'profile_picture']
 
 
 class UserSerializer(serializers.ModelSerializer):

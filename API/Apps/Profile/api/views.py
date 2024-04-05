@@ -32,6 +32,7 @@ class ProfileDetailView(APIView):
         return Response(profile_serializer.data, status=200)
 
     def put(self, request):
+        print(request.data.get('profile-picture'))
         profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)

@@ -3,14 +3,14 @@ import {API_URL, BASE_URL, getCookie, loadPage} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
 import {escapeHTML} from "./utils.js";
-class History extends BaseComponent
-{
-    constructor(state,parentElement = null) {
-        super(state,parentElement);
+
+class History extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
         this.handleHTML()
     }
-    handleHTML()
-    {
+
+    handleHTML() {
         return `
             <div class="histories-wrapper">
             ${this.state.histories.map(history => `
@@ -37,10 +37,12 @@ class History extends BaseComponent
           </div>
 `
     }
+
     render() {
         this.parentElement.innerHTML = this.handleHTML();
     }
 }
+
 class Stats extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -48,8 +50,8 @@ class Stats extends BaseComponent {
     }
 
     handleHTML() {
-    console.log(this.state)
-    return `
+        console.log(this.state)
+        return `
     <div class="stats-wrapper">
     <div class="stats-row">
         <div class="stats-item">
@@ -84,20 +86,20 @@ class Stats extends BaseComponent {
 </div>
 
     `;
-}
+    }
 
     render() {
         this.parentElement.innerHTML = this.html;
-    }   
+    }
 }
-class Friends extends BaseComponent
-{
-    constructor(state,parentElement = null) {
-        super(state,parentElement);
+
+class Friends extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
         this.html = this.handleHTML()
     }
-    handleHTML()
-    {
+
+    handleHTML() {
         return `
             <div class="friends-wrapper">
             ${this.state.friends.map(friend => `
@@ -107,8 +109,8 @@ class Friends extends BaseComponent
                     <img src="https://picsum.photos/id/237/200/300" alt="" />
                   </div>
                   <div class="friend-data">
-                    <h6>${friend.user.first_name.length  > 0 ?escapeHTML(friend.user.first_name) : "No name is set for this user" }</h6>
-                    <span>${friend.nickname.length > 0 ? friend.nickname: friend.user.username}</span>
+                    <h6>${friend.user.first_name.length > 0 ? escapeHTML(friend.user.first_name) : "No name is set for this user"}</h6>
+                    <span>${friend.nickname.length > 0 ? friend.nickname : friend.user.username}</span>
                   </div>
                 </div>
                 <div class="friend-more">
@@ -121,20 +123,21 @@ class Friends extends BaseComponent
           </div>
         `
     }
+
     setState(newState) {
-        this.state = { ...this.state, ...newState };
+        this.state = {...this.state, ...newState};
         this.render();
     }
 }
 
-class ProfileInfo extends BaseComponent
-{
-    constructor(state,parentElement = null) {
-        super(state,parentElement);
+
+class ProfileInfo extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
     }
-    handleEditHTML()
-    {
-        const {nickname, first_name, last_name,bio,profile_picture} = this.state.profile;
+
+    handleEditHTML() {
+        const {nickname, first_name, last_name, bio, profile_picture} = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -149,10 +152,15 @@ class ProfileInfo extends BaseComponent
                   alt=""
                   class=""
                 />
+                <div>
+                    <label for="profile-photo" class="custom-file-upload">
+                    </label>
+                    <input id="profile-photo" type="file" style="display: none"/>
+                </div>
               </div>
               <div>
-                <input class="transparent-input" id="profile-nickname" value="${nickname ? nickname: "no nickname is set!"}"/>
-                <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name: "no first name is set"}">
+                <input class="transparent-input" id="profile-nickname" value="${nickname ? nickname : "no nickname is set!"}"/>
+                <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name : "no first name is set"}">
               </div>
               <div>
                 <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">${bio ? bio : 'No bio available'}</textarea>  
@@ -162,9 +170,9 @@ class ProfileInfo extends BaseComponent
         </div>
         `
     }
-    handleHTML()
-    {
-        const {nickname, first_name, last_name,bio,profile_picture} = this.state.profile;
+
+    handleHTML() {
+        const {nickname, first_name, last_name, bio, profile_picture} = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -180,89 +188,90 @@ class ProfileInfo extends BaseComponent
                 />
               </div>
               <div>
-                <h1>${nickname ? escapeHTML(nickname): "no nickname is set!"}</h1>
-                <span>${first_name ? escapeHTML(first_name): "no first name is set"}</span>
+                <h1>${nickname ? escapeHTML(nickname) : "no nickname is set!"}</h1>
+                <span>${first_name ? escapeHTML(first_name) : "no first name is set"}</span>
               </div>
               <div>
                 <p>
-                ${bio ? escapeHTML(bio): 'No bio available'}
+                ${bio ? escapeHTML(bio) : 'No bio available'}
                 </p>
               </div>`
     }
+
     updateProfile = async (formData) => {
         const access_token = JSON.parse(getCookie('access'));
-        try
-        {
-            let response = await request(`${API_URL}/profile`,{
-                method:'PUT',
-                headers:{
-                    'Content-Type':'application/json',
-                    'Authorization':`Bearer ${access_token}`
+        try {
+            let response = await request(`${API_URL}/profile/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': '',
                 },
-                body: JSON.stringify(formData)
+                body: formData
             });
             notify('Profile updated', 3, 'success');
-            this.setState({...this.state, profile:response});
-        }
-        catch(error)
-        {
+            this.setState({...this.state, profile: response});
+        } catch (error) {
             console.error('Error:', error);
             notify('Error updating profile', 3, 'error')
         }
     }
+
+
     render() {
         this.parentElement.innerHTML = this.state.isEditing ? this.handleEditHTML() : this.handleHTML();
         const updateForm = document.getElementById('update-form');
-        if(updateForm)
-        {
+
+        if (updateForm) {
             updateForm.addEventListener('submit', async (e) => {
                 e.preventDefault()
-                let formData = {
-                    nickname: document.getElementById('profile-nickname').value,
-                    bio: document.getElementById('profile-bio').value
+                let formData = new FormData();
+                let image = document.getElementById('profile-photo')
+                if (image.files.length > 0) {
+                    formData.append('profile_picture', image.files[0]);
                 }
+                formData.append('nickname', document.getElementById('profile-nickname').value)
+                formData.append('bio', document.getElementById('profile-bio').value)
                 await this.updateProfile(formData);
             });
         }
+
     }
+
     setState(newState) {
-        this.state = { ...this.state, ...newState };
+        this.state = {...this.state, ...newState};
         this.render();
         document.getElementById('edit-button').addEventListener('click', () => {
             this.setState({...this.state, isEditing: !this.state.isEditing});
         });
     }
 }
-async function fetchProfile()
-{
+
+async function fetchProfile() {
     const pathName = window.location.pathname;
     const pathParts = pathName.split('/');
     const nickname = pathParts[pathParts.length - 1];
     const access_token = getCookie('access_token');
-    try
-    {
-    let data = await request(`${API_URL}/profile-with-nickname/${nickname}`,{
-        method:'GET',
-    });
-    const profileParentElement = document.getElementById('profile-info');
-    const profile = new ProfileInfo({profile:data,isEditing:false},profileParentElement);
-    profile.render();
-    const editButton = document.getElementById('edit-button');
+    try {
+        let data = await request(`${API_URL}/profile-with-nickname/${nickname}`, {
+            method: 'GET',
+        });
+        const profileParentElement = document.getElementById('profile-info');
+        const profile = new ProfileInfo({profile: data, isEditing: false}, profileParentElement);
+        profile.render();
+        const editButton = document.getElementById('edit-button');
         editButton.addEventListener('click', () => {
-        profile.setState({...profile.state, isEditing: !profile.state.isEditing});
-    });
-    }
-    catch(error)
-    {
+            profile.setState({...profile.state, isEditing: !profile.state.isEditing});
+        });
+    } catch (error) {
         console.error('Error:', error);
         notify('Error fetching profile', 3, 'error')
         loadPage('/home');
     }
 }
-async function assignDataRouting()
-{
+
+async function assignDataRouting() {
     const historyButton = document.getElementById('history-button');
-    const friendsButton  = document.getElementById('friends-button');
+    const friendsButton = document.getElementById('friends-button');
     const statsButton = document.getElementById('stats-button');
     historyButton.addEventListener('click', (e) => {
         history.replaceState(null, null, '#history')
@@ -278,62 +287,53 @@ async function assignDataRouting()
     });
 }
 
-async function fetchStats()
-{
-    try{
-        let response = await request(`${API_URL}/profile/stats`,{
-            method:'GET',
-            headers:{
-                'Content-Type':'application/json',
-                'Authorization':`Bearer ${JSON.parse(getCookie('tokens')).access}`
+async function fetchStats() {
+    try {
+        let response = await request(`${API_URL}/profile/stats`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
             }
         });
         return response;
-    }
-    catch (error)
-    {
+    } catch (error) {
         console.error('Error:', error);
         notify('Error fetching stats', 3, 'error')
     }
 }
 
-async function fetchFriends()
-{
-    try{
-        let data = await request(`${API_URL}/profile/friends`,{
-            method:'GET',
-            headers:{
-                'Content-Type':'application/json',
-                'Authorization':`Bearer ${JSON.parse(getCookie('tokens')).access}`
-        }
-    });
+async function fetchFriends() {
+    try {
+        let data = await request(`${API_URL}/profile/friends`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
+            }
+        });
         return data;
-    }
-    catch (error)
-    {
+    } catch (error) {
         console.error('Error:', error);
         notify('Error fetching friends', 3, 'error')
     }
 }
-async function handleRouting()
-{
+
+async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
-    if(hash === '#history')
-    {
-        const history = new History({histories: [1]},parentElement);
+    if (hash === '#history') {
+        const history = new History({histories: [1]}, parentElement);
         history.render();
     }
-    if(hash === '#friends')
-    {
+    if (hash === '#friends') {
         let data = await fetchFriends();
-        const friends = new Friends({friends:data},parentElement);
+        const friends = new Friends({friends: data}, parentElement);
         friends.render();
     }
-    if(hash === '#stats')
-    {
+    if (hash === '#stats') {
         let data = await fetchStats();
-        const statsInfo = new Stats({statsInfo:data}, parentElement);
+        const statsInfo = new Stats({statsInfo: data}, parentElement);
         statsInfo.render();
     }
 }

@@ -10,9 +10,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='tweet',
-            name='image',
-            field=models.ImageField(blank=True, default=None, null=True, upload_to=''),
-        ),
     ]
