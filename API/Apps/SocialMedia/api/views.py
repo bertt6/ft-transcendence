@@ -73,7 +73,6 @@ def delete_tweet(request, tweet_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def post_comment(request):
-    print(request.data)
     try:
         serializer = CommentPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
