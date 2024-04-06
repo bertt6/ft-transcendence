@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.dispatch import receiver
+from django.db.models.signals import m2m_changed
 
 
 class Stats(models.Model):
@@ -25,3 +27,11 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.nickname if self.nickname else self.user.username}"
+
+
+@receiver(m2m_changed, sender=Profile.friends.through)
+def update_friends(sender, instance, action, **kwargs):
+    if action == 'post_add':
+        for friend in kwargs['pk_set']:
+            friend_profile = Profile.objects.get(pk=friend)
+            friend_profile.friends.add(instance)
