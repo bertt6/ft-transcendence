@@ -271,8 +271,8 @@ class ConversationComponent extends BaseComponent
              ${message.user.id === this.state.senderId ? `
               <div class="sent-message-container">
                   <div class="message-data-wrapper">
-                    <span>${calculateDate(message.created_date)}</span>
-                    <span>${message.user.nickname}</span>
+                    <span class="sent-message-date">${calculateDate(message.created_date)}</span>
+                    <span class="sent-message-name">${message.user.nickname}</span>
                 </div>
                   <p>
                     ${message.content}
@@ -281,8 +281,8 @@ class ConversationComponent extends BaseComponent
                 `: `
                 <div class="received-message-container">
                   <div class="message-data-wrapper">
-                  <span>${message.user.nickname}</span>
-                  <span>${calculateDate(message.created_date)}</span>
+                  <span class="received-message-name">${message.user.nickname}</span>
+                  <span class="received-message-date">${calculateDate(message.created_date)}</span>
                 </div>
                   <p>
                     ${message.content}
@@ -297,7 +297,11 @@ class ConversationComponent extends BaseComponent
     render() {
         this.html = this.handleHtml();
         this.parentElement.innerHTML = this.html;
-
+    }
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        console.log("state",this.state)
+        this.render();
     }
 }
 let parentElement = document.getElementById('posts-wrapper');
@@ -457,6 +461,7 @@ async function getProfile()
             method: 'GET'
         });
         localStorage.setItem('activeUserId', data.id);
+        localStorage.setItem('activeUserNickname', data.nickname);
         socialPostsComponent.setState({userId: data.id})
         let nickname = document.getElementById('username');
         nickname.innerText = data.nickname;
@@ -572,10 +577,27 @@ function handleRightClick(event) {
         { once: true }
       );
 }
-async function connectToRoom(room)
+async function connectToRoom(room,conversationComponent)
 {
-    const socket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/`);
-
+    const nickname = localStorage.getItem('activeUserNickname');
+    const socket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
+    let chatSendForm = document.getElementById('chat-send');
+    let chatInput = document.getElementById('chat-input');
+    chatSendForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        let content = chatInput.value;
+        socket.send(JSON.stringify({message: content}));
+        chatInput.value = '';
+    });
+    socket.onmessage = (event) => {
+        let data = JSON.parse(event.data);
+        let message = {
+        content: data.message,
+        user: {nickname: data.user,id: data.id},
+        created_date: new Date()
+        }
+        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
+    }
 }
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
@@ -586,7 +608,6 @@ async function fetchRoomData(element) {
         });
         let {room} = data;
         let conversationWrapper = document.getElementById('conversation-wrapper');
-
         let conversationComponent = new ConversationComponent(
             {
             messages: room.messages,
@@ -595,7 +616,7 @@ async function fetchRoomData(element) {
             },
             conversationWrapper);
         conversationComponent.render();
-        connectToRoom(room);
+        await connectToRoom(room,conversationComponent);
     }
     catch (err) {
         console.error('Error:', err);
