@@ -414,9 +414,7 @@ async function assignLikeButtons()
                 try{
                     let data = await request(`${API_URL}/like_tweet/${tweetId}`, {
                         method: 'PATCH',
-                        headers: {
-                            'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-                        }
+
                     });
                     console.log(data);
                     button.children[0].src = button.children[0].src.includes('not') ?  '/static/public/liked.svg' : '/static/public/not-liked.svg';
