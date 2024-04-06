@@ -140,25 +140,50 @@ input {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   overflow-y: auto;
+}
+.conversation-wrapper *{
+  font-size: large;
 }
 
 .received-message-container {
   font-size: small;
+  width: 100%;
   align-self: flex-start;
+  border-bottom: 1px solid white;
+  border-color: rgba(0,0,0,0.7);
+
 }
-.received-message-container > span {
-  text-decoration: underline;
+.received-message-container > p {
+    word-break: break-all;
+    margin: 0;
 }
+
 .sent-message-container {
   font-size: small;
   display: flex;
   flex-direction: column;
+  border-bottom: 1px solid white;
+    border-color: rgba(59, 59, 59, 0.7);
+
+}
+
+.sent-message-container > p {
+  align-self: flex-end;
+  word-break: break-all;
+  margin: 0 0 10px;
 }
 .sent-message-container > span {
   text-decoration: underline;
   margin-right: 15px;
   align-self: flex-end;
+}
+.message-data-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: smaller;
 }
 .send-container {
   position: relative;
@@ -455,4 +480,21 @@ input[type="file"] {
 
 .chat-options-open {
   visibility: visible;
+}
+
+.sent-message-date ,.received-message-date{
+  font-size: small;
+}
+.sent-message-name, .received-message-name{
+  font-size: medium;
+  font-weight: bold;
+}
+.chat-send-button{
+  position: absolute;
+  right: 0;
+}
+.chat-send-button{
+  position: absolute;
+  right: 0;
+  max-width: 32px;
 }

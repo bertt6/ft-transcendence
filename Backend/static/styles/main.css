@@ -1,13 +1,14 @@
 :root {
   --main-color: #201433;
 }
+
 html,
 body {
   height: 100%;
   margin: 0 !important;
 }
 * {
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: "Pixelify Sans",sans-serif;
   box-sizing: border-box;
   color: white;
 }
