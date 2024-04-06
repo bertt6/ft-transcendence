@@ -586,6 +586,8 @@ async function connectToRoom(room,conversationComponent)
     chatSendForm.addEventListener('submit', (event) => {
         event.preventDefault();
         let content = chatInput.value;
+        if(content.length <= 0)
+            return;
         socket.send(JSON.stringify({message: content}));
         chatInput.value = '';
     });
