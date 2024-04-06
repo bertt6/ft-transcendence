@@ -63,7 +63,7 @@ class SocialPostsComponent extends BaseComponent {
                       </div>
                       <div>
                         <h6>${tweet.from_user.nickname}</h6>
-                        <span>${calculateDate(tweet)}</span>
+                        <span>${calculateDate(tweet.date)}</span>
                       </div>
                     </pong-redirect>
                     <div>
@@ -178,7 +178,7 @@ class SelectedPostComponent extends BaseComponent{
                     </div>
                     <div>
                       <h6>TEST1</h6>
-                      <span>${calculateDate(tweet)}</span>
+                      <span>${calculateDate(tweet.date)}</span>
                     </div>
                   </div>
                   <div>
@@ -227,7 +227,7 @@ class SelectedPostComponent extends BaseComponent{
                 <div style="flex: 1">
                 <div style="display: flex;justify-content: space-between">          
               <h6>${comment.from_user.nickname}</h6>
-                <span>${calculateDate(comment)}</span>
+                <span>${calculateDate(comment.date)}</span>
 </div>
                   <p>
                     ${escapeHTML(comment.content)}
@@ -258,13 +258,55 @@ class SelectedPostComponent extends BaseComponent{
         });
     }
 }
+class ConversationComponent extends BaseComponent
+{
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+    }
+    handleHtml()
+    {
+        return `
+        ${
+            this.state.messages.map(message => `
+             ${message.user.id === this.state.senderId ? `
+              <div class="sent-message-container">
+                  <div class="message-data-wrapper">
+                    <span>${calculateDate(message.created_date)}</span>
+                    <span>${message.user.nickname}</span>
+                </div>
+                  <p>
+                    ${message.content}
+                  </p>
+                </div>
+                `: `
+                <div class="received-message-container">
+                  <div class="message-data-wrapper">
+                  <span>${message.user.nickname}</span>
+                  <span>${calculateDate(message.created_date)}</span>
+                </div>
+                  <p>
+                    ${message.content}
+                  </p>
+                </div>
+                `}
+            `).join('')
+        }
+        `
+
+    }
+    render() {
+        this.html = this.handleHtml();
+        this.parentElement.innerHTML = this.html;
+
+    }
+}
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
-function   calculateDate(tweet)
+function   calculateDate(date)
     {
-    let tweetDate = new Date(tweet.date);
+    let tweetDate = new Date(date);
     let currentDate = new Date();
     let differenceInSeconds = Math.floor((currentDate - tweetDate) / 1000);
 
@@ -321,7 +363,6 @@ const fetchChatFriends = async () => {
 const fetchSocialPosts = async () => {
  try{
       let response = await request(`${API_URL}/tweets`, {method: 'GET'})
-      console.log("response",response)
         socialPostsComponent.setState({tweets: response.results.tweets});
 
  }
@@ -416,6 +457,7 @@ async function getProfile()
         let data = await request(`${API_URL}/profile`, {
             method: 'GET'
         });
+        localStorage.setItem('activeUserId', data.id);
         socialPostsComponent.setState({userId: data.id})
         let nickname = document.getElementById('username');
         nickname.innerText = data.nickname;
@@ -507,16 +549,11 @@ const renderAllPosts = async () => {
     `
     socialPostsComponent.parentElement = document.getElementById('posts-wrapper');
     postTweetFormComponent.parentElement = document.getElementById('social-send-form');
-    await fetchChatFriends();
-    await fetchSocialPosts();
-    await getProfile();
+    await Promise.all([fetchChatFriends(), fetchSocialPosts(), getProfile()]);
     await assignEventListeners();
 
 }
-function handleChatEvents() {
-  let elements = document.getElementsByClassName("user-wrapper");
-  for (let element of elements) {
-    element.addEventListener("contextmenu", (event) => {
+function handleRightClick(event) {
       event.preventDefault();
       let mouseX = event.clientX;
       let mouseY = event.clientY;
@@ -531,13 +568,75 @@ function handleChatEvents() {
         "click",
         function closeMenu(event) {
           chatOptions.classList.remove("chat-options-open");
-
-
           document.removeEventListener("click", closeMenu);
         },
         { once: true }
       );
-    });
+}
+async function connectToRoom(room)
+{
+    const socket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/`);
+
+}
+async function fetchRoomData(element) {
+    let nickname = element.children[1].children[0].innerText;
+    try {
+        let data = await  request(`${API_URL}/start-chat`, {
+            method: 'POST',
+            body: JSON.stringify({nickname: nickname})
+        });
+        let {room} = data;
+        let conversationWrapper = document.getElementById('conversation-wrapper');
+
+        let conversationComponent = new ConversationComponent(
+            {
+            messages: room.messages,
+            senderId: parseInt(localStorage.getItem("activeUserId")),
+            receiverId: room.second_user
+            },
+            conversationWrapper);
+        conversationComponent.render();
+        connectToRoom(room);
+    }
+    catch (err) {
+        console.error('Error:', err);
+        notify('Error starting chat', 3, 'error');
+    }
+}
+function handleChatState() {
+  let chatContainer = document.getElementById("chat-container");
+  let socialWrapper = document.getElementById("social-container");
+  let chatCloseButton = document.getElementById("chat-close-button");
+
+  chatCloseButton.addEventListener("click", () => {
+    chatContainer.classList.add("chat-transition");
+    setTimeout(() => {
+      chatContainer.classList.remove("chat-transition");
+      socialWrapper.classList.add("social-wrapper-chat-closed");
+    }, 1000);
+    chatContainer.classList.add("chat-closed");
+  });
+  async function toggleChat() {
+      await fetchRoomData(this);
+    if (chatContainer.classList.contains("chat-closed")) {
+      chatContainer.classList.add("chat-transition");
+      setTimeout(() => {
+        chatContainer.classList.remove("chat-transition");
+        chatContainer.classList.remove("chat-closed");
+      }, 1000);
+      socialWrapper.classList.add("social-wrapper-open");
+      socialWrapper.classList.remove("social-wrapper-chat-closed");
+    }
+  }
+  let allUsers = document.getElementsByClassName("user-wrapper");
+  for (let i = 0; i < allUsers.length; i++) {
+    allUsers[i].addEventListener("click", toggleChat);
+  }
+}
+function handleChatEvents() {
+  let elements = document.getElementsByClassName("user-wrapper");
+  for (let element of elements) {
+    element.addEventListener("contextmenu",handleRightClick);
   }
 }
 const App = async () => {
@@ -550,6 +649,7 @@ const App = async () => {
         await renderAllPosts();
     assignRouting();
     handleChatEvents();
+    handleChatState();
 }
 App().catch(error => console.error('Error:', error));
 

@@ -25,6 +25,8 @@
       <ul class="chat-options" id="chat-options">
         <li>Invite to Pong</li>
         <li>Go To Profile</li>
+          <li>Block</li>
+          <li>Add Friend</li>
       </ul>
       <div
         class="background container-fluid social-background"
@@ -50,7 +52,7 @@
               </div>
             </div>
             </div>
-            <div class="chat-container">
+            <div class="chat-container" id="chat-container">
               <div class="active-user-wrapper">
                 <div class="user-info">
                   <div class="user-pic-wrapper">
@@ -70,12 +72,12 @@
                 </div>
                 <div class="d-flex">
                   <img src="{% static '/public/more.svg' %}" alt="" style="width: 50px" />
-                  <div id="chat-close-button" style="cursor: pointer">
+                  <div id="chat-close-button"  style="cursor: pointer">
                     <img  src="{% static '/public/go-back.svg' %}" alt="" />
                   </div>
                 </div>
               </div>
-              <div class="conversation-wrapper">
+              <div class="conversation-wrapper" id="conversation-wrapper">
                 <div class="received-message-container">
                   <span>TEST6</span>
                   <p>

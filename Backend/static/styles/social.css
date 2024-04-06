@@ -155,10 +155,21 @@ input {
   display: flex;
   flex-direction: column;
 }
+.sent-message-container > p {
+  align-self: flex-end;
+  word-break: break-all;
+  margin: 0;
+}
 .sent-message-container > span {
   text-decoration: underline;
   margin-right: 15px;
   align-self: flex-end;
+}
+.message-data-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: smaller;
 }
 .send-container {
   position: relative;
