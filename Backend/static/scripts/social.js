@@ -78,7 +78,7 @@ class SocialPostsComponent extends BaseComponent {
                     </div>
                     ${tweet.image ? `
                     <div class="post-image">
-                      <img  src="${BASE_URL}${tweet.image}" alt="" />
+                      <img  src="${BASE_URL}${tweet.image}" alt="There is a problem with the image" />
                     </div>
                     `: ''}
                   </div>
@@ -185,7 +185,7 @@ class SelectedPostComponent extends BaseComponent{
                     <img src="/static/public/more.svg" alt="" style="width: 50px" />
                   </div>
                   <div id="comment-back-button" style="cursor: pointer">
-                    <img src="/static/public/go-back.svg" alt="" />
+                    <img src="/static/public/go-back.svg" alt="Load Failed" />
                   </div>
                 </div>
                 <div>
@@ -196,7 +196,7 @@ class SelectedPostComponent extends BaseComponent{
                   </div>
                   ${tweet.image ? 
             `<div class="post-image">
-                    <img src="${BASE_URL}${tweet.image}" alt="" />
+                    <img src="${BASE_URL}${tweet.image}" alt="There was a problem with the image" />
               </div>`: ''}
                 </div>
                 <div class="post-interaction">
@@ -348,6 +348,7 @@ async function submitTweet(event) {
                 'Content-Type': '',
             }
         });
+        console.log(data)
         notify('Tweet posted successfully', 3, 'success');
         let {tweet} = data;
         socialPostsComponent.setState({tweets: [tweet, ...socialPostsComponent.state.tweets]});
@@ -514,7 +515,6 @@ const renderAllPosts = async () => {
 }
 function handleChatEvents() {
   let elements = document.getElementsByClassName("user-wrapper");
-  console.log(elements);
   for (let element of elements) {
     element.addEventListener("contextmenu", (event) => {
       event.preventDefault();

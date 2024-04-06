@@ -61,6 +61,7 @@ class TweetGetWithDetailSerializer(serializers.ModelSerializer):
             return obj.image.url
         return None
 
+
 class TweetPostSerializer(serializers.ModelSerializer):
     content = serializers.CharField(
         required=True,
