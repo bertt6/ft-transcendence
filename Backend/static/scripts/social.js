@@ -389,7 +389,6 @@ async function submitTweet(event) {
                 'Content-Type': '',
             }
         });
-        console.log(data)
         notify('Tweet posted successfully', 3, 'success');
         let {tweet} = data;
         socialPostsComponent.setState({tweets: [tweet, ...socialPostsComponent.state.tweets]});

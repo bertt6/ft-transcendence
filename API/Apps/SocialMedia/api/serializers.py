@@ -17,6 +17,7 @@ class CommentPostSerializer(serializers.ModelSerializer):
         max_length=250,
     )
     from_user = ProfileGetSerializer(read_only=True)
+
     class Meta:
         model = Comment
         fields = '__all__'
