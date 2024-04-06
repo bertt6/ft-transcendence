@@ -640,7 +640,6 @@ if (!isMatch) {
 async function tryRefreshToken()
 {
     let refresh_token = getCookie('refresh_token');
-    console.log(refresh_token)
     if(!refresh_token)
         return;
     try{
