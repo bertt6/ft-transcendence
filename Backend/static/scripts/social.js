@@ -639,7 +639,6 @@ function handleChatState() {
   });
   async function toggleChat() {
       await fetchRoomData(this);
-
       if (chatContainer.classList.contains("chat-closed")) {
       chatContainer.classList.add("chat-transition");
       setTimeout(() => {
