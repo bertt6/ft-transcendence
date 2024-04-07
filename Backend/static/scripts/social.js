@@ -610,6 +610,8 @@ async function connectToRoom(room,conversationComponent)
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
     let wrapper = document.getElementById('conversation-wrapper');
+    let activeUserInfoWrapper = document.getElementById('active-user-info');
+    activeUserInfoWrapper.children[0].innerText = nickname;
     let spinner = new Spinner({isVisible:true},wrapper);
     spinner.render();
     try {
