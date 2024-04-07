@@ -56,20 +56,13 @@ const routes = new Map([
                     />
                 </div>
                 <div
-                        style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
+ class="buttons-wrapper"
                 >
-                    <div>
-
-                        <button class="login-button" type="submit">LOGIN</button>
+                        <button class="login-button" id="login-button" type="submit">LOGIN</button>
                         <pong-redirect href="register">
-                            <button class="login-button" type="button">REGISTER</button>
+                            <button class="register-button" type="button">REGISTER</button>
                         </pong-redirect>
 
-                    </div>
                 </div>
                 <button class="ecole-login-button">
                     Login with 42
