@@ -4,8 +4,12 @@ import  BaseComponent from './Component.js';
 export default class Spinner extends BaseComponent {
     constructor(state,parentElement) {
         super(state,parentElement);
+        console.log(this.state)
         this.html = `
-    <div class="lds-ring ${this.state.isError ? "hidden": "visible"}">
+    <div class="lds-ring ${this.state.isVisible ? "visible": "hidden"}
+        ${this.state.className ? 
+        this.state.className : ""}
+        ">
     <div></div>
     <div></div>
     <div></div>

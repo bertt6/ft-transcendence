@@ -1,5 +1,6 @@
 import {API_URL, loadPage} from "./spa.js";
 import Spinner from "../components/spinner.js";
+import {notify} from "../components/Notification.js";
 
 const registerSubmit = async (event) => {
     event.preventDefault();
@@ -23,15 +24,16 @@ try{
     });
     if (response.ok) {
         const data = await response.json();
-        console.log(data);
         loadPage('login');
     } else {
-        console.error('Error:', response);
         const data = await response.json();
-        console.log(data);
+        console.error('Error:', data);
+        spinner.setState({isVisible:false});
+        button.disabled = false;
+        notify(data.message, 3, 'error');
     }
     } catch (error) {
-        console.error('Error:', error);
+        notify("An error occurred. Please try again later", 3, "error");
     }
 }
 const App = async () => {
