@@ -203,13 +203,9 @@ class ProfileInfo extends BaseComponent {
 
     updateProfile = async (formData) => {
 
-        const access_token = JSON.parse(getCookie('access'));
         try {
             let response = await request(`${API_URL}/profile/`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': '',
-                },
                 body: formData
             });
             notify('Profile updated', 3, 'success');
@@ -262,7 +258,6 @@ async function fetchProfile() {
     const pathName = window.location.pathname;
     const pathParts = pathName.split('/');
     const nickname = pathParts[pathParts.length - 1];
-    const access_token = getCookie('access_token');
     try {
         let data = await request(`${API_URL}/profile-with-nickname/${nickname}`, {
             method: 'GET',
@@ -303,10 +298,7 @@ async function fetchStats() {
     try {
         let response = await request(`${API_URL}/profile/stats`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-            }
+
         });
         return response;
     } catch (error) {
@@ -319,10 +311,7 @@ async function fetchFriends() {
     try {
         let data = await request(`${API_URL}/profile/friends`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(getCookie('tokens')).access}`
-            }
+
         });
         return data;
     } catch (error) {

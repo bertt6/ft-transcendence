@@ -585,19 +585,6 @@ function loadRequiredScripts() {
             document.body.appendChild(newScript);
         }
     });
-    let pathName = window.location.pathname;
-    let value = findRouteKey(pathName);
-    if(!value)
-        return;
-    if(document.getElementById('script'))
-        document.getElementById('script').remove();
-    let script = document.createElement('script');
-    script.src = '/static/scripts/' + value + '.js?ts=' + new Date().getTime();
-    script.type = 'module';
-    script.id = "script";
-    document.body.appendChild(script);
-    handleStyles(value)
-
 }
 function findRouteFile(pathName) {
     const route = routeToFile.find(route => route[0].some(url => {
@@ -689,8 +676,24 @@ export function assignRouting()
         });
     }
 }
+function loadSpecificScript()
+{
+let pathName = window.location.pathname;
+    let value = findRouteKey(pathName);
+    if(!value)
+        return;
+    if(document.getElementById('script'))
+        document.getElementById('script').remove();
+    let script = document.createElement('script');
+    script.src = '/static/scripts/' + value + '.js?ts=' + new Date().getTime();
+    script.type = 'module';
+    script.id = "script";
+    document.body.appendChild(script);
+    handleStyles(value)
+}
 const App = async () => {
     loadRequiredScripts();
+    loadSpecificScript();
     await checkForAuth();
     assignRouting()
 }
