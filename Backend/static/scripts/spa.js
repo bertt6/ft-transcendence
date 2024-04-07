@@ -284,7 +284,9 @@ const routes = new Map([
     html: `
       <ul class="chat-options" id="chat-options">
         <li>Invite to Pong</li>
-        <li>Go To Profile</li>
+        <pong-redirect id="options-profile">Go To Profile</pong-redirect>
+          <li>Block</li>
+          <li>Add Friend</li>
       </ul>
           <div
         class="background container-fluid social-background"
@@ -310,8 +312,8 @@ const routes = new Map([
               </div>
             </div>
             </div>
-            <div class="chat-container">
-              <div class="active-user-wrapper">
+            <div class="chat-container" id="chat-container">
+                           <div class="active-user-wrapper">
                 <div class="user-info">
                   <div class="user-pic-wrapper">
                     <img
@@ -319,7 +321,7 @@ const routes = new Map([
                       alt=""
                     />
                   </div>
-                  <div class="active-user-info-wrapper">
+                  <div class="active-user-info-wrapper" id="active-user-info">
                     <h6>test1</h6>
                     <span>active now</span>
                     <div class="spotify-info">
@@ -330,68 +332,15 @@ const routes = new Map([
                 </div>
                 <div class="d-flex">
                   <img src="/static/public/more.svg" alt="" style="width: 50px" />
-                  <div id="chat-close-button" style="cursor: pointer">
+                  <div id="chat-close-button"  style="cursor: pointer">
                     <img  src="/static/public/go-back.svg" alt="" />
                   </div>
                 </div>
               </div>
-              <div class="conversation-wrapper">
-                <div class="received-message-container">
-                  <span>TEST6</span>
-                  <p>
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. A
-                    repudiandae autem quibusdam totam numquam explicabo saepe
-                    iure veritatis natus voluptas voluptate eveniet quos quasi
-                    facilis laudantium suscipit, obcaecati optio illo.
-                  </p>
-                </div>
-                <div class="sent-message-container">
-                  <span>TEST2</span>
-                  <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Quis cumque maxime iste odio ratione aliquid nisi commodi
-                    asperiores, quo nihil sint, voluptate iure vel accusamus
-                    odit incidunt porro debitis illo!
-                  </p>
-                </div>
-                <div class="sent-message-container">
-                  <span>lorem</span>
-                  <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Quis cumque maxime iste odio ratione aliquid nisi commodi
-                    asperiores, quo nihil sint, voluptate iure vel accusamus
-                    odit incidunt porro debitis illo!
-                  </p>
-                </div>
-                <div class="sent-message-container">
-                  <span>TEST2</span>
-                  <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Veniam accusantium fugit ad magnam, odio numquam id quidem
-                    saepe, deserunt consequuntur commodi animi dolor error
-                    debitis sed natus minus. Tempora, laborum?
-                  </p>
-                </div>
-                <div class="received-message-container">
-                  <span>TEST6</span>
-                  <p>
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. A
-                    repudiandae autem quibusdam totam numquam explicabo saepe
-                    iure veritatis natus voluptas voluptate eveniet quos quasi
-                    facilis laudantium suscipit, obcaecati optio illo.
-                  </p>
-                </div>
-                <div class="received-message-container">
-                  <span>TEST6</span>
-                  <p>
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. A
-                    repudiandae autem quibusdam totam numquam explicabo saepe
-                    iure veritatis natus voluptas voluptate eveniet quos quasi
-                    facilis laudantium suscipit, obcaecati optio illo.
-                  </p>
-                </div>
+              <div class="conversation-wrapper no-chat-wrapper" id="conversation-wrapper">
+                Select a user to start a conversation
               </div>
-              <form class="send-container" style="margin-bottom: 1px">
+              <form class="send-container" style="margin-bottom: 1px" id="chat-send">
                 <input
                   type="text"
                   name=""
@@ -400,7 +349,7 @@ const routes = new Map([
                   style="width: 100%"
                 />
                 <div>
-                  <img  src="/static/public/send.svg"alt="" />
+                  <img  src="/static/public/send.svg" alt="" />
                 </div>
               </form>
             </div>

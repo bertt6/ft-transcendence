@@ -24,9 +24,9 @@
     <main class="main" id="main">
       <ul class="chat-options" id="chat-options">
         <li>Invite to Pong</li>
-        <li>Go To Profile</li>
+        <pong-redirect id="profile-redirect">Go To Profile</pong-redirect>
           <li>Block</li>
-          <li>Add Friend</li>
+          <li id="options-add-friend">Add Friend</li>
       </ul>
       <div
         class="background container-fluid social-background"
@@ -61,7 +61,7 @@
                       alt=""
                     />
                   </div>
-                  <div class="active-user-info-wrapper">
+                  <div class="active-user-info-wrapper" id="active-user-info">
                     <h6>test1</h6>
                     <span>active now</span>
                     <div class="spotify-info">
@@ -84,7 +84,7 @@
                 <input
                   type="text"
                   name=""
-                  id=""
+                  id="chat-input"
                   placeholder="Send a message"
                   style="width: 100%"
                 />
