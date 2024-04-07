@@ -2,6 +2,7 @@ import {API_URL, getCookie, loadPage, BASE_URL,assignRouting} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
+import Spinner from "../components/spinner.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
         super(state,parentElement);
@@ -555,7 +556,7 @@ const renderAllPosts = async () => {
     await assignEventListeners();
 
 }
-function handleRightClick(event) {
+function handleRightClick(event,element) {
       event.preventDefault();
       let mouseX = event.clientX;
       let mouseY = event.clientY;
@@ -566,6 +567,12 @@ function handleRightClick(event) {
       chatOptions.addEventListener("click", (event) => {
         event.stopPropagation();
       });
+      function handleChatContext()
+      {
+          let redirect = document.getElementById('profile-redirect');
+          redirect.setAttribute('href', `/profile/${element.children[1].children[0].innerText}`)
+      }
+      handleChatContext()
       document.addEventListener(
         "click",
         function closeMenu(event) {
@@ -582,6 +589,7 @@ async function connectToRoom(room,conversationComponent)
     let chatSendForm = document.getElementById('chat-send');
     let chatInput = document.getElementById('chat-input');
     chatSendForm.addEventListener('submit', (event) => {
+        console.log('submitting')
         event.preventDefault();
         let content = chatInput.value;
         if(content.length <= 0)
@@ -601,6 +609,9 @@ async function connectToRoom(room,conversationComponent)
 }
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
+    let wrapper = document.getElementById('conversation-wrapper');
+    let spinner = new Spinner({isVisible:true},wrapper);
+    spinner.render();
     try {
         let data = await  request(`${API_URL}/start-chat`, {
             method: 'POST',
@@ -611,16 +622,18 @@ async function fetchRoomData(element) {
         conversationWrapper.classList.remove('no-chat-wrapper')
         let conversationComponent = new ConversationComponent(
         {
-            messages: room.messages,
+            messages: room.messages.toReversed(),
             senderId: parseInt(localStorage.getItem("activeUserId")),
             receiverId: room.second_user
             },
             conversationWrapper);
+        spinner.setState({isVisible: false});
         conversationComponent.render();
         await connectToRoom(room,conversationComponent);
     }
     catch (err) {
         console.error('Error:', err);
+        spinner.setState({isVisible: false});
         notify('Error starting chat', 3, 'error');
     }
 }
@@ -629,7 +642,7 @@ function handleChatState() {
     let chatContainer = document.getElementById("chat-container");
   let socialWrapper = document.getElementById("social-container");
   let chatCloseButton = document.getElementById("chat-close-button");
- chatCloseButton.addEventListener("click", () => {
+  chatCloseButton.addEventListener("click", () => {
     chatContainer.classList.add("chat-transition");
     setTimeout(() => {
       chatContainer.classList.remove("chat-transition");
@@ -658,20 +671,21 @@ function handleChatState() {
 function handleChatEvents() {
   let elements = document.getElementsByClassName("user-wrapper");
   for (let element of elements) {
-    element.addEventListener("contextmenu",handleRightClick);
+    element.addEventListener("contextmenu",(event) => handleRightClick(event,element));
   }
 }
+
 const App = async () => {
-  let regex = /\/tweet\/(\d+)/;
+    let regex = /\/tweet\/(\d+)/;
     let match = window.location.pathname.match(regex);
-    if (match) {
+    if (match)
         await renderIndividualPost(match[1]);
-    }
     else
         await renderAllPosts();
     assignRouting();
     handleChatEvents();
     handleChatState();
+
 }
 App().catch(error => console.error('Error:', error));
 
