@@ -626,14 +626,20 @@ async function fetchRoomData(element) {
 }
 function handleChatState() {
 
-
-
-  async function toggleChat() {
-      await fetchRoomData(this);
     let chatContainer = document.getElementById("chat-container");
   let socialWrapper = document.getElementById("social-container");
   let chatCloseButton = document.getElementById("chat-close-button");
-      console.log(chatContainer, socialWrapper, chatCloseButton)
+ chatCloseButton.addEventListener("click", () => {
+    chatContainer.classList.add("chat-transition");
+    setTimeout(() => {
+      chatContainer.classList.remove("chat-transition");
+      socialWrapper.classList.add("social-wrapper-chat-closed");
+    }, 1000);
+    chatContainer.classList.add("chat-closed");
+  });
+  async function toggleChat() {
+      await fetchRoomData(this);
+
       if (chatContainer.classList.contains("chat-closed")) {
       chatContainer.classList.add("chat-transition");
       setTimeout(() => {
@@ -643,14 +649,7 @@ function handleChatState() {
       socialWrapper.classList.add("social-wrapper-open");
       socialWrapper.classList.remove("social-wrapper-chat-closed");
     }
-    chatCloseButton.addEventListener("click", () => {
-    chatContainer.classList.add("chat-transition");
-    setTimeout(() => {
-      chatContainer.classList.remove("chat-transition");
-      socialWrapper.classList.add("social-wrapper-chat-closed");
-    }, 1000);
-    chatContainer.classList.add("chat-closed");
-  });
+
   }
   let allUsers = document.getElementsByClassName("user-wrapper");
   for (let i = 0; i < allUsers.length; i++) {
