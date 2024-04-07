@@ -275,7 +275,7 @@ class ConversationComponent extends BaseComponent
                     <span class="sent-message-name">${message.user.nickname}</span>
                 </div>
                   <p>
-                    ${message.content}
+                    ${escapeHTML(message.content)}
                   </p>
                 </div>
                 `: `
@@ -285,7 +285,7 @@ class ConversationComponent extends BaseComponent
                   <span class="received-message-date">${calculateDate(message.created_date)}</span>
                 </div>
                   <p>
-                    ${message.content}
+                    ${escapeHTML(message.content)}
                   </p>
                 </div>
                 `}
@@ -608,8 +608,9 @@ async function fetchRoomData(element) {
         });
         let {room} = data;
         let conversationWrapper = document.getElementById('conversation-wrapper');
+        conversationWrapper.classList.remove('no-chat-wrapper')
         let conversationComponent = new ConversationComponent(
-            {
+        {
             messages: room.messages,
             senderId: parseInt(localStorage.getItem("activeUserId")),
             receiverId: room.second_user
@@ -624,21 +625,16 @@ async function fetchRoomData(element) {
     }
 }
 function handleChatState() {
-  let chatContainer = document.getElementById("chat-container");
-  let socialWrapper = document.getElementById("social-container");
-  let chatCloseButton = document.getElementById("chat-close-button");
 
-  chatCloseButton.addEventListener("click", () => {
-    chatContainer.classList.add("chat-transition");
-    setTimeout(() => {
-      chatContainer.classList.remove("chat-transition");
-      socialWrapper.classList.add("social-wrapper-chat-closed");
-    }, 1000);
-    chatContainer.classList.add("chat-closed");
-  });
+
+
   async function toggleChat() {
       await fetchRoomData(this);
-    if (chatContainer.classList.contains("chat-closed")) {
+    let chatContainer = document.getElementById("chat-container");
+  let socialWrapper = document.getElementById("social-container");
+  let chatCloseButton = document.getElementById("chat-close-button");
+      console.log(chatContainer, socialWrapper, chatCloseButton)
+      if (chatContainer.classList.contains("chat-closed")) {
       chatContainer.classList.add("chat-transition");
       setTimeout(() => {
         chatContainer.classList.remove("chat-transition");
@@ -647,6 +643,14 @@ function handleChatState() {
       socialWrapper.classList.add("social-wrapper-open");
       socialWrapper.classList.remove("social-wrapper-chat-closed");
     }
+    chatCloseButton.addEventListener("click", () => {
+    chatContainer.classList.add("chat-transition");
+    setTimeout(() => {
+      chatContainer.classList.remove("chat-transition");
+      socialWrapper.classList.add("social-wrapper-chat-closed");
+    }, 1000);
+    chatContainer.classList.add("chat-closed");
+  });
   }
   let allUsers = document.getElementsByClassName("user-wrapper");
   for (let i = 0; i < allUsers.length; i++) {
