@@ -6,7 +6,7 @@ export default class Spinner extends BaseComponent {
         super(state,parentElement);
         console.log(this.state)
         this.html = `
-    <div class="lds-ring ${this.state.isVisible ? "hidden": "visible"}
+    <div class="lds-ring ${this.state.isVisible ? "visible": "hidden"}
         ${this.state.className ? 
         this.state.className : ""}
         ">
