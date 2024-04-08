@@ -7,14 +7,13 @@ export class Popup
     {
         this.state = state;
         this.child = child;
-        this.render();
     }
     handleHtml()
     {
         return `
         <div class="popup-wrapper" id="popup-wrapper">
           <div class="popup-data-container">
-          ${escapeHTML(this.child)}
+          ${this.child.html}
           </div>
         </div>
         <div class="background-overlay" id="background-overlay"></div>

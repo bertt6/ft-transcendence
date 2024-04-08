@@ -19,7 +19,6 @@ async function handleRouting()
 async function App()
 {
     await handleRouting();
-    let popup = new Popup({},`<h1>Popup</h1>`);
 }
 
 App().catch((error) => {

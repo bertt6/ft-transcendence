@@ -482,11 +482,12 @@ const routeToFile = [
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
+    '/static/scripts/Request.js',
+    '/static/scripts/requests.js',
     '/static/components/Component.js',
     '/static/components/spinner.js',
-    '/static/scripts/Request.js',
     '/static/scripts/utils.js',
-    '/static/scripts/Popup.js',
+    //'/static/scripts/Popup.js',
 ]
 
 function handleStyles(value)

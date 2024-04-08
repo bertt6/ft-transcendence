@@ -15,6 +15,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 import datetime
 
+import Apps.Tournament.apps
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,9 +54,10 @@ INSTALLED_APPS = [
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig",
     "Apps.Tournament.apps.TournamentConfig",
-    'Apps.SocialMedia.apps.SocialmediaConfig',
+    'Apps.SocialMedia.apps.SocialMediaConfig',
     "Apps.Chat.apps.ChatConfig",
-    "Apps.UserStatus.apps.OnlineusersConfig"
+    "Apps.UserStatus.apps.OnlineusersConfig",
+    "Apps.Request.apps.RequestConfig"
 ]
 
 MIDDLEWARE = [
