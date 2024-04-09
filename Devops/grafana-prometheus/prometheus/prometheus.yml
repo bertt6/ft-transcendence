@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['prometheus:9090'] # Örnek olarak, localhost:9100'deki bir uygulamanın metriklerini izliyoruz.
+
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100'] # node-exporter'ın metriklerini izliyoruz.
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080'] # grafana'nın metriklerini izliyoruz.
+      
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets: [ 'alertmanager:9093' ]
+    
+rule_files:
+  - rules.yml
