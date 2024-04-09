@@ -10,7 +10,6 @@ async function App()
         'receiver':nickname === 'MKM' ? 'test123' : 'MKM',
         'request_type':"friend"
     }
-    socket.send(JSON.stringify(data));
   }
   socket.onmessage = function (e) {
       console.log("Received from server");
