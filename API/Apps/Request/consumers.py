@@ -25,24 +25,16 @@ class RequestConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
-        print(text_data)
         text_data_json = json.loads(text_data)
         await self.create_request(text_data_json)
-        await self.channel_layer.group_send(
-            text_data_json["receiver"],  # Use the receiver's nickname as the group name
-            {
-                "type": "create_request_message",
-                "sender": text_data_json["sender"],
-                "receiver": text_data_json["receiver"],
-                "request_type": text_data_json["request_type"]
-            }
-        )
+
 
     async def create_request_message(self, event):
         await self.send(text_data=json.dumps({
             'sender': event['sender'],
             'receiver': event['receiver'],
             'request_type': event['request_type'],
+            'request_id': str(event['request_id'])
         }))
 
     async def create_request(self, event):
@@ -52,10 +44,21 @@ class RequestConsumer(AsyncWebsocketConsumer):
         sender_profile = await sync_to_async(Profile.objects.get)(nickname=sender)
         receiver_profile = await sync_to_async(Profile.objects.get)(nickname=receiver)
         try:
-            await sync_to_async(Request.objects.get)(
+            request = await sync_to_async(Request.objects.get)(
                 Q(sender=sender_profile, receiver=receiver_profile, type=request_type) |
                 Q(sender=receiver_profile, receiver=sender_profile, type=request_type)
             )
         except Request.DoesNotExist:
-            await sync_to_async(Request.objects.create)(sender=sender_profile, receiver=receiver_profile,
-                                                        type=request_type)
+            request = await sync_to_async(Request.objects.create)(sender=sender_profile, receiver=receiver_profile,
+                                                                  type=request_type)
+        # Send the request id along with the other data
+        await self.channel_layer.group_send(
+            receiver,  # Use the receiver's nickname as the group name
+            {
+                "type": "create_request_message",
+                "sender": sender,
+                "receiver": receiver,
+                "request_type": request_type,
+                "request_id": str(request.id),  # Include the request id
+            }
+        )

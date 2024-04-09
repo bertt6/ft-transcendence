@@ -46,7 +46,7 @@ class Notification extends BaseComponent {
             <span>${this.state.message}</span>
           </div>
           <div class="request-buttons">
-            <button data-type="Accept">
+            <button data-type="accept">
               <img src="/static/public/success.svg" alt="" />
               Accept
             </button>
@@ -124,6 +124,15 @@ export function notify(message,time=3,type) {
         document.getElementById('not-wrapper').remove();
     }, time * 1000);
 }
+function animateNotification(notification) {
+     notification.classList.add('request-close-transition')
+        setTimeout(() => {
+            notification.remove();
+            let element = currentNotifications.find((element) => element === notification);
+            currentNotifications.splice(currentNotifications.indexOf(element),1);
+            shiftNotifications()
+        }, 700);
+}
 notify.request = function (message,state,acceptCallback,rejectCallback) {
 
     let parentElement = document.getElementById('main');
@@ -135,13 +144,16 @@ notify.request = function (message,state,acceptCallback,rejectCallback) {
     let closeButton = createdNotification.querySelector('button[data-type="close"]');
     let acceptButton = createdNotification.querySelector('button[data-type="accept"]');
     let rejectButton = createdNotification.querySelector('button[data-type="reject"]');
+    console.log(closeButton,acceptButton,rejectButton)
     closeButton.addEventListener('click',() => {
-        createdNotification.classList.add('request-close-transition')
-        setTimeout(() => {
-            createdNotification.remove();
-            let element = currentNotifications.find((element) => element === createdNotification);
-            currentNotifications.splice(currentNotifications.indexOf(element),1);
-            shiftNotifications()
-        }, 700);
+    animateNotification(createdNotification);
+    });
+    acceptButton.addEventListener('click',() => {
+        acceptCallback();
+        animateNotification(createdNotification);
+    });
+    rejectButton.addEventListener('click',() => {
+        rejectCallback();
+        animateNotification(createdNotification);
     });
 }

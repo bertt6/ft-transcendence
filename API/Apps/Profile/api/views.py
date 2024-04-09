@@ -114,3 +114,14 @@ class ProfileFriendsView(APIView):
             return Response({"error": "Profile not found"}, status=404)
         serializer = ProfileFriendsSerializer(profile.friends, many=True)
         return Response(serializer.data, status=200)
+    def post(self, request):
+        profile = request.user.profile
+        if not profile:
+            return Response({"error": "Profile not found"}, status=404)
+        nickname = request.data.get('nickname')
+        friend = Profile.objects.get(nickname=nickname)
+        if not friend:
+            return Response({"error": "Friend not found"}, status=404)
+        profile.friends.add(friend)
+        profile.save()
+        return Response(status=201)
