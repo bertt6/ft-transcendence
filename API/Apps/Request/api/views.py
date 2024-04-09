@@ -36,6 +36,6 @@ class RequestView(APIView):
 @permission_classes([IsAuthenticated])
 class ProfileRequestsView(APIView):
     def get(self, request):
-        requests = Request.objects.filter(receiver=request.user.profile)
+        requests = Request.objects.filter(receiver=request.user.profile, status='pending')
         serializer = RequestSerializer(requests, many=True)
         return Response(serializer.data, status=200)
