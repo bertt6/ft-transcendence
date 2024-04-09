@@ -10,10 +10,14 @@ async function App()
         'receiver':nickname === 'MKM' ? 'test123' : 'MKM',
         'request_type':"friend"
     }
+      notify.friendRequest("Request sent1")
+      notify.friendRequest("Request sent2")
+      notify.friendRequest("Request sent3")
+      notify.friendRequest("Request sent4")
+      notify.friendRequest("Request sent5")
   }
   socket.onmessage = function (e) {
       console.log("Received from server");
-      notify("New request", 3, "success")
   }
 }
 App().catch((err) => console.error(err));

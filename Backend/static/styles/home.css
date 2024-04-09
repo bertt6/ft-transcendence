@@ -151,7 +151,7 @@
   border: none;
   font-size: 50px;
 }
-.profile-data {
+.main-profile-data {
   display: flex;
   position: absolute;
   right: 0;

@@ -4,7 +4,7 @@ import {Popup} from "../components/Popup.js";
 
 async function handleRouting()
 {
-
+/*
     try{
         let data = await request(`${API_URL}/profile`,{method:'GET'});
         let profilePhoto = document.getElementById('profile-photo');
@@ -14,7 +14,7 @@ async function handleRouting()
     {
         console.error(error)
     }
-
+*/
 }
 async function App()
 {
