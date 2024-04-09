@@ -140,8 +140,7 @@ notify.friendRequest = function (message) {
             let element = currentNotifications.find((element) => element === createdNotification);
             currentNotifications.splice(currentNotifications.indexOf(element),1);
             shiftNotifications()
-        }, 1000);
-
+        }, 700);
     });
 }
 notify.gameRequest = function (message,acceptCallback,rejectCallback) {

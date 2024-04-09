@@ -404,14 +404,52 @@ const routes = new Map([
         auth_required: true,
         url: ['/home/'],
         html: `
+    <div class="main-profile-data">
+        <div class="profile-wrapper">
+          <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+        </div>
+        <div class="inbox-wrapper">
+          <input type="checkbox" id="input-button" />
+          <label for="input-button" class="input-label">
+            <img src="/static/public/inbox.svg" alt="cannot load" />
+          </label>
+          <ul class="inbox-list">
+            <li class="inbox-element">
+              <div>
+                <div class="inbox-sender-image">
+                  <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+                </div>
+                <div>
+                  MKM invited you to play a game of pong. Do you accept?
+                </div>
+              </div>
+              <div class="inbox-element-interactions">
+                <button id="interaction-accept">Accept</button>
+                <button id="interaction-reject">Reject</button>
+              </div>
+            </li>
+            <li class="inbox-element">
+              <div>
+                <div class="inbox-sender-image">
+                  <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+                </div>
+                <div>
+                  MKM invited you to play a game of pong. Do you accept?
+                </div>
+              </div>
+              <div class="inbox-element-interactions">
+                <button id="interaction-accept">Accept</button>
+                <button id="interaction-reject">Reject</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
       <div
         class="background container-fluid position-relative"
         style="padding: 0"
       >
         <div class="main-buttons-wrapper">
-          <pong-redirect class="profile-wrapper" href="/profile" id="profile-photo">
-            <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
-          </pong-redirect>
           <div class="play-wrapper">
             <div
               style="

@@ -25,6 +25,7 @@ class RequestConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
+        print(text_data)
         text_data_json = json.loads(text_data)
         await self.create_request(text_data_json)
         await self.channel_layer.group_send(
