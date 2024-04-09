@@ -4,10 +4,8 @@ import {API_URL} from "./spa.js";
 async function getProfile(nickname)
 {
     try{
-        let data = await request(`${API_URL}/profile/${nickname}`,{method:'GET'});
-        let profilePhoto = document.getElementById('profile-photo');
-        profilePhoto.setAttribute('href', `/profile/${data.nickname}`)
-    }
+        return  await request(`${API_URL}/profile-with-nickname/${nickname}`,{method:'GET'});
+        }
     catch (error)
     {
         console.error(error)
@@ -22,20 +20,27 @@ async function App()
             sender:nickname,
             receiver:nickname === 'test123' ? 'MKM' : 'test123'
         }));
-    }
-    );
+    });
     const nickname = localStorage.getItem('activeUserNickname');
     let socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
     socket.onopen = function (e) {
   }
-  socket.onmessage = function (e) {
+  socket.onmessage = async function (e) {
 
-    const data = JSON.parse(e.data);
-      console.log(data)
-    if(data.request_type === "friend")
+    try
     {
-        notify.friendRequest(`You have a friend request from ${data.sender}`);
+        const data = JSON.parse(e.data);
+        const profile = await getProfile(data.sender);
+        if(data.request_type === "friend")
+    {
+        notify(`${profile.nickname} wants to be your friend`,3,'success');
     }
+    }
+    catch (error)
+    {
+        console.error(error)
+    }
+
   }
 }
 App().catch((err) => console.error(err));

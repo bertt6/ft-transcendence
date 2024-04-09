@@ -1,4 +1,5 @@
 import BaseComponent from "./Component.js";
+import {BASE_URL} from "../scripts/spa.js";
 const currentNotifications = [];
 class Notification extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -32,7 +33,7 @@ class Notification extends BaseComponent {
         </div>
       </div>`;
     }
-    handleFriendRequestHTML()
+    handleRequestHTML()
     {
         return `
           <div class="request-notification-wrapper" id="notification">
@@ -40,7 +41,7 @@ class Notification extends BaseComponent {
           <button data-type="close" class="request-close-button">X</button>
           <div>
             <div class="request-profile-image">
-              <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+              <img src="${BASE_URL}${this.state.profile.profile_picture}" alt="" />
             </div>
             <span>${this.state.message}</span>
           </div>
@@ -71,7 +72,7 @@ class Notification extends BaseComponent {
             this.html = this.handleSuccessHTML();
             break;
         case 'friendRequest':
-            this.html = this.handleFriendRequestHTML();
+            this.html = this.handleRequestHTML();
             break;
         }
         if (this.html === null) {
@@ -80,6 +81,7 @@ class Notification extends BaseComponent {
       let div =document.createElement('div')
         div.innerHTML = this.html;
         div.className = "show-notification";
+        div.id = "not-wrapper";
         div.style.top = "72px";
         this.parentElement.appendChild(div);
         this.div = div;
@@ -116,16 +118,16 @@ function shiftNotifications() {
 export function notify(message,time=3,type) {
     let parentElement = document.getElementById('main');
     const notification = new Notification({ type:type , message:message}, parentElement);
-
     notification.render();
     setProgressBarWithTime(time);
     setTimeout(() => {
         document.getElementById('not-wrapper').remove();
     }, time * 1000);
 }
-notify.friendRequest = function (message) {
+notify.request = function (message,state,acceptCallback,rejectCallback) {
+
     let parentElement = document.getElementById('main');
-    const notification = new Notification({ type:"friendRequest" , message:message}, parentElement);
+    const notification = new Notification({ type:"friendRequest" , message:message,profile:state.profile}, parentElement);
     notification.render();
     let createdNotification = notification.getNotificationElement();
     currentNotifications.unshift(createdNotification);
@@ -142,19 +144,4 @@ notify.friendRequest = function (message) {
             shiftNotifications()
         }, 700);
     });
-}
-notify.gameRequest = function (message,acceptCallback,rejectCallback) {
-    let parentElement = document.getElementById('main');
-    const notification = new Notification({ type:"gameRequest" , message:message}, parentElement);
-    let acceptButton = document.getElementById('request-accept-button');
-    let rejectButton = document.getElementById('request-reject-button');
-    let closeButton = document.getElementById('request-close-button');
-    acceptButton.addEventListener('click',acceptCallback);
-    rejectButton.addEventListener('click',rejectCallback);
-    closeButton.addEventListener('click',(event) => {
-    });
-    notification.render();
-    setTimeout(() => {
-        document.getElementById('not-wrapper').remove();
-    }, time * 1000);
 }
