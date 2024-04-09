@@ -526,6 +526,7 @@ const requiredScripts = [
     '/static/components/spinner.js',
     '/static/scripts/utils.js',
     //'/static/scripts/Popup.js',
+    '/static/scripts/inbox.js',
 ]
 
 function handleStyles(value)
