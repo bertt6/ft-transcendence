@@ -1,3 +1,4 @@
+import uuid
 
 from django.db import models
 
@@ -5,6 +6,7 @@ from Apps.Profile.models import Profile
 
 
 class Request(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sender')
     receiver = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='receiver')
     STATUS_CHOICES = (
