@@ -36,8 +36,8 @@ class Inbox  extends BaseComponent{
               </div>
               </div>
               <div class="inbox-element-interactions">
-                <button id="interaction-accept">Accept</button>
-                <button id="interaction-reject">Reject</button>
+                <button data-type="accept">Accept</button>
+                <button data-type="reject">Reject</button>
               </div>
         </li>`).join('')}
         `
@@ -49,6 +49,26 @@ class Inbox  extends BaseComponent{
         else{
             this.parentElement.innerHTML = this.handleInboxHTML();
         }
+        let buttonWrapper = this.parentElement.querySelector('.inbox-element-interactions');
+        if(!buttonWrapper){
+            return
+        }
+        let acceptButton = buttonWrapper.querySelector('[data-type="accept"]');
+        let rejectButton = buttonWrapper.querySelector('[data-type="reject"]');
+        acceptButton.addEventListener('click',async ()=>{
+            let response = await request(`${API_URL}/request/${request.sender.nickname}`,{
+                'method':'PUT',
+                body:JSON.stringify({status:'accepted'}),
+            })
+            console.log(response)
+        })
+        rejectButton.addEventListener('click',async ()=>{
+            let response = await request(`${API_URL}/request/${request.sender.nickname}`,{
+                'method':'PUT',
+                body:JSON.stringify({status:'rejected'}),
+            })
+            console.log(response)
+        })
     }
 }
 function getRequests() {
@@ -63,13 +83,24 @@ function getRequests() {
         console.error(error)
     }
 }
+async function handleProfileImage(){
+        let profile = await request(`${API_URL}/profile/`,{
+        method:'GET',
+    })
+    let image = document.getElementById('profile-image');
+    console.log(image)
+    if(image){
+        image.src = `${BASE_URL}${profile.profile_picture}`;
+    }
+    document.getElementById('profile-image-wrapper').setAttribute('href',`/profile/${profile.nickname}`)
+}
 async function App(){
     const inboxList = document.getElementById('inbox-list');
     if(!inboxList){
         throw new Error("No inbox list found")
     }
+    await handleProfileImage();
     let requests = await getRequests();
-    console.log(requests);
     const inbox = new Inbox({requests:requests},inboxList);
     inbox.render();
 }

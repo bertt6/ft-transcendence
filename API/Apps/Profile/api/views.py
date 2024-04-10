@@ -6,6 +6,7 @@ from ..models import Profile
 from rest_framework.response import Response
 
 from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer
+from ...Request.models import Request
 
 
 @authentication_classes([JWTAuthentication])
@@ -114,7 +115,15 @@ class ProfileFriendsView(APIView):
             return Response({"error": "Profile not found"}, status=404)
         serializer = ProfileFriendsSerializer(profile.friends, many=True)
         return Response(serializer.data, status=200)
+
     def post(self, request):
+        request_id = request.data.get('request_id')
+        try:
+            notification_request = Request.objects.get(id=request_id)
+        except Request.DoesNotExist:
+            return Response({"error": "Request not found"}, status=404)
+        notification_request.status = 'accepted'
+        notification_request.save()
         profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
