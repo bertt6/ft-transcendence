@@ -54,14 +54,7 @@ async function handleRejectedCallback(request_id)
     }
 }
 async function App() {
-    document.getElementById('testButton').addEventListener('click', async () => {
-        const nickname = localStorage.getItem('activeUserNickname');
-        socket.send(JSON.stringify({
-            request_type: "friend",
-            sender: nickname,
-            receiver: nickname === 'test123' ? 'MKM' : 'test123'
-        }));
-    });
+
     const nickname = localStorage.getItem('activeUserNickname');
     let socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
     socket.onopen = function (e) {

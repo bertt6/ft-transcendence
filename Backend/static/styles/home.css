@@ -141,9 +141,3 @@
   border: none;
   font-size: 50px;
 }
-.main-profile-data {
-  display: flex;
-  position: absolute;
-  right: 0;
-  top: 0;
-}

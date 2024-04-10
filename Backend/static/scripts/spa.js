@@ -288,6 +288,48 @@ const routes = new Map([
           <li>Block</li>
           <li>Add Friend</li>
       </ul>
+    <div class="main-profile-data">
+        <div class="profile-wrapper" id="profile-photo">
+          <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+        </div>
+        <div class="inbox-wrapper">
+          <input type="checkbox" id="input-button" />
+          <label for="input-button" class="input-label">
+            <img src="/static/public/inbox.svg" alt="cannot load" />
+          </label>
+          <ul class="inbox-list" id="inbox-list">
+            <li class="inbox-element">
+              <div>
+                <div class="inbox-sender-image">
+                  <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+                </div>
+                <div>
+                  MKM invited you to play a game of pong. Do you accept?
+                </div>
+              </div>
+              <div class="inbox-element-interactions">
+                <button id="interaction-accept">Accept</button>
+                <button id="interaction-reject">Reject</button>
+              </div>
+            </li>
+            <li class="inbox-element">
+              <div>
+                <div class="inbox-sender-image">
+                  <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
+                </div>
+                <div>
+                  MKM invited you to play a game of pong. Do you accept?
+                </div>
+              </div>
+              <div class="inbox-element-interactions">
+                <button id="interaction-accept">Accept</button>
+                <button id="interaction-reject">Reject</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
           <div
         class="background container-fluid social-background"
         style="padding: 0"

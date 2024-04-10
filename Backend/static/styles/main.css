@@ -339,3 +339,9 @@ pong-redirect{
   transition: all .7s ;
   translate: 300px;
 }
+.main-profile-data {
+  display: flex;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
