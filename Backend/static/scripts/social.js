@@ -615,7 +615,6 @@ async function connectToRoom(room,conversationComponent)
     let chatSendForm = document.getElementById('chat-send');
     let chatInput = document.getElementById('chat-input');
     chatSendForm.addEventListener('submit', (event) => {
-        console.log('submitting')
         event.preventDefault();
         let content = chatInput.value;
         if(content.length <= 0)
@@ -625,12 +624,14 @@ async function connectToRoom(room,conversationComponent)
     });
     socket.onmessage = (event) => {
         let data = JSON.parse(event.data);
+        console.log(data)
         let message = {
         content: data.message,
         user: {nickname: data.user,id: data.id},
         created_date: new Date()
         }
-        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
+        conversationComponent.setState({messages: [message,...conversationComponent.state.messages ]});
+        console.log("state",conversationComponent.state)
     }
 }
 async function fetchRoomData(element) {
