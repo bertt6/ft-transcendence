@@ -111,8 +111,9 @@ function shiftNotifications() {
     for(let current of currentNotifications)
     {
         current.style.top = `${lastTop + increment}px`;
-        if(parseInt(current.style.top) > 800)
-            current.remove();
+        if(parseInt(current.style.top) > 800) {
+            animateNotification(current);
+        }
         increment += 150;
     }
 }
