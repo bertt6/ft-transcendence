@@ -17,7 +17,7 @@ class ChatFriendsComponent extends  BaseComponent{
                 <div class="user-wrapper">
                   <div class="user-pic-wrapper">
                     <img
-                      src="https://picsum.photos/seed/picsum/200/300"
+                      src="${BASE_URL}${friend.profile_picture}"
                       alt=""
                     />
                   </div>
@@ -517,7 +517,7 @@ async function getProfile2() {
     }
 }
 const renderAllPosts = async () => {
-        let profile_picture_url = await getProfile2();
+    let profile_picture_url = await getProfile2();
     let container =    document.getElementById('social-container');
     container.innerHTML = `
                   <div
