@@ -83,6 +83,7 @@ class Notification extends BaseComponent {
         div.className = "show-notification";
         div.id = "not-wrapper";
         div.style.top = "72px";
+        div.style.transform = "translateX(100%)";
         this.parentElement.appendChild(div);
         this.div = div;
     }
@@ -125,7 +126,7 @@ export function notify(message,time=3,type) {
     }, time * 1000);
 }
 function animateNotification(notification) {
-     notification.classList.add('request-close-transition')
+     notification.style.transform = "translateX(100%)";
         setTimeout(() => {
             notification.remove();
             let element = currentNotifications.find((element) => element === notification);
@@ -139,12 +140,14 @@ notify.request = function (message,state,acceptCallback,rejectCallback) {
     const notification = new Notification({ type:"friendRequest" , message:message,profile:state.profile}, parentElement);
     notification.render();
     let createdNotification = notification.getNotificationElement();
+    setTimeout(() => {
+        createdNotification.style.transform = "translateX(0)";
+    },100);
     currentNotifications.unshift(createdNotification);
     shiftNotifications();
     let closeButton = createdNotification.querySelector('button[data-type="close"]');
     let acceptButton = createdNotification.querySelector('button[data-type="accept"]');
     let rejectButton = createdNotification.querySelector('button[data-type="reject"]');
-    console.log(closeButton,acceptButton,rejectButton)
     closeButton.addEventListener('click',() => {
     animateNotification(createdNotification);
     });
