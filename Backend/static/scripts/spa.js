@@ -620,7 +620,7 @@ export function assignRouting()
             history.pushState({to: fileName}, '', window.location.origin + fileName);
             loadPage(fileName);
         });
-        element.setAttribute('listener', true);
+        element.setAttribute('listener', 'true');
     }
 }
 function loadSpecificScript()
