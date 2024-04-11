@@ -714,6 +714,11 @@ const App = async () => {
     assignRouting();
     handleChatEvents();
     handleChatState();
+    //I don't know if this make sense but, I added this to prevent the form from submitting when
+    //there is no chat active
+  document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', (event) => event.preventDefault());
+    })
 }
 App().catch(error => console.error('Error:', error));
 
