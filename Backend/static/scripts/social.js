@@ -4,6 +4,7 @@ import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
 import {getSocket} from "./requests.js";
+import {escapeHTML} from "./utils.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
         super(state,parentElement);
@@ -336,11 +337,7 @@ function   calculateDate(date)
         return `${Math.floor(differenceInSeconds / week)} weeks ago`;
         }
     }
-function escapeHTML(str) {
-    let  div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
-}
+
 const fetchChatFriends = async () => {
 
     const endpoint = `${API_URL}/profile/friends`;
