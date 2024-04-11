@@ -88,8 +88,8 @@ async function handleProfileImage(){
         method:'GET',
     })
     let image = document.getElementById('profile-image');
-    console.log(image)
-    if(image){
+    if(image)
+    {
         image.src = `${BASE_URL}${profile.profile_picture}`;
     }
     document.getElementById('profile-image-wrapper').setAttribute('href',`/profile/${profile.nickname}`)

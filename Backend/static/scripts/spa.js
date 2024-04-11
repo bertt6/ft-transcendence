@@ -288,19 +288,6 @@ const routes = new Map([
           <li>Block</li>
           <li>Add Friend</li>
       </ul>
-            <div class="main-profile-data">
-        <pong-redirect class="profile-wrapper" id="profile-image-wrapper">
-          <img src="" id="profile-image" alt="" />
-        </pong-redirect>
-        <div class="inbox-wrapper">
-          <input type="checkbox" id="input-button" />
-          <label for="input-button" class="input-label">
-            <img src="/static/public/inbox.svg" alt="cannot load" />
-          </label>
-          <ul class="inbox-list" id="inbox-list">
-          </ul>
-        </div>
-      </div>
 
       
           <div
@@ -419,20 +406,6 @@ const routes = new Map([
         auth_required: true,
         url: ['/home/'],
         html: `
-            <div class="main-profile-data">
-        <pong-redirect class="profile-wrapper" id="profile-image-wrapper">
-          <img src="" id="profile-image" alt="" />
-        </pong-redirect>
-        <div class="inbox-wrapper">
-          <input type="checkbox" id="input-button" />
-          <label for="input-button" class="input-label">
-            <img src="/static/public/inbox.svg" alt="cannot load" />
-          </label>
-          <ul class="inbox-list" id="inbox-list">
-          </ul>
-        </div>
-      </div>
-
       <div
         class="background container-fluid position-relative"
         style="padding: 0"

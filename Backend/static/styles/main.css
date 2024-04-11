@@ -184,12 +184,12 @@ pong-redirect{
   height: 100%;
   cursor: pointer;
 }
-.profile-wrapper {
+.inbox-profile-wrapper {
   aspect-ratio: 1/1;
   height: 3rem;
   margin: 1rem;
 }
-.profile-wrapper img {
+.inbox-profile-wrapper img {
   width: 100%;
   height: 100%;
   border-radius: 100%;
@@ -340,8 +340,11 @@ pong-redirect{
   translate: 300px;
 }
 .main-profile-data {
+  max-width: 112px;
+  max-height: 80px;
   display: flex;
   position: absolute;
   right: 0;
   top: 0;
+  z-index: 10;
 }
