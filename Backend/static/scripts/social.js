@@ -60,8 +60,8 @@ class SocialPostsComponent extends BaseComponent {
                     <pong-redirect class="post-info" href="/profile/${tweet.from_user.nickname}">
                       <div class="user-pic-wrapper">
                         <img
-                          src="https://picsum.photos/seed/picsum/200/300"
-                          alt=""
+                            src="${BASE_URL}${tweet.from_user.profile_picture}"
+                            alt=""
                         />
                       </div>
                       <div>
@@ -459,7 +459,7 @@ async function getProfile()
         });
         localStorage.setItem('activeUserId', data.id);
         localStorage.setItem('activeUserNickname', data.nickname);
-        socialPostsComponent.setState({userId: data.id})
+        socialPostsComponent.setState({userId: data.id});
         let nickname = document.getElementById('username');
         nickname.innerText = data.nickname;
     }
@@ -503,7 +503,21 @@ const renderIndividualPost = async (tweetId) => {
     }
     );
 }
+
+async function getProfile2() {
+    try {
+        let data = await request(`${API_URL}/profile`, {
+            method: 'GET'
+        });
+        return data.profile_picture;
+    } catch (error) {
+        console.error('Error:', error);
+        notify('Error fetching profile', 3, 'error');
+        return null;
+    }
+}
 const renderAllPosts = async () => {
+        let profile_picture_url = await getProfile2();
     let container =    document.getElementById('social-container');
     container.innerHTML = `
                   <div
@@ -514,11 +528,11 @@ const renderAllPosts = async () => {
                 <div class="social-send-info">
                   <div class="user-pic-wrapper">
                     <img
-                      src="https://picsum.photos/seed/picsum/200/300"
-                      alt=""
+                      src="${BASE_URL}${profile_picture_url}"
+                     alt=""
                     />
                   </div>
-                  <h6 id="username">Test1</h6>
+                  <h6 id="username">Test12</h6>
                 </div>
                 <form class="social-send" id="social-send-form">
                   <input
@@ -530,8 +544,8 @@ const renderAllPosts = async () => {
                   />
                     <div class="form-input-wrapper">
                     <label for="image-add" class="custom-file-upload"></label>
-                    <input
-                    type="file" id="image-add"
+                    <inputadd
+                    type="file" id="image-"
                     src="{% static '/public/image.svg' %}" alt="" style="width: 35px"
                     accept="image/jpeg,image/png,image/gif"
                     >

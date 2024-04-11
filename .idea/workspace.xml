@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f2582942-10dc-49b0-a3c4-ad0d4f811f63" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/API/API/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/API/API/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/static/scripts/social.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/static/scripts/social.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/templates/home/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/templates/home/home.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="social-media-frontend" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/API/media/images/profile-pictures/default.svg" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2eYUrlZ0AE41pQcbhkMXB0bjGXi" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "check__",
+    "last_opened_file_path": "/Users/omer/Desktop/ft-transcendence",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/API/media/images/profile-pictures" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-d68999036c7f-b11f5e8da5ad-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.14475.56" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f2582942-10dc-49b0-a3c4-ad0d4f811f63" name="Changes" comment="" />
+      <created>1712081206337</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1712081206337</updated>
+      <workItem from="1712081207473" duration="68000" />
+      <workItem from="1712081277191" duration="3777000" />
+      <workItem from="1712089988070" duration="427000" />
+      <workItem from="1712090700391" duration="2013000" />
+      <workItem from="1712094944043" duration="563000" />
+      <workItem from="1712097567599" duration="966000" />
+      <workItem from="1712098536511" duration="925000" />
+      <workItem from="1712099475150" duration="549000" />
+      <workItem from="1712100076711" duration="108000" />
+      <workItem from="1712140679813" duration="205000" />
+      <workItem from="1712140886979" duration="813000" />
+      <workItem from="1712141703708" duration="12583000" />
+      <workItem from="1712160024898" duration="629000" />
+      <workItem from="1712160970327" duration="557000" />
+      <workItem from="1712161582279" duration="207000" />
+      <workItem from="1712173099126" duration="1455000" />
+      <workItem from="1712181860640" duration="11000" />
+      <workItem from="1712182049145" duration="668000" />
+      <workItem from="1712183415780" duration="2587000" />
+      <workItem from="1712186013495" duration="845000" />
+      <workItem from="1712188465548" duration="2079000" />
+      <workItem from="1712197234104" duration="1628000" />
+      <workItem from="1712198977625" duration="4000" />
+      <workItem from="1712199012167" duration="28000" />
+      <workItem from="1712199065487" duration="28000" />
+      <workItem from="1712199112160" duration="79000" />
+      <workItem from="1712199363469" duration="6000" />
+      <workItem from="1712199814316" duration="41000" />
+      <workItem from="1712230224446" duration="2309000" />
+      <workItem from="1712252918272" duration="691000" />
+      <workItem from="1712268141354" duration="252000" />
+      <workItem from="1712268504719" duration="47000" />
+      <workItem from="1712268936987" duration="4000" />
+      <workItem from="1712272342409" duration="118000" />
+      <workItem from="1712272723348" duration="6000" />
+      <workItem from="1712283283400" duration="89000" />
+      <workItem from="1712283965193" duration="3000" />
+      <workItem from="1712316483635" duration="13119000" />
+      <workItem from="1712336653181" duration="3224000" />
+      <workItem from="1712352444593" duration="3214000" />
+      <workItem from="1712359165848" duration="2517000" />
+      <workItem from="1712368696788" duration="5953000" />
+      <workItem from="1712405091534" duration="12000" />
+      <workItem from="1712405544005" duration="6996000" />
+      <workItem from="1712419386247" duration="1525000" />
+      <workItem from="1712423225225" duration="628000" />
+      <workItem from="1712427806777" duration="600000" />
+      <workItem from="1712428814578" duration="201000" />
+      <workItem from="1712446625057" duration="204000" />
+      <workItem from="1712529834841" duration="240000" />
+      <workItem from="1712530077035" duration="712000" />
+      <workItem from="1712530809625" duration="95000" />
+      <workItem from="1712534567429" duration="45000" />
+      <workItem from="1712849381771" duration="679000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="check_" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/Apps/SocialMedia/migrations/0001_initial.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/.venv/lib/python3.12/site-packages/twisted/test/test_text.py</url>
+          <line>173</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/API/settings.py</url>
+          <line>11</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/API/settings.py</url>
+          <line>204</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/Backend/static/components/Component.js</url>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
