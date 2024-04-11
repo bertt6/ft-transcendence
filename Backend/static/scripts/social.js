@@ -4,6 +4,7 @@ import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
 import {getSocket} from "./requests.js";
+import {escapeHTML} from "./utils.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
         super(state,parentElement);
@@ -336,11 +337,7 @@ function   calculateDate(date)
         return `${Math.floor(differenceInSeconds / week)} weeks ago`;
         }
     }
-function escapeHTML(str) {
-    let  div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
-}
+
 const fetchChatFriends = async () => {
 
     const endpoint = `${API_URL}/profile/friends`;
@@ -561,7 +558,10 @@ async function handleAddFriend(element)
 {
     const socket = getSocket();
     let nickname = element.children[1].children[0].innerText;
+    let friendRequestButton = document.getElementById('options-add-friend');
     try{
+        let spinner = new Spinner({isVisible:true,className:"options-spinner"},friendRequestButton);
+        spinner.render();
         let activeUserNickname = localStorage.getItem('activeUserNickname');
         let body = {
             request_type: "friend",
@@ -569,6 +569,10 @@ async function handleAddFriend(element)
             receiver: nickname
         }
         socket.send(JSON.stringify(body));
+        spinner.setState({isVisible: false});
+        friendRequestButton.innerText = 'Add Friend'
+        notify('Friend request sent', 3, 'success');
+
     }
     catch(error)
     {
@@ -618,7 +622,6 @@ async function connectToRoom(room,conversationComponent)
     let chatSendForm = document.getElementById('chat-send');
     let chatInput = document.getElementById('chat-input');
     chatSendForm.addEventListener('submit', (event) => {
-        console.log('submitting')
         event.preventDefault();
         let content = chatInput.value;
         if(content.length <= 0)
@@ -628,12 +631,14 @@ async function connectToRoom(room,conversationComponent)
     });
     socket.onmessage = (event) => {
         let data = JSON.parse(event.data);
+        console.log(data)
         let message = {
         content: data.message,
         user: {nickname: data.user,id: data.id},
         created_date: new Date()
         }
-        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
+        conversationComponent.setState({messages: [message,...conversationComponent.state.messages ]});
+        console.log("state",conversationComponent.state)
     }
 }
 async function fetchRoomData(element) {
@@ -716,6 +721,11 @@ const App = async () => {
     assignRouting();
     handleChatEvents();
     handleChatState();
+    //I don't know if this make sense but, I added this to prevent the form from submitting when
+    //there is no chat active
+  document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', (event) => event.preventDefault());
+    })
 }
 App().catch(error => console.error('Error:', error));
 

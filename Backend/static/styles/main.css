@@ -48,7 +48,6 @@ img {
   box-sizing: border-box;
   right: 0;
   top: 5rem;
-  position: absolute;
  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
   border-radius: 5px;
   cursor: pointer;
@@ -74,6 +73,7 @@ img {
   align-items: center;
   color: black;
 }
+
 .skeleton {
   background: linear-gradient(
     110deg,
@@ -116,16 +116,14 @@ pong-redirect{
   display: none;
 }
 
-.lds-ring {
-  color: #1c4c5b
-}
 .lds-ring,
 .lds-ring div {
   box-sizing: border-box;
 }
 .lds-ring {
-  display: inline-block;
-  position: relative;
+  display: flex!important;
+  align-items: center;
+  justify-content: center;
   width: 80px;
   height: 80px;
 }
@@ -285,6 +283,7 @@ pong-redirect{
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
   border-radius: 5px;
   padding: 1rem;
+  transition: all 1s ease-in-out;
 }
 .request-wrapper {
   display: flex;
@@ -334,10 +333,11 @@ pong-redirect{
 .show-notification{
   position: absolute;
   right: 0;
+  transition: all 0.7s
 }
 .request-close-transition{
   transition: all .7s ;
-  translate: 300px;
+  transform: translateX(100%);
 }
 .main-profile-data {
   max-width: 112px;

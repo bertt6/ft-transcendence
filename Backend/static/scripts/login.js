@@ -32,6 +32,8 @@ async function loginForm(event)
         } else {
             console.error('Error:', response);
             spinner.setState({isVisible:false});
+            loginButton.disabled = false;
+            loginButton.innerText = "Login";
             notify('Invalid username or password', 3, 'error');
             let data = await response.json();
         }
