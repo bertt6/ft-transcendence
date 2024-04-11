@@ -558,7 +558,10 @@ async function handleAddFriend(element)
 {
     const socket = getSocket();
     let nickname = element.children[1].children[0].innerText;
+    let friendRequestButton = document.getElementById('options-add-friend');
     try{
+        let spinner = new Spinner({isVisible:true,className:"options-spinner"},friendRequestButton);
+        spinner.render();
         let activeUserNickname = localStorage.getItem('activeUserNickname');
         let body = {
             request_type: "friend",
@@ -566,6 +569,10 @@ async function handleAddFriend(element)
             receiver: nickname
         }
         socket.send(JSON.stringify(body));
+        spinner.setState({isVisible: false});
+        friendRequestButton.innerText = 'Add Friend'
+        notify('Friend request sent', 3, 'success');
+
     }
     catch(error)
     {

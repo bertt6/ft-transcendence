@@ -506,3 +506,11 @@ input[type="file"] {
   align-items: center;
   justify-content: center;
 }
+.options-spinner {
+    width: 36px;
+    height: 36px;
+}
+.options-spinner div {
+    width: 36px;
+    height: 36px;
+}
