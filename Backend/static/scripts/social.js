@@ -1,8 +1,9 @@
-import {API_URL, getCookie, loadPage, BASE_URL,assignRouting} from "./spa.js";
+import {API_URL, BASE_URL,assignRouting} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
+import {getSocket} from "./requests.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
         super(state,parentElement);
@@ -141,7 +142,7 @@ class PostTweetFormComponent extends  BaseComponent
     let previewCloseButton = document.getElementById('preview-close-button');
     if(previewCloseButton)
     {
-        previewCloseButton.addEventListener('click', (event) => {
+        previewCloseButton.addEventListener('click', () => {
             postTweetFormComponent.setState({imageUrl: undefined});
         });
     }
@@ -252,7 +253,7 @@ class SelectedPostComponent extends BaseComponent{
     {
         super.render();
         let backButton = document.getElementById('comment-back-button');
-        backButton.addEventListener('click', (event) => {
+        backButton.addEventListener('click', () => {
 
             history.pushState({}, '', '/social');
             renderAllPosts();
@@ -411,7 +412,7 @@ async function assignLikeButtons()
         for(let button of likeButtons)
         {
             let tweetId = button.getAttribute('data-tweet-id');
-            button.addEventListener('click', async (event) => {
+            button.addEventListener('click', async () => {
                 try{
                     let data = await request(`${API_URL}/like_tweet/${tweetId}`, {
                         method: 'PATCH',
@@ -443,7 +444,7 @@ async function assignEventListeners() {
         for(let button of commentButtons)
         {
             let tweetId = button.getAttribute('data-tweet-id');
-            button.addEventListener('click', async (event) => {
+            button.addEventListener('click', async () => {
                 history.pushState({}, '', `/social/tweet/${tweetId}`);
                 await renderIndividualPost(tweetId);
             });
@@ -556,6 +557,32 @@ const renderAllPosts = async () => {
     await assignEventListeners();
 
 }
+async function handleAddFriend(element)
+{
+    const socket = getSocket();
+    let nickname = element.children[1].children[0].innerText;
+    try{
+        let activeUserNickname = localStorage.getItem('activeUserNickname');
+        let body = {
+            request_type: "friend",
+            sender: activeUserNickname,
+            receiver: nickname
+        }
+        socket.send(JSON.stringify(body));
+    }
+    catch(error)
+    {
+        console.error('Error:', error);
+        notify('Error adding friend', 3, 'error');
+    }
+}
+function addContextListeners(element)
+{
+    let addFriendButton = document.getElementById('options-add-friend');
+    let blockUserButton = document.getElementById('options-block-user');
+    addFriendButton.addEventListener('click',() => handleAddFriend(element));
+
+}
 function handleRightClick(event,element) {
       event.preventDefault();
       let mouseX = event.clientX;
@@ -567,12 +594,14 @@ function handleRightClick(event,element) {
       chatOptions.addEventListener("click", (event) => {
         event.stopPropagation();
       });
+
       function handleChatContext()
       {
           let redirect = document.getElementById('profile-redirect');
           redirect.setAttribute('href', `/profile/${element.children[1].children[0].innerText}`)
       }
       handleChatContext()
+    addContextListeners(element)
       document.addEventListener(
         "click",
         function closeMenu(event) {
@@ -610,6 +639,8 @@ async function connectToRoom(room,conversationComponent)
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
     let wrapper = document.getElementById('conversation-wrapper');
+    let activeUserInfoWrapper = document.getElementById('active-user-info');
+    activeUserInfoWrapper.children[0].innerText = nickname;
     let spinner = new Spinner({isVisible:true},wrapper);
     spinner.render();
     try {
@@ -685,7 +716,6 @@ const App = async () => {
     assignRouting();
     handleChatEvents();
     handleChatState();
-
 }
 App().catch(error => console.error('Error:', error));
 

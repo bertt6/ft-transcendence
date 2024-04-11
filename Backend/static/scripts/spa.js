@@ -288,6 +288,8 @@ const routes = new Map([
           <li>Block</li>
           <li>Add Friend</li>
       </ul>
+
+      
           <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -409,9 +411,6 @@ const routes = new Map([
         style="padding: 0"
       >
         <div class="main-buttons-wrapper">
-          <pong-redirect class="profile-wrapper" href="/profile" id="profile-photo">
-            <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
-          </pong-redirect>
           <div class="play-wrapper">
             <div
               style="
@@ -482,10 +481,13 @@ const routeToFile = [
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
+    '/static/scripts/Request.js',
+    '/static/scripts/requests.js',
     '/static/components/Component.js',
     '/static/components/spinner.js',
-    '/static/scripts/Request.js',
-    '/static/scripts/utils.js'
+    '/static/scripts/utils.js',
+    //'/static/scripts/Popup.js',
+    '/static/scripts/inbox.js',
 ]
 
 function handleStyles(value)

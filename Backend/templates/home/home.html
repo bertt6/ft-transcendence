@@ -20,15 +20,25 @@
     <title>Home Page</title>
   </head>
   <body>
+    <div class="main-profile-data">
+        <pong-redirect class="inbox-profile-wrapper" id="profile-image-wrapper">
+          <img src="" id="profile-image" alt="" />
+        </pong-redirect>
+        <div class="inbox-wrapper">
+          <input type="checkbox" id="input-button" />
+          <label for="input-button" class="input-label">
+            <img src="{% static 'public/inbox.svg' %}" alt="cannot load" />
+          </label>
+          <ul class="inbox-list" id="inbox-list">
+          </ul>
+        </div>
+      </div>
     <main class="main" id="main">
       <div
         class="background container-fluid position-relative"
         style="padding: 0"
       >
         <div class="main-buttons-wrapper">
-          <pong-redirect class="profile-wrapper" href="profile" id="profile-photo" dynamic-route>
-            <img src="https://picsum.photos/seed/picsum/200/300" alt="" />
-          </pong-redirect>
           <div class="play-wrapper">
             <div
               style="

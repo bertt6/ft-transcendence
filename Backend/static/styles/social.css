@@ -152,7 +152,7 @@ input {
   width: 100%;
   align-self: flex-start;
   border-bottom: 1px solid white;
-  border-color: rgba(0,0,0,0.7);
+  border-color: rgba(59, 59, 59, 0.7);
 
 }
 .received-message-container > p {
@@ -165,7 +165,7 @@ input {
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid white;
-    border-color: rgba(59, 59, 59, 0.7);
+  border-color: rgba(59, 59, 59, 0.7);
 
 }
 

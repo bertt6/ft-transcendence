@@ -11,6 +11,7 @@ from Apps.Profile.models import Profile
 
 
 class ChatConsumer(WebsocketConsumer):
+
     def connect(self):
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = "chat%s" % self.room_name
