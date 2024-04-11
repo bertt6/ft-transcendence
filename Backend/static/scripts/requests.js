@@ -1,17 +1,9 @@
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
 import {API_URL} from "./spa.js";
+import {getProfile} from "./utils.js";
 let socket = null;
-async function getProfile(nickname)
-{
-    try{
-        return  await request(`${API_URL}/profile-with-nickname/${nickname}`,{method:'GET'});
-        }
-    catch (error)
-    {
-        console.error(error)
-    }
-}
+
 async function handleAcceptCallback(profile,request_id)
 {
     let body ={
@@ -59,8 +51,7 @@ function addSocketTestButton(){
     let button = document.createElement('button');
     button.id = 'testButton';
     button.innerText = 'Test';
-    document.body.appendChild(button);
-        button.addEventListener('click', async () => {
+    button.addEventListener('click', async () => {
         const nickname = localStorage.getItem('activeUserNickname');
         socket.send(JSON.stringify({
             request_type: "friend",
