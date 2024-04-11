@@ -612,12 +612,15 @@ export function assignRouting()
     let elements = document.querySelectorAll("pong-redirect");
     for(let element of elements)
     {
+        if(element.getAttribute(('listener')) === 'true')
+            continue;
         element.addEventListener('click', function(event) {
             event.preventDefault();
             let fileName = element.getAttribute('href');
             history.pushState({to: fileName}, '', window.location.origin + fileName);
             loadPage(fileName);
         });
+        element.setAttribute('listener', true);
     }
 }
 function loadSpecificScript()
