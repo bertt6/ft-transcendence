@@ -19,7 +19,7 @@ websocket_urlpatterns = [
     re_path(r'^ws/chat/(?P<room_name>[^/]+)/(?P<nickname>[^/]+)$', ChatConsumer.as_asgi()),
     re_path(r'^ws/online/(?P<user_id>[^/]+)$', OnlineUsersConsumer.as_asgi()),
     re_path(r'^ws/requests/(?P<nickname>[^/]+)$', RequestConsumer.as_asgi()),
-    re_path(r'^ws/match-making', MatchMakingConsumer.as_asgi()),
+    re_path(r'^ws/match-making/(?P<nickname>[^/]+)$', MatchMakingConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter(
