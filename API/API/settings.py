@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'Apps.SocialMedia.apps.SocialMediaConfig',
     "Apps.Chat.apps.ChatConfig",
     "Apps.UserStatus.apps.OnlineusersConfig",
-    "Apps.Request.apps.RequestConfig"
+    "Apps.Request.apps.RequestConfig",
+    "Apps.Game.apps.GameConfig"
 ]
 
 MIDDLEWARE = [
