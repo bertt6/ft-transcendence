@@ -134,3 +134,23 @@ class ProfileFriendsView(APIView):
         profile.friends.add(friend)
         profile.save()
         return Response(status=201)
+
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+class ProfileBlockedUsersView(APIView):
+    def post(self, request):
+        profile_id = request.data.get('user_id')
+        profile = request.user.profile
+
+        if Profile.objects.filter(id=profile_id):
+            return Response({"error": "Profile not found"}, status=404)
+
+        if profile.blocked_users.filter(id=profile_id).exists():
+            profile.blocked_users.add(profile_id)
+            if profile.friends.filter(id=profile_id):
+                profile.friends.remove(profile_id)
+        else:
+            profile.blocked_users.remove(profile_id)
+        profile.save()
+        return Response(status=200)
