@@ -143,7 +143,7 @@ class ProfileBlockedUsersView(APIView):
         profile_id = request.data.get('user_id')
         profile = request.user.profile
 
-        if Profile.objects.filter(id=profile_id):
+        if Profile.objects.filter(id=profile_id).exists():
             return Response({"error": "Profile not found"}, status=404)
 
         if profile.blocked_users.filter(id=profile_id).exists():
