@@ -110,8 +110,20 @@ function setCanvasSize()
     canvas.width = 1200;
     canvas.height = 720;
 }// Start the game loop
+async function connectToServer()
+{
+  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
+  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    socket.onopen = () => {
+        console.log("Connected to server");
+    };
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+    };
+}
 async function App()
 {
+  await connectToServer();
   gameLoop();
 
 }

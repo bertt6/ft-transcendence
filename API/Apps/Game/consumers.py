@@ -1,9 +1,7 @@
 import json
 
-import redis
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
-from channels.layers import get_channel_layer
 
 from Apps.Game.api.serializers import GameSerializer
 from Apps.Game.cache import get_players_in_que, add_player_in_que, clear_players_in_que
@@ -14,8 +12,8 @@ from Apps.Profile.models import Profile
 
 class MatchMakingConsumer(WebsocketConsumer):
     def connect(self):
-        self.accept()
-        self.profile = ProfileGetSerializer(Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
+        self.profile = ProfileGetSerializer(
+            Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
         async_to_sync(self.channel_layer.group_add)(
             'matchmaking',
             self.channel_name
@@ -25,6 +23,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         }))
         add_player_in_que(self.profile)
         self.check_game()
+        self.accept()
 
     def disconnect(self, close_code):
         self.channel_layer.group_discard(
@@ -58,3 +57,37 @@ class MatchMakingConsumer(WebsocketConsumer):
                     'game': GameSerializer(game).data,
                 }
             )
+
+
+class GameConsumer(WebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.game_group_name = None
+        self.game_id = None
+
+    def connect(self):
+        self.game_id = self.scope['url_route']['kwargs']['game_id']
+        self.game_group_name = f'game_{self.game_id}'
+        self.channel_layer.group_add(
+            self.game_group_name,
+            self.channel_name
+        )
+        self.accept()
+        self.send_initial_state()
+
+    def disconnect(self, close_code):
+        self.channel_layer.group_discard(
+            self.game_group_name,
+            self.channel_name
+        )
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+
+    def send_initial_state(self):
+        game = Game.objects.get(id=self.game_id)
+        serializer = GameSerializer(game)
+        self.send(text_data=json.dumps({
+            'details': serializer.data,
+            'game': {}
+        }))
