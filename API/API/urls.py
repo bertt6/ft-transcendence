@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from Apps.Game import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('Apps.Profile.api.urls')),
@@ -26,8 +28,9 @@ urlpatterns = [
     path('api/v1/', include('Apps.Tournament.api.urls')),
     path('api/v1/', include('Apps.SocialMedia.api.urls')),
     path("api/v1/", include("Apps.Chat.api.urls")),
-    path("chat/", include("Apps.UserStatus.urls")),
     path("api/v1/", include("Apps.Request.api.urls")),
+    path('api/v1/', include('Apps.Game.api.urls')),
+    path('game/', views.index),
 ]
 
 if settings.DEBUG:
