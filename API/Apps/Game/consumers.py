@@ -51,7 +51,6 @@ class MatchMakingConsumer(WebsocketConsumer):
             player1, player2 = players_in_que
             clear_players_in_que()
             game = Game.objects.create(player1_id=player1['id'], player2_id=player2['id'])
-            print(game)
             async_to_sync(self.channel_layer.group_send)(
                 'matchmaking', {
                     'type': 'match_making_message',
