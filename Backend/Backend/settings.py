@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     "Apps.Auth.apps.AuthConfig",
     'Apps.Home.apps.HomeConfig',
     "Apps.Profile.apps.ProfileConfig",
-    "Apps.SocialMedia.apps.SocialMediaConfig"
+    "Apps.SocialMedia.apps.SocialMediaConfig",
+    "Apps.Game.apps.GameConfig"
 ]
 
 MIDDLEWARE = [

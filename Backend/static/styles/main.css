@@ -103,7 +103,13 @@ button{
   color: black ;
   font-size: larger;
 }
-
+.social-background {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("/static/public/inside.jpg") !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-position: center;
+}
 pong-redirect{
   cursor: pointer;
 }

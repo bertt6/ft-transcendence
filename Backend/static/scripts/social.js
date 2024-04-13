@@ -541,6 +541,7 @@ const renderAllPosts = async () => {
                     </div>
                 </form>
               </div>
+              
               <div class="posts-container" id="posts-wrapper">
                 <div class="post-container skeleton" id="post-wrapper">
                 </div>
