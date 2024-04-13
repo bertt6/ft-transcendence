@@ -469,7 +469,23 @@ const routes = new Map([
         </div>
     </div>
         `
-    }]
+    }],
+    ['game', {
+            auth_required: true,
+            url: [/game\/(\d+)/],
+            html: `
+          <div class="container">
+                <div class="player">
+                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 1">
+                  <p>Player 1 &nbsp <br>Point: 2000&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</p>
+                  <p>Player 2 &nbsp <br>Point: 2000</p>
+                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 2">
+                </div>
+                <canvas class="canvas-class" id="pongCanvas" width="800" height="400"></canvas>
+              </div>
+
+            `
+        }]
 ]);
 const routeToFile = [
     [["/auth/login/"], 'login'],
@@ -477,7 +493,8 @@ const routeToFile = [
     [[/profile\/[A-Za-z]+/], 'profile'],
     [['/social/',  '/social/\\w+/g'], 'social'],
     [['/home/'], 'home'],
-    [['/verification/'], 'verification']
+    [['/verification/'], 'verification'],
+    [[/game\/(\d+)/], 'game'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -486,7 +503,6 @@ const requiredScripts = [
     '/static/components/Component.js',
     '/static/components/spinner.js',
     '/static/scripts/utils.js',
-    //'/static/scripts/Popup.js',
     '/static/scripts/inbox.js',
 ]
 
@@ -627,6 +643,7 @@ function loadSpecificScript()
 {
 let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
+    console.log(value,pathName)
     if(!value)
         return;
     if(document.getElementById('script'))
