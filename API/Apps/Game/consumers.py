@@ -5,6 +5,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.layers import get_channel_layer
 
+from Apps.Game.api.serializers import GameSerializer
 from Apps.Game.cache import get_players_in_que, add_player_in_que, clear_players_in_que
 from Apps.Game.models import Game
 from Apps.Profile.api.Serializers import ProfileGetSerializer
@@ -35,9 +36,9 @@ class MatchMakingConsumer(WebsocketConsumer):
         pass
 
     def match_making_message(self, event):
-        message = event['message']
         self.send(text_data=json.dumps({
-            'message': message
+            'message': event['message'],
+            'game': event['game']
         }))
 
     def check_game(self):
@@ -49,10 +50,12 @@ class MatchMakingConsumer(WebsocketConsumer):
         else:
             player1, player2 = players_in_que
             clear_players_in_que()
-            Game.objects.create(player1_id=player1['id'], player2_id=player2['id'])
+            game = Game.objects.create(player1_id=player1['id'], player2_id=player2['id'])
+            print(game)
             async_to_sync(self.channel_layer.group_send)(
                 'matchmaking', {
                     'type': 'match_making_message',
-                    'message': 'Game found! You are now playing!'
+                    'message': 'Game found! You are now playing!',
+                    'game': GameSerializer(game).data,
                 }
             )
