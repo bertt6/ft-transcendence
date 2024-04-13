@@ -1,24 +1,28 @@
 import json
+
+import redis
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.layers import get_channel_layer
 
+from Apps.Game.cache import get_players_in_que, add_player_in_que, clear_players_in_que
 from Apps.Game.models import Game
+from Apps.Profile.api.Serializers import ProfileGetSerializer
 from Apps.Profile.models import Profile
+
 
 class MatchMakingConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
-        self.user = async_to_sync(Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname']))
-        print(self.channel_name)
-        print('ASDHGAGSJDJASFGHASDFGFDGSAFGHJSDAGFSADGFHAJDGFHJSADFGHSDAGF')
-        self.channel_layer.group_add(
+        self.profile = ProfileGetSerializer(Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
+        async_to_sync(self.channel_layer.group_add)(
             'matchmaking',
-            self.channel_name,
+            self.channel_name
         )
         self.send(text_data=json.dumps({
             'message': 'Searching for a game...'
         }))
+        add_player_in_que(self.profile)
         self.check_game()
 
     def disconnect(self, close_code):
@@ -37,13 +41,15 @@ class MatchMakingConsumer(WebsocketConsumer):
         }))
 
     def check_game(self):
-        if len(get_channel_layer().group_channel('matchmaking')) == 1:
+        players_in_que = get_players_in_que()
+        if len(players_in_que) == 1:
             self.send(text_data=json.dumps({
                 'message': 'Waiting for another player...'
             }))
         else:
-            player1, player2 = self.channel_layer.group_channel_layer('matchmaking')
-            Game.objects.create(player1=player1, player2=player2)
+            player1, player2 = players_in_que
+            clear_players_in_que()
+            Game.objects.create(player1_id=player1['id'], player2_id=player2['id'])
             async_to_sync(self.channel_layer.group_send)(
                 'matchmaking', {
                     'type': 'match_making_message',
