@@ -7,6 +7,7 @@ const canvasHeight = canvas.height;
 const paddleWidth = 10;
 const paddleHeight = 200;
 const ballSize = 20;
+let lastRenderedState = null;
 function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   ctx.save();  // Save the current state of the context
@@ -82,9 +83,41 @@ async function connectToServer()
     };
     return socket;
 }
+function doClientPrediction(state, currentPaddle)
+{
+  if(!lastRenderedState)
+      return;
+    const {game} = state;
+    let playerOne = game.player_one;
+    let playerTwo = game.player_two;
+    let ball = game.ball;
+    let newBall = {
+        x: ball.x + ball.dx,
+        y: ball.y + ball.dy,
+        dx: ball.dx,
+        dy: ball.dy
+    }
+    let newPlayerOne = {
+        paddle_x: playerOne.paddle_x,
+        paddle_y: playerOne.paddle_y + (currentPaddle.paddle === "player_one" ? currentPaddle.dy : lastRenderedState.game.player_one.dy)
+    }
+    let newPlayerTwo = {
+        paddle_x: playerTwo.paddle_x,
+        paddle_y: playerTwo.paddle_y + (currentPaddle.paddle === "player_two" ? currentPaddle.dy : lastRenderedState.game.player_two.dy)
+    }
+    let newGame = {
+        player_one: newPlayerOne,
+        player_two: newPlayerTwo,
+        ball: newBall
+    }
+    let newState = {
+        game: newGame
+    }
+    draw(newState.game);
+    lastRenderedState = newState;
+}
 function handleMovement(socket,data)
 {
-
   let currentPaddle = {
     paddle: "spectator",
     dy: 0
@@ -94,7 +127,7 @@ function handleMovement(socket,data)
     else if(data.details.player2.nickname === localStorage.getItem("activeUserNickname"))
         currentPaddle.paddle = "player_two";
   document.addEventListener("keydown", (event) => {
-        if (event.key === "w" || event.key === "s")
+    if (event.key === "w" || event.key === "s")
         {
           currentPaddle.dy = event.key === "w" ? -10: 10;
             socket.send(JSON.stringify(currentPaddle));

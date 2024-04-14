@@ -90,16 +90,16 @@ class GameConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         paddle = text_data_json['paddle']
         if paddle == 'player_one':
-            self.gameState['player_one']['dy'] = text_data_json['dy']
+            GameConsumer.game_states[self.game_id]['player_one']['dy'] = text_data_json['dy']
         elif paddle == 'player_two':
-            self.gameState['player_two']['dy'] = text_data_json['dy']
+            GameConsumer.game_states[self.game_id]['player_two']['dy'] = text_data_json['dy']
 
     async def send_initial_state(self):
         data = await self.get_game()
         await self.send(text_data=json.dumps({
             'state_type': 'initial_state',
             'details': data,
-            'game': self.gameState
+            'game': GameConsumer.game_states[self.game_id]
         }))
 
     @database_sync_to_async
@@ -115,7 +115,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 self.game_group_name,
                 {
                     'type': 'send_state',
-                    'game': self.gameState
+                    'game': GameConsumer.game_states[self.game_id]
                 }
             )
             await asyncio.sleep(0.01667)
@@ -129,44 +129,44 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Update player paddles positions
         paddle_height = 200  # Adjust paddle height if needed
 
-        self.gameState['player_one']['paddle_y'] += self.gameState['player_one']['dy']
-        self.gameState['player_one']['paddle_y'] = max(-self.gameState['canvas_height'] / 2 + paddle_height / 2,
-                                                       min(self.gameState['canvas_height'] / 2 - paddle_height / 2,
-                                                           self.gameState['player_one']['paddle_y']))
+        GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] += GameConsumer.game_states[self.game_id]['player_one']['dy']
+        GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] = max(-GameConsumer.game_states[self.game_id]['canvas_height'] / 2 + paddle_height / 2,
+                                                       min(GameConsumer.game_states[self.game_id]['canvas_height'] / 2 - paddle_height / 2,
+                                                           GameConsumer.game_states[self.game_id]['player_one']['paddle_y']))
 
-        self.gameState['player_two']['paddle_y'] += self.gameState['player_two']['dy']
-        self.gameState['player_two']['paddle_y'] = max(-self.gameState['canvas_height'] / 2 + paddle_height / 2,
-                                                       min(self.gameState['canvas_height'] / 2 - paddle_height / 2,
-                                                           self.gameState['player_two']['paddle_y']))
-        ball = self.gameState['ball']
+        GameConsumer.game_states[self.game_id]['player_two']['paddle_y'] += GameConsumer.game_states[self.game_id]['player_two']['dy']
+        GameConsumer.game_states[self.game_id]['player_two']['paddle_y'] = max(-GameConsumer.game_states[self.game_id]['canvas_height'] / 2 + paddle_height / 2,
+                                                       min(GameConsumer.game_states[self.game_id]['canvas_height'] / 2 - paddle_height / 2,
+                                                           GameConsumer.game_states[self.game_id]['player_two']['paddle_y']))
+        ball = GameConsumer.game_states[self.game_id]['ball']
         ball['x'] += ball['dx']
         ball['y'] += ball['dy']
         # Check collision with top or bottom walls
-        if ball['y'] + 10 >= self.gameState['canvas_height'] / 2 or ball['y'] - 10 <= -self.gameState[
+        if ball['y'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_height'] / 2 or ball['y'] - 10 <= -GameConsumer.game_states[self.game_id][
             'canvas_height'] / 2:
             ball['dy'] = -ball['dy']
 
-        paddle_one_y = self.gameState['player_one']['paddle_y']
+        paddle_one_y = GameConsumer.game_states[self.game_id]['player_one']['paddle_y']
         paddle_top = paddle_one_y - paddle_height / 2
         paddle_bottom = paddle_one_y + paddle_height / 2
-        if (ball['x'] - 40 <= -self.gameState['canvas_width'] / 2 and
+        if (ball['x'] - 40 <= -GameConsumer.game_states[self.game_id]['canvas_width'] / 2 and
                 paddle_top <= ball['y'] <= paddle_bottom):
             ball['dx'] = -ball['dx']
-        paddle_two_y = self.gameState['player_two']['paddle_y']
+        paddle_two_y = GameConsumer.game_states[self.game_id]['player_two']['paddle_y']
         paddle_top = paddle_two_y - paddle_height / 2
         paddle_bottom = paddle_two_y + paddle_height / 2
-        if (ball['x'] + 40 >= self.gameState['canvas_width'] / 2 and
+        if (ball['x'] + 40 >= GameConsumer.game_states[self.game_id]['canvas_width'] / 2 and
                 paddle_top <= ball['y'] <= paddle_bottom):
             ball['dx'] = -ball['dx']
         # Score
-        if ball['x'] - 10 <= -self.gameState['canvas_width'] / 2:
-            self.gameState['player_two']['score'] += 1
+        if ball['x'] - 10 <= -GameConsumer.game_states[self.game_id]['canvas_width'] / 2:
+            GameConsumer.game_states[self.game_id]['player_two']['score'] += 1
             ball['x'] = 0
             ball['y'] = 0
             ball['dx'] = random.choice([-10, 10])
 
-        if ball['x'] + 10 >= self.gameState['canvas_width'] / 2:
-            self.gameState['player_one']['score'] += 1
+        if ball['x'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_width'] / 2:
+            GameConsumer.game_states[self.game_id]['player_one']['score'] += 1
             ball['x'] = 0
             ball['y'] = 0
             ball['dx'] = random.choice([-10, 10])
