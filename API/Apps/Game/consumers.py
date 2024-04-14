@@ -61,12 +61,12 @@ class MatchMakingConsumer(WebsocketConsumer):
 
 
 class GameConsumer(AsyncWebsocketConsumer):
+    game_states = {}
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.game_id = None
         self.game_group_name = None
         self.gameState = {}
-
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.game_group_name = f'game_{self.game_id}'
@@ -75,20 +75,11 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
-        canvas_width = 1368
-        canvas_height = 600
-        initial_ball_x = 0
-        initial_ball_y = 0
+        if self.game_id not in GameConsumer.game_states:
+            GameConsumer.game_states[self.game_id] = self.initialize_game_state()
 
-        self.gameState = {
-            'canvas_width': canvas_width,
-            'canvas_height': canvas_height,
-            'player_one': {'paddle_y': 0, 'paddle_x': -canvas_width / 2 + 20, 'dy': 0, 'score': 0},
-            'player_two': {'paddle_y': 0, 'paddle_x': canvas_width / 2 - 20, 'dy': 0, 'score': 0},
-            'ball': {'x': initial_ball_x, 'y': initial_ball_y, 'dx': 10, 'dy': 10},
-        }
         await self.send_initial_state()
-
+        asyncio.ensure_future(self.game_loop())
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.game_group_name,
@@ -102,11 +93,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.gameState['player_one']['dy'] = text_data_json['dy']
         elif paddle == 'player_two':
             self.gameState['player_two']['dy'] = text_data_json['dy']
-        self.update()
-        await self.send(text_data=json.dumps({
-            'state_type': 'game_state',
-            'game': self.gameState
-        }))
 
     async def send_initial_state(self):
         data = await self.get_game()
@@ -123,14 +109,21 @@ class GameConsumer(AsyncWebsocketConsumer):
         return serializer.data
 
     async def game_loop(self):
-        await self.update()
+        while True:
+            self.update()
+            await self.channel_layer.group_send(
+                self.game_group_name,
+                {
+                    'type': 'send_state',
+                    'game': self.gameState
+                }
+            )
+            await asyncio.sleep(0.01667)
+    async def send_state(self, event):
         await self.send(text_data=json.dumps({
             'state_type': 'game_state',
-            'game': self.gameState
+            'game': event['game']
         }))
-        await asyncio.sleep(0.01)
-
-    import random
 
     def update(self):
         # Update player paddles positions
@@ -148,11 +141,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         ball = self.gameState['ball']
         ball['x'] += ball['dx']
         ball['y'] += ball['dy']
-        print('Ball x:', ball['x'], 'Ball y:', ball['y'])
         # Check collision with top or bottom walls
         if ball['y'] + 10 >= self.gameState['canvas_height'] / 2 or ball['y'] - 10 <= -self.gameState[
             'canvas_height'] / 2:
-            print('Collision with top or bottom walls')
             ball['dy'] = -ball['dy']
 
         paddle_one_y = self.gameState['player_one']['paddle_y']
@@ -169,7 +160,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             ball['dx'] = -ball['dx']
         # Score
         if ball['x'] - 10 <= -self.gameState['canvas_width'] / 2:
-            # Player two scores
             self.gameState['player_two']['score'] += 1
             ball['x'] = 0
             ball['y'] = 0
@@ -180,6 +170,20 @@ class GameConsumer(AsyncWebsocketConsumer):
             ball['x'] = 0
             ball['y'] = 0
             ball['dx'] = random.choice([-10, 10])
+
+    def initialize_game_state(self):
+        canvas_width = 1368
+        canvas_height = 600
+        initial_ball_x = 0
+        initial_ball_y = 0
+
+        return {
+            'canvas_width': canvas_width,
+            'canvas_height': canvas_height,
+            'player_one': {'paddle_y': 0, 'paddle_x': -canvas_width / 2 + 20, 'dy': 0, 'score': 0},
+            'player_two': {'paddle_y': 0, 'paddle_x': canvas_width / 2 - 20, 'dy': 0, 'score': 0},
+            'ball': {'x': initial_ball_x, 'y': initial_ball_y, 'dx': 10, 'dy': 10},
+        }
 
     async def players_count(self):
         return await self.channel_layer.group_count(self.game_group_name)
