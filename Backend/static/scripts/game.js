@@ -13,19 +13,23 @@ let ballSpeedX = 4;
 let ballSpeedY = 4;
 
 function draw(data) {
+  console.log(data)
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.save();  // Save the current state of the context
+  ctx.translate(canvasWidth / 2, canvasHeight / 2);
+  ctx.beginPath();
+  ctx.moveTo(0, -canvasHeight / 2);
+  ctx.lineTo(0, canvasHeight / 2);
+  ctx.strokeStyle = "white";
+  ctx.stroke();
   ctx.fillStyle = "white";
-  ctx.fillRect(canvasWidth - paddleWidth, canvasHeight / 2 - data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
-  ctx.fillRect(0, canvasHeight / 2 - data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
+  // Adjust y-coordinates by half the canvas height
   ctx.beginPath();
   ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
   ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(canvasWidth / 2, 0);
-  ctx.lineTo(canvasWidth / 2, canvasHeight);
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 2;
-  ctx.stroke();
+ctx.fillRect(data.player_one.paddle_x, data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
+ctx.fillRect(data.player_two.paddle_x, data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
+  ctx.restore();  // Restore the context state to what it was before translating the origin
 }
 
 function update() {
@@ -144,7 +148,7 @@ function handleMovement(socket)
   }
   document.addEventListener("keydown", (event) => {
         if (event.key === "w" || event.key === "s") {
-          currentPaddle.dy = event.key === "w" ? 10: -10;
+          currentPaddle.dy = event.key === "w" ? -10: 10;
         }
     });
   document.addEventListener("keyup", (event) => {
@@ -154,7 +158,7 @@ function handleMovement(socket)
 });
   setInterval(() => {
     socket.send(JSON.stringify(currentPaddle));
-  }, 1000 );
+  }, 1000/60 );
 }
 async function App()
 {

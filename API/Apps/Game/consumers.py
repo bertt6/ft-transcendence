@@ -83,8 +83,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.gameState = {
             'canvas_width': canvas_width,
             'canvas_height': canvas_height,
-            'player_one': {'paddle_y': 0,'paddle_x':20, 'dy': 0, 'score': 0},
-            'player_two': {'paddle_y': 0,'paddle_x':canvas_width - 20, 'dy': 0, 'score': 0},
+            'player_one': {'paddle_y': 0, 'paddle_x': -canvas_width / 2 + 20, 'dy': 0, 'score': 0},
+            'player_two': {'paddle_y': 0, 'paddle_x': canvas_width / 2 - 20, 'dy': 0, 'score': 0},
             'ball': {'x': initial_ball_x, 'y': initial_ball_y, 'dx': 10, 'dy': 10},
         }
         await self.send_initial_state()
@@ -134,56 +134,52 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     def update(self):
         # Update player paddles positions
+        paddle_height = 200  # Adjust paddle height if needed
+
         self.gameState['player_one']['paddle_y'] += self.gameState['player_one']['dy']
-        # Ensure player one's paddle stays within the canvas bounds
-        self.gameState['player_one']['paddle_y'] = max(-200, min(200, self.gameState['player_one']['paddle_y']))
+        self.gameState['player_one']['paddle_y'] = max(-self.gameState['canvas_height'] / 2 + paddle_height / 2,
+                                                       min(self.gameState['canvas_height'] / 2 - paddle_height / 2,
+                                                           self.gameState['player_one']['paddle_y']))
 
         self.gameState['player_two']['paddle_y'] += self.gameState['player_two']['dy']
-        # Ensure player two's paddle stays within the canvas bounds
-        self.gameState['player_two']['paddle_y'] = max(-200, min(200, self.gameState['player_two']['paddle_y']))
-
+        self.gameState['player_two']['paddle_y'] = max(-self.gameState['canvas_height'] / 2 + paddle_height / 2,
+                                                       min(self.gameState['canvas_height'] / 2 - paddle_height / 2,
+                                                           self.gameState['player_two']['paddle_y']))
         ball = self.gameState['ball']
         ball['x'] += ball['dx']
         ball['y'] += ball['dy']
-
+        print('Ball x:', ball['x'], 'Ball y:', ball['y'])
         # Check collision with top or bottom walls
-        if ball['y'] + 10 >= self.gameState['canvas_height'] or ball['y'] - 10 <= 0:
+        if ball['y'] + 10 >= self.gameState['canvas_height'] / 2 or ball['y'] - 10 <= -self.gameState[
+            'canvas_height'] / 2:
             print('Collision with top or bottom walls')
             ball['dy'] = -ball['dy']
 
-        # Collision with player one's paddle
         paddle_one_y = self.gameState['player_one']['paddle_y']
-        print("paddle",paddle_one_y,"ball", ball['y'])
-        if (
-                ball['x'] - 10 <= 20 and
-                paddle_one_y - 100 <= ball['y'] <= paddle_one_y + 100
-        ):
-            print('Collision with player one paddle')
+        paddle_top = paddle_one_y - paddle_height / 2
+        paddle_bottom = paddle_one_y + paddle_height / 2
+        if (ball['x'] - 40 <= -self.gameState['canvas_width'] / 2 and
+                paddle_top <= ball['y'] <= paddle_bottom):
             ball['dx'] = -ball['dx']
-
-        # Collision with player two's paddle
         paddle_two_y = self.gameState['player_two']['paddle_y']
-        if (
-                ball['x'] + 10 >= self.gameState['canvas_width'] - 20 and
-                paddle_two_y - 100 <= ball['y'] <= paddle_two_y + 100
-        ):
-            print('Collision with player two paddle')
+        paddle_top = paddle_two_y - paddle_height / 2
+        paddle_bottom = paddle_two_y + paddle_height / 2
+        if (ball['x'] + 40 >= self.gameState['canvas_width'] / 2 and
+                paddle_top <= ball['y'] <= paddle_bottom):
             ball['dx'] = -ball['dx']
-
         # Score
-        if ball['x'] - 10 <= 0:
+        if ball['x'] - 10 <= -self.gameState['canvas_width'] / 2:
             # Player two scores
             self.gameState['player_two']['score'] += 1
             ball['x'] = 0
             ball['y'] = 0
-            ball['dx'] = random.choice([-10, 10])  # Random direction
+            ball['dx'] = random.choice([-10, 10])
 
-        if ball['x'] + 10 >= self.gameState['canvas_width']:
-            # Player one scores
+        if ball['x'] + 10 >= self.gameState['canvas_width'] / 2:
             self.gameState['player_one']['score'] += 1
             ball['x'] = 0
             ball['y'] = 0
-            ball['dx'] = random.choice([-10, 10])  # Random direction
+            ball['dx'] = random.choice([-10, 10])
 
     async def players_count(self):
         return await self.channel_layer.group_count(self.game_group_name)
