@@ -51,14 +51,13 @@ class RequestConsumer(AsyncWebsocketConsumer):
         except Request.DoesNotExist:
             request = await sync_to_async(Request.objects.create)(sender=sender_profile, receiver=receiver_profile,
                                                                   type=request_type)
-        # Send the request id along with the other data
         await self.channel_layer.group_send(
-            receiver,  # Use the receiver's nickname as the group name
+            receiver,
             {
                 "type": "create_request_message",
                 "sender": sender,
                 "receiver": receiver,
                 "request_type": request_type,
-                "request_id": str(request.id),  # Include the request id
+                "request_id": str(request.id),
             }
         )

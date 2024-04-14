@@ -1,52 +1,33 @@
+import {BASE_URL} from "./spa.js";
+
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
 const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
 const paddleWidth = 10;
 const paddleHeight = 200;
-const paddleSpeed = 4;
-const ballSize = 10;
+const ballSize = 20;
 let ballX = canvasWidth / 2;
 let ballY = canvasHeight / 2;
 let ballSpeedX = 4;
 let ballSpeedY = 4;
 
-let player1 = {
-  x: 10,
-  y: canvasHeight / 2 - paddleHeight / 2,
-  dy: 0,
-  score: 0
-};
-
-let player2 = {
-  x: canvasWidth - 20,
-  y: canvasHeight / 2 - paddleHeight / 2,
-  dy: 0,
-  score: 0
-};
-function draw() {
-  // Clear the canvas
+function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-  // Draw paddles
   ctx.fillStyle = "white";
-  ctx.fillRect(player1.x, player1.y, paddleWidth, paddleHeight);
-  ctx.fillRect(player2.x, player2.y, paddleWidth, paddleHeight);
-
-  // Draw ball
+  ctx.fillRect(canvasWidth - paddleWidth, canvasHeight / 2 - data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
+  ctx.fillRect(0, canvasHeight / 2 - data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
   ctx.beginPath();
-  ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
-  ctx.fillStyle = "white";
+  ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
   ctx.fill();
-
-  // Draw midline
   ctx.beginPath();
   ctx.moveTo(canvasWidth / 2, 0);
   ctx.lineTo(canvasWidth / 2, canvasHeight);
   ctx.strokeStyle = "white";
   ctx.lineWidth = 2;
   ctx.stroke();
-
 }
+
 function update() {
   // Move paddles
   player1.y += player1.dy;
@@ -98,7 +79,6 @@ function resetBall() {
 function gameLoop() {
   update();
   draw();
-  requestAnimationFrame(gameLoop);
 }
 
 function setCanvasSize()
@@ -110,47 +90,76 @@ function setCanvasSize()
     canvas.width = 1200;
     canvas.height = 720;
 }// Start the game loop
+function setCurrentPoints(state)
+{
+  const {game} = state;
+    let points = document.getElementById("game-points");
+    points.classList.remove("skeleton")
+    points.innerText =`${game.player_one.score} - ${game.player_two.score}`;
+}
+function setPlayerData(state)
+{
+  const {details} = state;
+  let playerOneWrapper  = document.getElementById("player-one");
+  let image = playerOneWrapper.querySelector("img");
+  image.src = `${BASE_URL}${details.player1.profile_picture}`;
+  let detailsWrapper = document.getElementById("player-one-details");
+    let name = detailsWrapper.querySelector(".player-name");
+    name.innerText = details.player1.nickname;
+    let playerTwoWrapper  = document.getElementById("player-two");
+    image = playerTwoWrapper.querySelector("img");
+    image.src = `${BASE_URL}${details.player2.profile_picture}`;
+    detailsWrapper = document.getElementById("player-two-details");
+    name = detailsWrapper.querySelector(".player-name");
+    name.innerText = details.player2.nickname;
+}
+function handleInitialState(state)
+{
+  setCurrentPoints(state)
+  setPlayerData(state);
+  draw(state.game);
+}
 async function connectToServer()
 {
   const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
     socket.onopen = () => {
         console.log("Connected to server");
+      handleMovement(socket);
     };
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      if(data.state_type === "initial_state")
+        handleInitialState(data);
+      else if(data.state_type === "game_state")
+        draw(data.game);
     };
+    return socket;
+}
+function handleMovement(socket)
+{
+  let currentPaddle = {
+    paddle: "player_one",
+    dy: 0
+  }
+  document.addEventListener("keydown", (event) => {
+        if (event.key === "w" || event.key === "s") {
+          currentPaddle.dy = event.key === "w" ? 10: -10;
+        }
+    });
+  document.addEventListener("keyup", (event) => {
+  if (event.key === "w" || event.key === "s") {
+    currentPaddle.dy = 0;
+  }
+});
+  setInterval(() => {
+    socket.send(JSON.stringify(currentPaddle));
+  }, 1000 );
 }
 async function App()
 {
-  await connectToServer();
-  gameLoop();
-
+  let socket = await connectToServer();
 }
 App().catch((e) => {
     console.error(e);
-});
-document.addEventListener("keydown", (event) => {
-  if (event.key === "w") {
-    player1.dy = -paddleSpeed;
-  } else if (event.key === "s") {
-    player1.dy = paddleSpeed;
-
-  }
-
-  if (event.key === "ArrowUp") {
-    player2.dy = -paddleSpeed;
-  } else if (event.key === "ArrowDown") {
-    player2.dy = paddleSpeed;
-  }
-});
-
-document.addEventListener("keyup", (event) => {
-  if (event.key === "w" || event.key === "s") {
-    player1.dy = 0;
-  }
-
-  if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-    player2.dy = 0;
-  }
 });
