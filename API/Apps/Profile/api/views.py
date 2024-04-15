@@ -23,6 +23,14 @@ class ProfileView(APIView):
         return Response(profile_serializer.data, status=200)
 
 
+class ProfileSearchView(APIView):
+    def get(self, request):
+        search = request.data.get('search')
+        profiles = Profile.objects.filter(nickname__icontains=search)
+        if not profiles:
+            return Response({"error": "Profile not found"}, status=404)
+        profile_serializer = ProfileGetSerializer(profiles, many=True)
+        return Response(profile_serializer.data, status=200)
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 class ProfileDetailView(APIView):
