@@ -45,7 +45,7 @@ class ProfileDetailView(APIView):
         return Response(profile_serializer.data, status=200)
 
     def delete(self, request):
-        profile = request.user.profileq
+        profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
         profile.delete()
