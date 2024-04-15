@@ -83,39 +83,6 @@ async function connectToServer()
     };
     return socket;
 }
-function doClientPrediction(state, currentPaddle)
-{
-  if(!lastRenderedState)
-      return;
-    const {game} = state;
-    let playerOne = game.player_one;
-    let playerTwo = game.player_two;
-    let ball = game.ball;
-    let newBall = {
-        x: ball.x + ball.dx,
-        y: ball.y + ball.dy,
-        dx: ball.dx,
-        dy: ball.dy
-    }
-    let newPlayerOne = {
-        paddle_x: playerOne.paddle_x,
-        paddle_y: playerOne.paddle_y + (currentPaddle.paddle === "player_one" ? currentPaddle.dy : lastRenderedState.game.player_one.dy)
-    }
-    let newPlayerTwo = {
-        paddle_x: playerTwo.paddle_x,
-        paddle_y: playerTwo.paddle_y + (currentPaddle.paddle === "player_two" ? currentPaddle.dy : lastRenderedState.game.player_two.dy)
-    }
-    let newGame = {
-        player_one: newPlayerOne,
-        player_two: newPlayerTwo,
-        ball: newBall
-    }
-    let newState = {
-        game: newGame
-    }
-    draw(newState.game);
-    lastRenderedState = newState;
-}
 function handleMovement(socket,data)
 {
   let currentPaddle = {
