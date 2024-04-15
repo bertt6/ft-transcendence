@@ -2,13 +2,9 @@ import asyncio
 import json
 import threading
 import time
-
-import redis
 from asgiref.sync import async_to_sync
-from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
-from channels.layers import get_channel_layer
-from Apps.Game.api.serializers import GameSerializer
-from Apps.Game.cache import get_players_in_que, add_player_in_que, clear_players_in_que, remove_player_in_que
+from channels.generic.websocket import WebsocketConsumer
+from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que
 from Apps.Game.models import Game
 from Apps.Profile.api.Serializers import ProfileGetSerializer
 from Apps.Profile.models import Profile
@@ -33,9 +29,6 @@ class MatchMakingConsumer(WebsocketConsumer):
             self.channel_name,
         )
 
-    def receive(self, text_data):
-        pass
-
     def match_making_message(self, event):
         self.send(text_data=json.dumps({
             'message': event['message'],
@@ -48,7 +41,7 @@ class MatchMakingConsumer(WebsocketConsumer):
             'message': 'Searching for a game...'
         }))
         if len(players_in_que) == 2:
-            threading.Thread(target=self.match_making).start()
+            threading.Thread(target=self.match_making).start()  # opening thread because socket time out while true
 
     def match_making(self):
         players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
@@ -70,6 +63,6 @@ class MatchMakingConsumer(WebsocketConsumer):
                         }
                     )
                     break
-                ideal_mmr += 0.00001
+                ideal_mmr += 0.00001  # up to value and time intervals can be added
             players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
-            print(len(players))
+            print(len(players), players)
