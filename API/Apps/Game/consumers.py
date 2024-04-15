@@ -1,5 +1,7 @@
 import asyncio
 import json
+import threading
+import time
 
 import redis
 from asgiref.sync import async_to_sync
@@ -46,7 +48,7 @@ class MatchMakingConsumer(WebsocketConsumer):
             'message': 'Searching for a game...'
         }))
         if len(players_in_que) == 2:
-            self.match_making()
+            threading.Thread(target=self.match_making).start()
 
     def match_making(self):
         players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
@@ -70,3 +72,4 @@ class MatchMakingConsumer(WebsocketConsumer):
                     break
                 ideal_mmr += 0.00001
             players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
+            print(len(players))
