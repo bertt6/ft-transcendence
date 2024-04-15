@@ -100,7 +100,7 @@ button{
   outline: none;
   border: none;
   background-color: transparent;
-  color: black ;
+  color: rgb(255, 255, 255) ;
   font-size: larger;
 }
 .social-background {

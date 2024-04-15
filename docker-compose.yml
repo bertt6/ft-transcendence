@@ -61,7 +61,7 @@ services:
     volumes:
       - ./Devops/grafana-prometheus/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./Devops/grafana-prometheus/prometheus/rules.yml:/etc/prometheus/rules.yml
-      
+
     restart: always
     networks:
       - monitoring
