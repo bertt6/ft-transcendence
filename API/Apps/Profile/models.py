@@ -22,9 +22,9 @@ class Profile(models.Model):
     profile_picture = models.ImageField(upload_to='profile-pictures/',  default="profile-pictures/default.svg")
     is_online = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
-    friends = models.ManyToManyField('Profile', blank=True)
+    friends = models.ManyToManyField('Profile', blank=True, related_name='profile_friends')
     bio = models.TextField(blank=True, null=True, default=None)
-    blocked_users = models.ManyToManyField('Profile', blank=True)
+    blocked_users = models.ManyToManyField('Profile', blank=True , related_name='users_blocked')
 
     def __str__(self):
         return f"{self.nickname if self.nickname else self.user.username}"
