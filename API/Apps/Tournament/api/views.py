@@ -8,21 +8,18 @@ from ..Serializers import TournamentGetSerializer, TournamentPostSerializer
 from rest_framework.decorators import api_view, permission_classes
 
 
-@api_view(['GET', 'POST'])
-def create(request, profile_id):
 
-    try:
-        profiles = Profile.objects.get(id=profile_id)
-    except Profile.DoesNotExist:
-        return Response(status=400)
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def create(request):
 
     if request.method == 'GET':
         Tournaments = Tournament.objects.all()
         serializer = TournamentGetSerializer(Tournaments, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
-        request.data['created_by'] = profile_id
-        request.data['current_participants'] = [profile_id]
+        request.data['created_by'] = request.user.profile.id
+        request.data['current_participants'] = [request.user.profile.id]
         serializert = TournamentPostSerializer(data=request.data)
         if serializert.is_valid():
             serializert.save()
@@ -31,12 +28,8 @@ def create(request, profile_id):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def get_tournaments(request, profile_id, tournament_id):
-    try:
-        instance = Profile.objects.get(id=profile_id)
-    except Profile.DoesNotExist:
-        return Response(status=400)
-
+@permission_classes([IsAuthenticated])
+def get_tournaments(request, tournament_id):
     try:
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
@@ -51,7 +44,7 @@ def get_tournaments(request, profile_id, tournament_id):
             serializert.save()
             return Response()
     elif request.method == 'DELETE':
-        if tournament.created_by.id == profile_id:
+        if tournament.created_by.id == request.user.profile.id:
             tournament.delete()
             return Response(status=200)
         else:
@@ -61,22 +54,19 @@ def get_tournaments(request, profile_id, tournament_id):
 
 
 @api_view(['GET', 'POST'])
-def join(request, profile_id, tournament_id):
-    try:
-        instance = Profile.objects.get(id=profile_id)
-    except Profile.DoesNotExist:
-        return Response(data={"error": "invalid user"},status=400)
+@permission_classes([IsAuthenticated])
+def join(request, tournament_id):
 
     try:
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
         return Response(data={"error": "invalid tournament"}, status=400)
 
-    participants = tournament.current_participants.filter(id=profile_id)
+    participants = tournament.current_participants.filter(id=request.user.profile.id)
     if participants.exists():
         return Response(data={"error": "You are already on channel"}, status=400)
     elif tournament.current_participants.count() < tournament.max_participants:
-        tournament.current_participants.add(instance)
+        tournament.current_participants.add(request.user.profile.id)
         tournament.save()
         return Response(status=200)
     else:
@@ -85,20 +75,16 @@ def join(request, profile_id, tournament_id):
 
 
 @api_view(['GET', 'POST'])
-def delete(request, profile_id, tournament_id):
-    try:
-        instance = Profile.objects.get(id=profile_id)
-    except Profile.DoesNotExist:
-        return Response(data={"error": "invalid user"},status=400)
-
+@permission_classes([IsAuthenticated])
+def delete(request, tournament_id):
     try:
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
         return Response(data={"error": "invalid tournament"}, status=400)
 
-    participants = tournament.current_participants.filter(id=profile_id)
+    participants = tournament.current_participants.filter(id=request.user.profile.id)
     if participants.exists():
-        tournament.current_participants.remove(instance)
+        tournament.current_participants.remove(request.user.profile.id)
         tournament.save()
         if tournament.current_participants.count() == 0:
             tournament.delete()
