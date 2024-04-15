@@ -75,16 +75,11 @@ def find_small_diff(players):
 
 def match(players, ideal_mmr):
     player1, player2 = find_small_diff(players)
-    if (player2['mmr'] - player1['mmr']) < -1:  # for testing
+    if (player2['mmr'] - player1['mmr']) < ideal_mmr:  # for testing
         print(f"{player1['nickname']} ile {player2['nickname']} matched!")
         remove_player_in_que(player1)
         remove_player_in_que(player2)
         return [player1, player2]
     return []
 
-
-
-start = time.time()
-#match_making()
-print('Time: ', time.time() - start)
 

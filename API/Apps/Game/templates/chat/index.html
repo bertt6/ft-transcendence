@@ -11,18 +11,18 @@
     <input id="chat-message-submit" type="button" value="Send">
     {{ room_name|json_script:"room-name" }}
     <script>
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const params = new URLSearchParams(window.location.search)
 
         const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
-            + '/ws/match-making/yugurlu'
+            + '/ws/match-making/' + params.get('user')
         );
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            console.log(data.game)
             document.querySelector('#chat-log').value += (data.message + '\n');
+            console.log(data.game)
         };
 
         chatSocket.onclose = function(e) {

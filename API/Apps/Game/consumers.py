@@ -4,6 +4,8 @@ import threading
 import time
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+
+from Apps.Game.api.serializers import GameSerializer
 from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que
 from Apps.Game.models import Game
 from Apps.Profile.api.Serializers import ProfileGetSerializer
@@ -46,23 +48,26 @@ class MatchMakingConsumer(WebsocketConsumer):
     def match_making(self):
         players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
         while len(players) != 0:
+            print(players)
             ideal_mmr = 1
             while True and len(players) > 1:
-                players = match(players, ideal_mmr)
-                if len(players) == 2:
-                    Game.objects.create(player1=Profile.objects.get(id=players[0]['id']), player2=Profile.objects.get(id=players[1]['id']))
+                matched_players = match(players, ideal_mmr)
+                if len(matched_players) == 2:
+                    game = Game.objects.create(player1=Profile.objects.get(id=matched_players[0]['id']),
+                                               player2=Profile.objects.get(id=matched_players[1]['id']))
                     self.send(text_data=json.dumps({
-                        'message': 'Match found! Ready for playing!',
-                        'game': None,
+                        'message': f'Match found! Ready for playing!',
+                        'game': GameSerializer(game).data,
                     }))
                     async_to_sync(self.channel_layer.group_send)(
-                        f'player-{players[1]['nickname'] if self.profile['nickname'] == players[0]['nickname'] else players[0]['nickname']}', {
+                        f'player-{matched_players[1]['nickname'] if self.profile['nickname'] == matched_players[0]['nickname'] else matched_players[0]['nickname']}',
+                        {
                             "type": "match_making_message",
                             "message": 'Match found! Ready for playing!',
-                            "game": None,
+                            "game": GameSerializer(game).data,
                         }
                     )
                     break
-                ideal_mmr += 0.00001  # up to value and time intervals can be added
-            players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
-            print(len(players), players)
+                ideal_mmr += 0.0001  # up to value and time intervals can be added
+                players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
+        print('finish')
