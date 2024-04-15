@@ -52,7 +52,7 @@ class ChatConsumer(WebsocketConsumer):
         message = event["message"]
         user = event["nickname"]
         id = event["id"]
-                # Send message to WebSocket
+        # Send message to WebSocket
         self.send(text_data=json.dumps({
             "message": message,
             "user": user,

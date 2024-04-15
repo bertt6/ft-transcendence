@@ -247,3 +247,53 @@
   right: 0;
 }
 
+.unblock-button {
+  background-color: #4CAF50;
+  color: rgb(255, 255, 255);
+  padding: 4px 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease; 
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blocked-users-wrapper {
+  flex-direction: column;
+  display: flex;
+  gap: 1rem;
+
+}
+.blocked-user-wrapper {
+  display: flex;
+  padding: 1rem;
+  border-radius: 3rem;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  justify-content: space-between;
+  align-items: center;
+}
+.blocked-user-image {
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  height: 3rem;
+  width: 3rem;
+}
+.blocked-user-image > img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.blocked-user-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+.blocked-user-more {
+  display: flex;
+  gap: 0.5rem;
+}

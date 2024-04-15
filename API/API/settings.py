@@ -32,14 +32,12 @@ SECRET_KEY = '0a4fd7e3567eab20bab2f2d6682ea96d0d865050bfcde9c293aa7f9ec48bce55'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000"
+    "http://localhost:3030",
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
@@ -59,7 +57,8 @@ INSTALLED_APPS = [
     'Apps.SocialMedia.apps.SocialMediaConfig',
     "Apps.Chat.apps.ChatConfig",
     "Apps.UserStatus.apps.OnlineusersConfig",
-    "Apps.Request.apps.RequestConfig"
+    "Apps.Request.apps.RequestConfig",
+    "Apps.Game.apps.GameConfig"
 ]
 
 MIDDLEWARE = [
