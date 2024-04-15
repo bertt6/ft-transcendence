@@ -108,6 +108,8 @@ class SocialPostsComponent extends BaseComponent {
     addObserver()
     {
         let loading = document.getElementById('load-more');
+        if(!loading)
+            return;
         let observer = new IntersectionObserver(async (entries) => {
             if(entries[0].isIntersecting)
             {
@@ -667,6 +669,7 @@ async function connectToRoom(room,conversationComponent)
         socket.send(JSON.stringify({message: content}));
         chatInput.value = '';
     });
+    console.log("submit form",chatSendForm)
     socket.onmessage = (event) => {
         let data = JSON.parse(event.data);
         console.log(data)
