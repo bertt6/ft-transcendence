@@ -96,6 +96,7 @@ class SocialPostsComponent extends BaseComponent {
                 </div>
               </div>
             `).join('')}
+            <div id="load-more"">Please wait...</div>
             `
     }
     setState(newState)
@@ -103,6 +104,27 @@ class SocialPostsComponent extends BaseComponent {
         this.state = {...this.state, ...newState};
         this.html = this.handleHTML()
         this.render()
+    }
+    addObserver()
+    {
+        let loading = document.getElementById('load-more');
+        let observer = new IntersectionObserver(async (entries) => {
+            if(entries[0].isIntersecting)
+            {
+                let response = await request(this.state.next, {method: 'GET'});
+                this.setState({tweets: [...this.state.tweets, ...response.results.tweets], next: response.next});
+                await assignLikeButtons();
+                await assignCommentButtons();
+            }
+        }, {threshold: 1});
+        observer.observe(loading);
+    }
+    render()
+    {
+       if(this.html === null)
+        throw new Error('Component Should have an html');
+    this.parentElement.innerHTML = this.html;
+    this.addObserver();
     }
 }
 class PostTweetFormComponent extends  BaseComponent
@@ -366,7 +388,7 @@ const fetchChatFriends = async () => {
 const fetchSocialPosts = async () => {
  try{
       let response = await request(`${API_URL}/tweets`, {method: 'GET'})
-        socialPostsComponent.setState({tweets: response.results.tweets});
+        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next});
 
  }
     catch(error)
@@ -426,6 +448,18 @@ async function assignLikeButtons()
             });
         }
     }
+async function assignCommentButtons()
+{
+let commentButtons = document.getElementsByClassName('comment-button');
+for(let button of commentButtons)
+{
+    let tweetId = button.getAttribute('data-tweet-id');
+    button.addEventListener('click', async () => {
+        history.pushState({}, '', `/social/tweet/${tweetId}`);
+        await renderIndividualPost(tweetId);
+    });
+}
+}
 async function assignEventListeners() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
@@ -435,18 +469,6 @@ async function assignEventListeners() {
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl : url});
     });
-    async function assignCommentButtons()
-    {
-        let commentButtons = document.getElementsByClassName('comment-button');
-        for(let button of commentButtons)
-        {
-            let tweetId = button.getAttribute('data-tweet-id');
-            button.addEventListener('click', async () => {
-                history.pushState({}, '', `/social/tweet/${tweetId}`);
-                await renderIndividualPost(tweetId);
-            });
-        }
-    }
 
     await assignLikeButtons();
     await assignCommentButtons();
