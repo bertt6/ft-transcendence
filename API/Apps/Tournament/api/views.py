@@ -8,11 +8,8 @@ from ..Serializers import TournamentGetSerializer, TournamentPostSerializer
 from rest_framework.decorators import api_view, permission_classes
 
 
-
-@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def create(request):
-
     if request.method == 'GET':
         Tournaments = Tournament.objects.all()
         serializer = TournamentGetSerializer(Tournaments, many=True)

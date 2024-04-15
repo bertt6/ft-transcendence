@@ -26,10 +26,15 @@ class ProfileFriendsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['friends','nickname','user']
+        fields = ['friends','nickname','user','profile_picture']
 
 
 class ProfileStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stats
         fields = ['total_games', 'total_wins', 'total_losses', 'points']
+
+class ProfileBlockedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['nickname','profile_picture']

@@ -26,6 +26,7 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True, default=None)
     blocked_users = models.ManyToManyField('Profile', blank=True, related_name='users_blocked')
 
+
     def __str__(self):
         return f"{self.nickname if self.nickname else self.user.username}"
 

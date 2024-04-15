@@ -7,7 +7,7 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 from django.urls import re_path
 from Apps.Chat.consumers import ChatConsumer
-from Apps.Game.consumers import MatchMakingConsumer
+from Apps.Game.consumers import MatchMakingConsumer, GameConsumer
 from Apps.Request.consumers import RequestConsumer
 from Apps.UserStatus.consumers import OnlineUsersConsumer
 
@@ -20,6 +20,7 @@ websocket_urlpatterns = [
     re_path(r'^ws/online/(?P<user_id>[^/]+)$', OnlineUsersConsumer.as_asgi()),
     re_path(r'^ws/requests/(?P<nickname>[^/]+)$', RequestConsumer.as_asgi()),
     re_path(r'^ws/match-making/(?P<nickname>[^/]+)$', MatchMakingConsumer.as_asgi()),
+    re_path(r'^ws/game/(?P<game_id>[^/]+)$', GameConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter(
