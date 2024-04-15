@@ -7,10 +7,9 @@ from rest_framework.response import Response
 from ..Serializers import TournamentGetSerializer, TournamentPostSerializer
 from rest_framework.decorators import api_view, permission_classes
 
-
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'POST'])
 def create(request, profile_id):
-
     try:
         profiles = Profile.objects.get(id=profile_id)
     except Profile.DoesNotExist:
