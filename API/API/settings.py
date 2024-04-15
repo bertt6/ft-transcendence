@@ -37,9 +37,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000"
     "http://localhost:3030",
 ]
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3030",
+]
 CORS_ALLOW_CREDENTIALS = True
-# Application definition
 
 INSTALLED_APPS = [
     'daphne',
