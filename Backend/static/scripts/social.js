@@ -544,8 +544,8 @@ const renderAllPosts = async () => {
                   />
                     <div class="form-input-wrapper">
                     <label for="image-add" class="custom-file-upload"></label>
-                    <inputadd
-                    type="file" id="image-"
+                    <input
+                    type="file" id="image-add"
                     src="{% static '/public/image.svg' %}" alt="" style="width: 35px"
                     accept="image/jpeg,image/png,image/gif"
                     >
