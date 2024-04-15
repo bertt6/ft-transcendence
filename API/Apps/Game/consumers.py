@@ -101,7 +101,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             'details': data,
             'game': GameConsumer.game_states[self.game_id]
         }))
-
     @database_sync_to_async
     def get_game(self):
         game = Game.objects.get(id=self.game_id)
@@ -126,8 +125,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         }))
 
     def update(self):
-        # Update player paddles positions
-        paddle_height = 200  # Adjust paddle height if needed
+        paddle_height = 200
 
         GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] += GameConsumer.game_states[self.game_id]['player_one']['dy']
         GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] = max(-GameConsumer.game_states[self.game_id]['canvas_height'] / 2 + paddle_height / 2,

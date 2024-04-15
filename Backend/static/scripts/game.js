@@ -65,13 +65,13 @@ async function connectToServer()
 {
   const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
-
     socket.onopen = (ev) => {
          console.log("Connected to server");
     };
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if(data.state_type === "initial_state"){
+      if(data.state_type === "initial_state")
+      {
         handleInitialState(data);
         handleMovement(socket,data);
       }

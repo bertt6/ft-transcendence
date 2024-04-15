@@ -124,7 +124,8 @@ class SocialPostsComponent extends BaseComponent {
        if(this.html === null)
         throw new Error('Component Should have an html');
     this.parentElement.innerHTML = this.html;
-    this.addObserver();
+    if(this.state.next !== null)
+        this.addObserver();
     }
 }
 class PostTweetFormComponent extends  BaseComponent
