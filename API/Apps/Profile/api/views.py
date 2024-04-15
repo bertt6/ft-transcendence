@@ -147,6 +147,12 @@ class ProfileFriendsView(APIView):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 class ProfileBlockedUsersView(APIView):
+    def get(self,request):
+        profile = request.user.profile
+        if not profile:
+            return Response({"error": "Profile not found"}, status=404)
+        serializer = ProfileFriendsSerializer(profile.blocked_users, many=True)
+        return Response(serializer.data, status=200)
     def post(self, request):
         profile_id = request.data.get('user_id')
         profile = request.user.profile

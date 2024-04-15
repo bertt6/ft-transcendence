@@ -1,8 +1,8 @@
 import BaseComponent from "../components/Component.js";
-import {API_URL, BASE_URL, getCookie, loadPage} from "./spa.js";
-import {notify} from "../components/Notification.js";
-import {request} from "./Request.js";
-import {escapeHTML} from "./utils.js";
+import { API_URL, BASE_URL, getCookie, loadPage } from "./spa.js";
+import { notify } from "../components/Notification.js";
+import { request } from "./Request.js";
+import { escapeHTML } from "./utils.js";
 
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -42,6 +42,36 @@ class History extends BaseComponent {
         this.parentElement.innerHTML = this.handleHTML();
     }
 }
+
+class BlockedUsers extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+        this.html = this.handleHTML();
+    }
+    handleHTML() {
+        return `
+        <div class="blocked-users-wrapper">
+        ${this.state.blockedUsers.map(user => `
+            <div class="blocked-user-wrapper">
+                <div class="blocked-user-info">
+                  <div class="blocked-user-image">
+                    <img src="${user.profile_picture}" alt="" />
+                  </div>
+                  <div class="blocked-user-data">
+                    <h6>${user.nickname}</h6>
+                    </div>
+                    </div>
+                    <button class="unblock-button">Unblock</button>
+            </div>
+        `).join('')}
+        </div>
+        `
+    }
+    render() {
+        this.parentElement.innerHTML = this.html;
+    }
+}
+
 
 class Stats extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -126,7 +156,7 @@ class Friends extends BaseComponent {
     }
 
     setState(newState) {
-        this.state = {...this.state, ...newState};
+        this.state = { ...this.state, ...newState };
         this.render();
     }
 }
@@ -139,7 +169,7 @@ class ProfileInfo extends BaseComponent {
 
 
     handleEditHTML() {
-        const {nickname, first_name, last_name, bio, profile_picture} = this.state.profile;
+        const { nickname, first_name, last_name, bio, profile_picture } = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -174,7 +204,7 @@ class ProfileInfo extends BaseComponent {
         `
     }
     handleHTML() {
-        const {nickname, first_name, last_name, bio, profile_picture} = this.state.profile;
+        const { nickname, first_name, last_name, bio, profile_picture } = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -210,9 +240,9 @@ class ProfileInfo extends BaseComponent {
             });
             notify('Profile updated', 3, 'success');
 
-            this.setState({...this.state, profile: response});
-        } 
-      catch (error) {
+            this.setState({ ...this.state, profile: response });
+        }
+        catch (error) {
             console.error('Error:', error);
             notify('Error updating profile', 3, 'error')
         }
@@ -245,10 +275,10 @@ class ProfileInfo extends BaseComponent {
     }
 
     setState(newState) {
-        this.state = {...this.state, ...newState};
+        this.state = { ...this.state, ...newState };
         this.render();
         document.getElementById('edit-button').addEventListener('click', () => {
-            this.setState({...this.state, isEditing: !this.state.isEditing});
+            this.setState({ ...this.state, isEditing: !this.state.isEditing });
         });
     }
 }
@@ -262,12 +292,13 @@ async function fetchProfile() {
         let data = await request(`${API_URL}/profile-with-nickname/${nickname}`, {
             method: 'GET',
         });
+        console.log(data);
         const profileParentElement = document.getElementById('profile-info');
-        const profile = new ProfileInfo({profile: data, isEditing: false}, profileParentElement);
+        const profile = new ProfileInfo({ profile: data, isEditing: false }, profileParentElement);
         profile.render();
         const editButton = document.getElementById('edit-button');
         editButton.addEventListener('click', () => {
-            profile.setState({...profile.state, isEditing: !profile.state.isEditing});
+            profile.setState({ ...profile.state, isEditing: !profile.state.isEditing });
         });
     } catch (error) {
         console.error('Error:', error);
@@ -280,6 +311,7 @@ async function assignDataRouting() {
     const historyButton = document.getElementById('history-button');
     const friendsButton = document.getElementById('friends-button');
     const statsButton = document.getElementById('stats-button');
+    const blockedUsersButton = document.getElementById('blocked-users-button');
     historyButton.addEventListener('click', (e) => {
         history.replaceState(null, null, '#history')
         handleRouting()
@@ -292,6 +324,21 @@ async function assignDataRouting() {
         history.replaceState(null, null, '#stats')
         handleRouting()
     });
+    blockedUsersButton.addEventListener('click', (e) => {
+        history.replaceState(null, null, '#blockedusers')
+        handleRouting()
+    });
+}
+
+async function fetchBlockedUsers() {
+    const users = [
+        { nickname: "user1", profile_picture: "https://example.com/user1.jpg" },
+        { nickname: "user2", profile_picture: "https://example.com/user2.jpg" },
+        { nickname: "user3", profile_picture: "https://example.com/user3.jpg" },
+        { nickname: "user4", profile_picture: "https://example.com/user4.jpg" },
+        { nickname: "user5", profile_picture: "https://example.com/user5.jpg" }
+    ];
+    return users;
 }
 
 async function fetchStats() {
@@ -324,23 +371,29 @@ async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
     if (hash === '#history') {
-        const history = new History({histories: [1]}, parentElement);
+        const history = new History({ histories: [1] }, parentElement);
         history.render();
     }
     if (hash === '#friends') {
         let data = await fetchFriends();
-        const friends = new Friends({friends: data}, parentElement);
+        const friends = new Friends({ friends: data }, parentElement);
         friends.render();
     }
     if (hash === '#stats') {
         let data = await fetchStats();
-        const statsInfo = new Stats({statsInfo: data}, parentElement);
+        const statsInfo = new Stats({ statsInfo: data }, parentElement);
         statsInfo.render();
+    }
+    if (hash === '#blockedusers') {
+        let data = await fetchBlockedUsers();
+        const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
+        blockedUsers.render();
     }
 }
 
 const App = async () => {
     await fetchProfile();
+    await fetchBlockedUsers();
     await assignDataRouting();
     await handleRouting();
 }
