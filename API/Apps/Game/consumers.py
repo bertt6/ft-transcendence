@@ -79,7 +79,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             GameConsumer.game_states[self.game_id] = self.initialize_game_state()
 
         await self.send_initial_state()
-        asyncio.ensure_future(self.game_loop())
+        if ('task' not in GameConsumer.game_states[self.game_id]):
+            task = asyncio.ensure_future(self.game_loop())
+            GameConsumer.game_states[self.game_id]['task'] = True
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.game_group_name,
@@ -93,7 +95,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             GameConsumer.game_states[self.game_id]['player_one']['dy'] = text_data_json['dy']
         elif paddle == 'player_two':
             GameConsumer.game_states[self.game_id]['player_two']['dy'] = text_data_json['dy']
-
     async def send_initial_state(self):
         data = await self.get_game()
         await self.send(text_data=json.dumps({
@@ -117,7 +118,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                     'game': GameConsumer.game_states[self.game_id]
                 }
             )
-            await asyncio.sleep(0.01667)
+            await asyncio.sleep(0.01567)
     async def send_state(self, event):
         await self.send(text_data=json.dumps({
             'state_type': 'game_state',
