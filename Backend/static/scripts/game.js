@@ -63,7 +63,7 @@ function handleInitialState(state)
 }
 async function connectToServer()
 {
-  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
+  const id = "77a18eba-6940-4912-a2f8-c34a3cf69e40";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
     socket.onopen = (ev) => {
          console.log("Connected to server");

@@ -1,6 +1,8 @@
 import asyncio
 import json
 import random
+import threading
+
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
@@ -79,7 +81,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             GameConsumer.game_states[self.game_id] = self.initialize_game_state()
 
         await self.send_initial_state()
-        asyncio.ensure_future(self.game_loop())
+        if 'task' not in GameConsumer.game_states[self.game_id]:
+            asyncio.ensure_future(self.game_loop())
+            GameConsumer.game_states[self.game_id]['task'] = True
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.game_group_name,
@@ -117,7 +121,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                     'game': GameConsumer.game_states[self.game_id]
                 }
             )
-            await asyncio.sleep(0.01667)
+            await asyncio.sleep(0.0001)
     async def send_state(self, event):
         await self.send(text_data=json.dumps({
             'state_type': 'game_state',
