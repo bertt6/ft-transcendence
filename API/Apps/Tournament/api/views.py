@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from ..Serializers import TournamentGetSerializer, TournamentPostSerializer
 from rest_framework.decorators import api_view, permission_classes
 
-
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def create(request):
     if request.method == 'GET':
