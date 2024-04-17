@@ -81,7 +81,10 @@ const routes = new Map([
         html: `
               <div class="background container-fluid">
             <div class="d-flex align-items-center justify-content-center h-100">
-              <form class="register-wrapper p-5 gap-2" id="register-form">{% csrf_token %}
+              <form class="register-wrapper p-5 gap-2" id="register-form">
+              <pong-redirect class="register-back" href="/auth/login/">
+                  <img src="/static/public/go-back.svg" alt="">
+              </pong-redirect>
                 <div
                   style="
                     display: flex;

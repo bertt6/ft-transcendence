@@ -49,5 +49,9 @@ try{
 const App = async () => {
     const form = document.getElementById('register-form');
     form.addEventListener('submit', registerSubmit);
+
 }
-document.addEventListener('DOMContentLoaded', App);
+
+App().catch((error) => {
+    console.error(error);
+});
