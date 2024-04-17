@@ -109,7 +109,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_game(self):
-        game = Game.objects.get(id=self.game_id)
+        try:
+            game = Game.objects.get(id=self.game_id)
+        except Game.DoesNotExist:
+            return None
         serializer = GameSerializer(game)
         return serializer.data
 
@@ -124,7 +127,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                     'game': GameConsumer.game_states[self.game_id]
                 }
             )
-            # await asyncio.sleep(0.00166)
+            await asyncio.sleep(0.012)
             self.update()
             count += 1
             if time.time() - start >= 1:
@@ -176,13 +179,13 @@ class GameConsumer(AsyncWebsocketConsumer):
             GameConsumer.game_states[self.game_id]['player_two']['score'] += 1
             ball['x'] = 0
             ball['y'] = 0
-            ball['dx'] = random.choice([-10, 10])
+            ball['dx'] = random.choice([-5, 5])
 
         if ball['x'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_width'] / 2:
             GameConsumer.game_states[self.game_id]['player_one']['score'] += 1
             ball['x'] = 0
             ball['y'] = 0
-            ball['dx'] = random.choice([-10, 10])
+            ball['dx'] = random.choice([-5, 5])
 
     def initialize_game_state(self):
         canvas_width = 1368
@@ -195,7 +198,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'canvas_height': canvas_height,
             'player_one': {'paddle_y': 0, 'paddle_x': -canvas_width / 2 + 20, 'dy': 0, 'score': 0},
             'player_two': {'paddle_y': 0, 'paddle_x': canvas_width / 2 - 20, 'dy': 0, 'score': 0},
-            'ball': {'x': initial_ball_x, 'y': initial_ball_y, 'dx': 10, 'dy': 10},
+            'ball': {'x': initial_ball_x, 'y': initial_ball_y, 'dx': 5, 'dy': 5},
         }
 
     async def players_count(self):
