@@ -55,7 +55,7 @@
   position: absolute;
 }
 .ecole-register-button > div > img {
-  background-image: url("/public/42.svg");
+  background-image: url("/static/public/42.svg");
   width: 1.5rem;
 }
 
@@ -67,4 +67,14 @@
 .register-password {
   display: flex;
   gap: 2px;
+}
+
+.register-loading{
+  width: 24px;
+  height: 24px;
+}
+.register-loading div{
+  width: 24px;
+  height: 24px;
+
 }

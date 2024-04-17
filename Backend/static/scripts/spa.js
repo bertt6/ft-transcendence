@@ -155,6 +155,8 @@ const routes = new Map([
         auth_required: true,
         url: [/profile\/[A-Za-z]+/],
         html: `
+
+
               <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -645,7 +647,6 @@ function loadSpecificScript()
 {
 let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    console.log(value,pathName)
     if(!value)
         return;
     if(document.getElementById('script'))

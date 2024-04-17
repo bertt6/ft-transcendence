@@ -2,6 +2,14 @@ import {API_URL, loadPage} from "./spa.js";
 import Spinner from "../components/spinner.js";
 import {notify} from "../components/Notification.js";
 
+const parseErrorToNotify = (data) => {
+    let message = '';
+    for (const [key, value] of Object.entries(data))
+    {
+        message += `${key}: ${value.join(', ')} `;
+    }
+    return message;
+}
 const registerSubmit = async (event) => {
     event.preventDefault();
     const formData = {
@@ -11,7 +19,7 @@ const registerSubmit = async (event) => {
         email: document.getElementById('email').value,
     };
     const button = document.getElementById('register-button');
-    const spinner = new Spinner({},button);
+    const spinner = new Spinner({isVisible: true, className: 'register-loading'},button);
     spinner.render();
     button.disabled = true;
 try{
@@ -22,15 +30,17 @@ try{
         },
         body: JSON.stringify(formData),
     });
-    if (response.ok) {
-        const data = await response.json();
+    if (response.status === 201)
+    {
+        notify("Registration successful. You will be redirected to the login page", 3, "success");
         loadPage('login');
     } else {
         const data = await response.json();
-        console.error('Error:', data);
-        spinner.setState({isVisible:false});
+        spinner.setState({isVisible: false});
         button.disabled = false;
-        notify(data.message, 3, 'error');
+        button.innerText = 'REGISTER';
+        const message = parseErrorToNotify(data);
+        notify(message, 3, 'error');
     }
     } catch (error) {
         notify("An error occurred. Please try again later", 3, "error");
