@@ -137,7 +137,7 @@ def MatchRound(request, tournament_id):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     if request.method == 'POST':
         try:
-            round_obj = tournament.rounds.first()  # İlk raundu alıyoruz, değiştirebilirsiniz
+            round_obj = tournament.rounds.first()
             participants = round_obj.participants.all()
             for i in range(0,len(participants),2):
                 if i + 1 < len(participants):
