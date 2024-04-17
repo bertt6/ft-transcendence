@@ -231,7 +231,7 @@ class ProfileInfo extends BaseComponent {
               </div>`
     }
 
-    updateProfile = async (formData) => {
+updateProfile = async (formData) => {
 
         try {
             let response = await request(`${API_URL}/profile/`, {
@@ -241,6 +241,7 @@ class ProfileInfo extends BaseComponent {
             notify('Profile updated', 3, 'success');
 
             this.setState({ ...this.state, profile: response });
+            localStorage.setItem('activeUserNickname', response.nickname);
         }
         catch (error) {
             console.error('Error:', error);
