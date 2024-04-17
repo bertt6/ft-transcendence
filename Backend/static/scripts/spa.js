@@ -1,5 +1,6 @@
 import {request} from "./Request.js";
 import {notify} from "../components/Notification.js";
+import {getProfile} from "./utils.js";
 
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
@@ -49,18 +50,17 @@ const routes = new Map([
                 </div>
                 <div>
                     <input
-                            type="text"
+                            type="password"
                             class="login-input p-2"
                             id="password"
                             placeholder="PASSWORD"
                     />
                 </div>
-                <div
- class="buttons-wrapper"
-                >
+                <div class="buttons-wrapper">
+
                         <button class="login-button" id="login-button" type="submit">LOGIN</button>
-                        <pong-redirect href="register">
-                            <button class="register-button" type="button">REGISTER</button>
+                        <pong-redirect href="/auth/register/">
+                            <button class="login-button" type="button">REGISTER</button>
                         </pong-redirect>
 
                 </div>
@@ -72,7 +72,8 @@ const routes = new Map([
                 </button>
             </form>
         </div>
-    </div>`
+    </div>
+`
     }],
     ['register', {
         auth_required: false,
@@ -655,11 +656,18 @@ let pathName = window.location.pathname;
     document.body.appendChild(script);
     handleStyles(value)
 }
+function assignLocalStorage()
+{
+    let profile = getProfile();
+    localStorage.setItem('activeUserNickname', profile.nickname);
+
+}
 const App = async () => {
     loadRequiredScripts();
     loadSpecificScript();
     await checkForAuth();
     assignRouting()
+    assignLocalStorage();
 }
 window.addEventListener('popstate', (event ) => {
     let pathName = window.location.pathname;

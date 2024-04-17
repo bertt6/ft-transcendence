@@ -55,50 +55,41 @@ function setPlayerData(state)
     name = detailsWrapper.querySelector(".player-name");
     name.innerText = details.player2.nickname;
 }
-function handleInitialState(state,paddleState)
+function handleInitialState(state)
 {
-    if(state.details.player2.nickname === localStorage.getItem("activeUserNickname"))
-      paddleState.paddle = "player_two";
-    setCurrentPoints(state)
-    setPlayerData(state);
-    draw(state.game);
+  setCurrentPoints(state)
+  setPlayerData(state);
+  draw(state.game);
 }
-function handleEvent(socket)
+async function connectToServer()
 {
-    let state = {
-        paddle: "player_one",
-        dy: 0
-    }
-    let initState = false;
+  const id = "77a18eba-6940-4912-a2f8-c34a3cf69e40";
+  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+  var startTime = new Date().getTime();
+  var count = 0
+    socket.onopen = (ev) => {
+         console.log("Connected to server");
+    };
+
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
-        initState = true;
-        handleInitialState(data,state);
+        handleInitialState(data);
         handleMovement(socket,data);
       }
       else if(data.state_type === "game_state")
       {
         draw(data.game);
         setCurrentPoints(data);
+        count++
+        if (new Date().getTime() - startTime > 1000) {
+          console.log(count)
+          count = 0
+          startTime = new Date().getTime()
+        }
       }
     };
-    setInterval(() => {
-      if(!initState)
-          return;
-        socket.send(JSON.stringify(state));
-    },1000/60);
-}
-async function connectToServer()
-{
-  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
-  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
-    socket.onopen = (ev) => {
-         console.log("Connected to server");
-         handleEvent(socket);
-    };
-
     return socket;
 }
 function handleMovement(socket,data)
@@ -107,9 +98,9 @@ function handleMovement(socket,data)
     paddle: "spectator",
     dy: 0
   }
-  if(data.details.player1.nickname === localStorage.getItem("activeUserNickname"))
+  if (data.details.player1.nickname === localStorage.getItem("username"))
     currentPaddle.paddle = "player_one";
-    else if(data.details.player2.nickname === localStorage.getItem("activeUserNickname"))
+  else if (data.details.player2.nickname === localStorage.getItem("username"))
         currentPaddle.paddle = "player_two";
   document.addEventListener("keydown", (event) => {
     if (event.key === "w" || event.key === "s")

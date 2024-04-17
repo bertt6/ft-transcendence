@@ -10,7 +10,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('Profile', '0020_profile_blocked_users_alter_profile_friends'),
         ('Tournament', '0007_tournament_current_participants_and_more'),
     ]
 
