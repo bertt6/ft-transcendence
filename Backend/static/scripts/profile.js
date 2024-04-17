@@ -51,14 +51,14 @@ class BlockedUsers extends BaseComponent {
     handleHTML() {
         return `
         <div class="blocked-users-wrapper">
-        ${this.state.blockedUsers.map(user => `
+        ${this.state.blockedUsers.map(blockedUser => `
             <div class="blocked-user-wrapper">
                 <div class="blocked-user-info">
                   <div class="blocked-user-image">
-                    <img src="${user.profile_picture}" alt="" />
+                    <img src="${BASE_URL}${blockedUser.profile_picture}" alt="" />
                   </div>
                   <div class="blocked-user-data">
-                    <h6>${user.nickname}</h6>
+                    <h6>${blockedUser.nickname}</h6>
                     </div>
                     </div>
                     <button class="unblock-button">Unblock</button>
@@ -145,7 +145,6 @@ class Friends extends BaseComponent {
                   </div>
                 </div>
                 <div class="friend-more">
-                  <div><img src="/static/public/image.svg" alt="" /></div>
                   <div><img src="/static/public/chat-bubble.svg"/></div>
                   <div><img src="/static/public/more.svg" alt="" /></div>
                 </div>
@@ -331,14 +330,16 @@ async function assignDataRouting() {
 }
 
 async function fetchBlockedUsers() {
-    const users = [
-        { nickname: "user1", profile_picture: "https://example.com/user1.jpg" },
-        { nickname: "user2", profile_picture: "https://example.com/user2.jpg" },
-        { nickname: "user3", profile_picture: "https://example.com/user3.jpg" },
-        { nickname: "user4", profile_picture: "https://example.com/user4.jpg" },
-        { nickname: "user5", profile_picture: "https://example.com/user5.jpg" }
-    ];
-    return users;
+    try {
+        let data = await request(`${API_URL}/profile/blocked-users`, {
+            method: 'GET',
+        });
+        console.log(data);
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        notify('Error fetching blocked users', 3, 'error')
+    }
 }
 
 async function fetchStats() {

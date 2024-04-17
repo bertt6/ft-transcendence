@@ -95,14 +95,10 @@ async function handleProfileImage(){
     document.getElementById('profile-image-wrapper').setAttribute('href',`/profile/${profile.nickname}`)
 }
 async function App(){
-    if(localStorage.getItem('activeUserNickname') === null)
-        return;
     const inboxList = document.getElementById('inbox-list');
-    if(!inboxList)
-    {
-        throw new Error("Inbox Error: Inbox list not found or user not logged in")
+    if(!inboxList){
+        throw new Error("No inbox list found")
     }
-
     await handleProfileImage();
     let requests = await getRequests();
     const inbox = new Inbox({requests:requests},inboxList);

@@ -17,12 +17,11 @@ def start_chat(request):
     second_user = Profile.objects.get(nickname=nickname)
     if not second_user:
         return Response({"error": "User not found"}, status=404)
-    try:
-        room = Room.objects.get(
-            (Q(first_user=first_user) & Q(second_user=second_user)) |
-            (Q(first_user=second_user) & Q(second_user=first_user))
-        )
-    except Room.DoesNotExist:
+    room = Room.objects.get(
+        (Q(first_user=first_user) & Q(second_user=second_user)) |
+        (Q(first_user=second_user) & Q(second_user=first_user))
+    )
+    if not room:
         room = Room.objects.create(first_user=request.user.profile, second_user=second_user)
     room_serializer = RoomSerializer(room)
     return Response({"success": True, "room": room_serializer.data}, status=200)

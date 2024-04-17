@@ -16,7 +16,7 @@ media/images/*
 !media/images/profile-pictures/default.svg
 # Thumbnails
 ._*
-/psql
+
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes

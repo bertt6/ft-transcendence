@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from ..models import Profile
 from rest_framework.response import Response
 
-from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer
+from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer, ProfileBlockedSerializer
 from ...Request.models import Request
 
 
@@ -23,14 +23,6 @@ class ProfileView(APIView):
         return Response(profile_serializer.data, status=200)
 
 
-class ProfileSearchView(APIView):
-    def get(self, request):
-        search = request.data.get('search')
-        profiles = Profile.objects.filter(nickname__icontains=search)
-        if not profiles:
-            return Response({"error": "Profile not found"}, status=404)
-        profile_serializer = ProfileGetSerializer(profiles, many=True)
-        return Response(profile_serializer.data, status=200)
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 class ProfileDetailView(APIView):
@@ -53,7 +45,7 @@ class ProfileDetailView(APIView):
         return Response(profile_serializer.data, status=200)
 
     def delete(self, request):
-        profile = request.user.profile
+        profile = request.user.profileq
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
         profile.delete()
@@ -151,8 +143,9 @@ class ProfileBlockedUsersView(APIView):
         profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
-        serializer = ProfileFriendsSerializer(profile.blocked_users, many=True)
+        serializer = ProfileBlockedSerializer(profile.blocked_users, many=True)
         return Response(serializer.data, status=200)
+
     def post(self, request):
         profile_id = request.data.get('user_id')
         profile = request.user.profile
@@ -168,3 +161,4 @@ class ProfileBlockedUsersView(APIView):
             profile.blocked_users.remove(profile_id)
         profile.save()
         return Response(status=200)
+    

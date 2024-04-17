@@ -1,6 +1,5 @@
 import {request} from "./Request.js";
 import {notify} from "../components/Notification.js";
-import {getProfile} from "./utils.js";
 
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
@@ -50,17 +49,18 @@ const routes = new Map([
                 </div>
                 <div>
                     <input
-                            type="password"
+                            type="text"
                             class="login-input p-2"
                             id="password"
                             placeholder="PASSWORD"
                     />
                 </div>
-                <div class="buttons-wrapper">
-
+                <div
+ class="buttons-wrapper"
+                >
                         <button class="login-button" id="login-button" type="submit">LOGIN</button>
-                        <pong-redirect href="/auth/register/">
-                            <button class="login-button" type="button">REGISTER</button>
+                        <pong-redirect href="register">
+                            <button class="register-button" type="button">REGISTER</button>
                         </pong-redirect>
 
                 </div>
@@ -72,8 +72,7 @@ const routes = new Map([
                 </button>
             </form>
         </div>
-    </div>
-`
+    </div>`
     }],
     ['register', {
         auth_required: false,
@@ -470,23 +469,7 @@ const routes = new Map([
         </div>
     </div>
         `
-    }],
-    ['game', {
-            auth_required: true,
-            url: [/game\/(\d+)/],
-            html: `
-          <div class="container">
-                <div class="player">
-                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 1">
-                  <p>Player 1 &nbsp <br>Point: 2000&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</p>
-                  <p>Player 2 &nbsp <br>Point: 2000</p>
-                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 2">
-                </div>
-                <canvas class="canvas-class" id="pongCanvas" width="800" height="400"></canvas>
-              </div>
-
-            `
-        }]
+    }]
 ]);
 const routeToFile = [
     [["/auth/login/"], 'login'],
@@ -494,8 +477,7 @@ const routeToFile = [
     [[/profile\/[A-Za-z]+/], 'profile'],
     [['/social/',  '/social/\\w+/g'], 'social'],
     [['/home/'], 'home'],
-    [['/verification/'], 'verification'],
-    [[/game\/(\d+)/], 'game'],
+    [['/verification/'], 'verification']
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -504,6 +486,7 @@ const requiredScripts = [
     '/static/components/Component.js',
     '/static/components/spinner.js',
     '/static/scripts/utils.js',
+    //'/static/scripts/Popup.js',
     '/static/scripts/inbox.js',
 ]
 
@@ -644,7 +627,6 @@ function loadSpecificScript()
 {
 let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    console.log(value,pathName)
     if(!value)
         return;
     if(document.getElementById('script'))
@@ -656,18 +638,11 @@ let pathName = window.location.pathname;
     document.body.appendChild(script);
     handleStyles(value)
 }
-function assignLocalStorage()
-{
-    let profile = getProfile();
-    localStorage.setItem('activeUserNickname', profile.nickname);
-
-}
 const App = async () => {
     loadRequiredScripts();
     loadSpecificScript();
     await checkForAuth();
     assignRouting()
-    assignLocalStorage();
 }
 window.addEventListener('popstate', (event ) => {
     let pathName = window.location.pathname;

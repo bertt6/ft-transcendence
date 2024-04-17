@@ -17,7 +17,7 @@ class ChatFriendsComponent extends  BaseComponent{
                 <div class="user-wrapper">
                   <div class="user-pic-wrapper">
                     <img
-                      src="${BASE_URL}${friend.profile_picture}"
+                      src="https://picsum.photos/seed/picsum/200/300"
                       alt=""
                     />
                   </div>
@@ -60,8 +60,8 @@ class SocialPostsComponent extends BaseComponent {
                     <pong-redirect class="post-info" href="/profile/${tweet.from_user.nickname}">
                       <div class="user-pic-wrapper">
                         <img
-                            src="${BASE_URL}${tweet.from_user.profile_picture}"
-                            alt=""
+                          src="https://picsum.photos/seed/picsum/200/300"
+                          alt=""
                         />
                       </div>
                       <div>
@@ -96,7 +96,6 @@ class SocialPostsComponent extends BaseComponent {
                 </div>
               </div>
             `).join('')}
-            <div id="load-more"">Please wait...</div>
             `
     }
     setState(newState)
@@ -104,30 +103,6 @@ class SocialPostsComponent extends BaseComponent {
         this.state = {...this.state, ...newState};
         this.html = this.handleHTML()
         this.render()
-    }
-    addObserver()
-    {
-        let loading = document.getElementById('load-more');
-        if(!loading)
-            return;
-        let observer = new IntersectionObserver(async (entries) => {
-            if(entries[0].isIntersecting)
-            {
-                let response = await request(this.state.next, {method: 'GET'});
-                this.setState({tweets: [...this.state.tweets, ...response.results.tweets], next: response.next});
-                await assignLikeButtons();
-                await assignCommentButtons();
-            }
-        }, {threshold: 1});
-        observer.observe(loading);
-    }
-    render()
-    {
-       if(this.html === null)
-        throw new Error('Component Should have an html');
-    this.parentElement.innerHTML = this.html;
-    if(this.state.next !== null)
-        this.addObserver();
     }
 }
 class PostTweetFormComponent extends  BaseComponent
@@ -391,7 +366,7 @@ const fetchChatFriends = async () => {
 const fetchSocialPosts = async () => {
  try{
       let response = await request(`${API_URL}/tweets`, {method: 'GET'})
-        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next});
+        socialPostsComponent.setState({tweets: response.results.tweets});
 
  }
     catch(error)
@@ -451,18 +426,6 @@ async function assignLikeButtons()
             });
         }
     }
-async function assignCommentButtons()
-{
-let commentButtons = document.getElementsByClassName('comment-button');
-for(let button of commentButtons)
-{
-    let tweetId = button.getAttribute('data-tweet-id');
-    button.addEventListener('click', async () => {
-        history.pushState({}, '', `/social/tweet/${tweetId}`);
-        await renderIndividualPost(tweetId);
-    });
-}
-}
 async function assignEventListeners() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
@@ -472,6 +435,18 @@ async function assignEventListeners() {
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl : url});
     });
+    async function assignCommentButtons()
+    {
+        let commentButtons = document.getElementsByClassName('comment-button');
+        for(let button of commentButtons)
+        {
+            let tweetId = button.getAttribute('data-tweet-id');
+            button.addEventListener('click', async () => {
+                history.pushState({}, '', `/social/tweet/${tweetId}`);
+                await renderIndividualPost(tweetId);
+            });
+        }
+    }
 
     await assignLikeButtons();
     await assignCommentButtons();
@@ -484,7 +459,7 @@ async function getProfile()
         });
         localStorage.setItem('activeUserId', data.id);
         localStorage.setItem('activeUserNickname', data.nickname);
-        socialPostsComponent.setState({userId: data.id});
+        socialPostsComponent.setState({userId: data.id})
         let nickname = document.getElementById('username');
         nickname.innerText = data.nickname;
     }
@@ -528,21 +503,7 @@ const renderIndividualPost = async (tweetId) => {
     }
     );
 }
-
-async function getProfile2() {
-    try {
-        let data = await request(`${API_URL}/profile`, {
-            method: 'GET'
-        });
-        return data.profile_picture;
-    } catch (error) {
-        console.error('Error:', error);
-        notify('Error fetching profile', 3, 'error');
-        return null;
-    }
-}
 const renderAllPosts = async () => {
-    let profile_picture_url = await getProfile2();
     let container =    document.getElementById('social-container');
     container.innerHTML = `
                   <div
@@ -553,11 +514,11 @@ const renderAllPosts = async () => {
                 <div class="social-send-info">
                   <div class="user-pic-wrapper">
                     <img
-                      src="${BASE_URL}${profile_picture_url}"
-                     alt=""
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
                     />
                   </div>
-                  <h6 id="username">Test12</h6>
+                  <h6 id="username">Test1</h6>
                 </div>
                 <form class="social-send" id="social-send-form">
                   <input
@@ -580,7 +541,6 @@ const renderAllPosts = async () => {
                     </div>
                 </form>
               </div>
-              
               <div class="posts-container" id="posts-wrapper">
                 <div class="post-container skeleton" id="post-wrapper">
                 </div>
@@ -669,7 +629,6 @@ async function connectToRoom(room,conversationComponent)
         socket.send(JSON.stringify({message: content}));
         chatInput.value = '';
     });
-    console.log("submit form",chatSendForm)
     socket.onmessage = (event) => {
         let data = JSON.parse(event.data);
         console.log(data)

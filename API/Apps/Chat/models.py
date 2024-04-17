@@ -8,8 +8,7 @@ class Room(models.Model):
     first_user = models.ForeignKey(Profile, related_name='room_first', on_delete=models.CASCADE)
     second_user = models.ForeignKey(Profile, related_name='room_second', on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"{self.first_user.nickname} - {self.second_user.nickname}"
+
 class Message(models.Model):
     user = models.ForeignKey(Profile, related_name='messages', on_delete=models.CASCADE)
     room = models.ForeignKey(Room, related_name='messages', on_delete=models.CASCADE)

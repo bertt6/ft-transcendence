@@ -23,4 +23,4 @@ class Request(models.Model):
     type = models.CharField(max_length=10, choices=Types)
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
-        return f'{self.sender} sent a request to {self.receiver}'
+        return f'{self.sender} sent a friend request to {self.receiver}'

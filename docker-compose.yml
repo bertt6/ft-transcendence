@@ -7,8 +7,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5432:5432"
-    volumes:
-      - ./psql/data:/var/lib/postgresql/data
 
   frontend:
     build:
@@ -37,6 +35,7 @@ services:
     command: sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
+
   redis:
     image: "redis:alpine"
 
@@ -61,7 +60,7 @@ services:
     volumes:
       - ./Devops/grafana-prometheus/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./Devops/grafana-prometheus/prometheus/rules.yml:/etc/prometheus/rules.yml
-
+      
     restart: always
     networks:
       - monitoring
