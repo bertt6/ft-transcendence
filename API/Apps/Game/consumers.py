@@ -1,6 +1,8 @@
 import asyncio
 import json
 import random
+import time
+
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
@@ -62,11 +64,14 @@ class MatchMakingConsumer(WebsocketConsumer):
 
 class GameConsumer(AsyncWebsocketConsumer):
     game_states = {}
+    move_buffer = {}
+    last_receive_time = time.time()
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.game_id = None
         self.game_group_name = None
         self.gameState = {}
+
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.game_group_name = f'game_{self.game_id}'
@@ -77,11 +82,10 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.accept()
         if self.game_id not in GameConsumer.game_states:
             GameConsumer.game_states[self.game_id] = self.initialize_game_state()
-
+        if self.game_id not in GameConsumer.move_buffer:
+            GameConsumer.move_buffer[self.game_id] = {}
         await self.send_initial_state()
-        if ('task' not in GameConsumer.game_states[self.game_id]):
-            task = asyncio.ensure_future(self.game_loop())
-            GameConsumer.game_states[self.game_id]['task'] = True
+
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.game_group_name,
@@ -91,10 +95,56 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         paddle = text_data_json['paddle']
-        if paddle == 'player_one':
-            GameConsumer.game_states[self.game_id]['player_one']['dy'] = text_data_json['dy']
-        elif paddle == 'player_two':
-            GameConsumer.game_states[self.game_id]['player_two']['dy'] = text_data_json['dy']
+        dy = text_data_json['dy']
+
+        # Ensure the move_buffer for the current game_id is initialized
+        if self.game_id not in GameConsumer.move_buffer:
+            GameConsumer.move_buffer[self.game_id] = {}
+
+        # Store the received data in the move buffer
+        GameConsumer.move_buffer[self.game_id][paddle] = dy
+
+        # Check if both players have sent their state
+        if 'player_one' in GameConsumer.move_buffer[self.game_id] and 'player_two' in GameConsumer.move_buffer[
+            self.game_id]:
+            # Update the game states with the received inputs
+            GameConsumer.game_states[self.game_id]['player_one']['dy'] = GameConsumer.move_buffer[self.game_id][
+                'player_one']
+            GameConsumer.game_states[self.game_id]['player_two']['dy'] = GameConsumer.move_buffer[self.game_id][
+                'player_two']
+
+            # Remove the processed inputs from the buffer
+            del GameConsumer.move_buffer[self.game_id]['player_one']
+            del GameConsumer.move_buffer[self.game_id]['player_two']
+
+            # Update the game state
+            self.update()
+            await self.send_game_state();
+
+    async def send_game_state(self):
+        current_time = time.time()
+
+        # Calculate the time difference since the last call
+        if GameConsumer.last_receive_time is not None:
+            time_diff = current_time - GameConsumer.last_receive_time
+        else:
+            time_diff = 0
+
+        # Update the last receive time
+        GameConsumer.last_receive_time = current_time
+
+        # Calculate FPS based on time difference
+        fps = 1 / time_diff if time_diff != 0 else float('inf')
+        print(f'FPS: {fps}')
+
+        # Send the updated game state to the clients
+        await self.channel_layer.group_send(
+            self.game_group_name,
+            {
+                'type': 'send_state',
+                'game': GameConsumer.game_states[self.game_id]
+            }
+        )
     async def send_initial_state(self):
         data = await self.get_game()
         await self.send(text_data=json.dumps({
@@ -102,6 +152,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'details': data,
             'game': GameConsumer.game_states[self.game_id]
         }))
+
     @database_sync_to_async
     def get_game(self):
         game = Game.objects.get(id=self.game_id)
@@ -118,7 +169,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                     'game': GameConsumer.game_states[self.game_id]
                 }
             )
-            await asyncio.sleep(0.01567)
+            await asyncio.sleep(0.01667)
+
     async def send_state(self, event):
         await self.send(text_data=json.dumps({
             'state_type': 'game_state',
@@ -128,20 +180,25 @@ class GameConsumer(AsyncWebsocketConsumer):
     def update(self):
         paddle_height = 200
 
-        GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] += GameConsumer.game_states[self.game_id]['player_one']['dy']
-        GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] = max(-GameConsumer.game_states[self.game_id]['canvas_height'] / 2 + paddle_height / 2,
-                                                       min(GameConsumer.game_states[self.game_id]['canvas_height'] / 2 - paddle_height / 2,
-                                                           GameConsumer.game_states[self.game_id]['player_one']['paddle_y']))
+        GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] += \
+        GameConsumer.game_states[self.game_id]['player_one']['dy']
+        GameConsumer.game_states[self.game_id]['player_one']['paddle_y'] = max(
+            -GameConsumer.game_states[self.game_id]['canvas_height'] / 2 + paddle_height / 2,
+            min(GameConsumer.game_states[self.game_id]['canvas_height'] / 2 - paddle_height / 2,
+                GameConsumer.game_states[self.game_id]['player_one']['paddle_y']))
 
-        GameConsumer.game_states[self.game_id]['player_two']['paddle_y'] += GameConsumer.game_states[self.game_id]['player_two']['dy']
-        GameConsumer.game_states[self.game_id]['player_two']['paddle_y'] = max(-GameConsumer.game_states[self.game_id]['canvas_height'] / 2 + paddle_height / 2,
-                                                       min(GameConsumer.game_states[self.game_id]['canvas_height'] / 2 - paddle_height / 2,
-                                                           GameConsumer.game_states[self.game_id]['player_two']['paddle_y']))
+        GameConsumer.game_states[self.game_id]['player_two']['paddle_y'] += \
+        GameConsumer.game_states[self.game_id]['player_two']['dy']
+        GameConsumer.game_states[self.game_id]['player_two']['paddle_y'] = max(
+            -GameConsumer.game_states[self.game_id]['canvas_height'] / 2 + paddle_height / 2,
+            min(GameConsumer.game_states[self.game_id]['canvas_height'] / 2 - paddle_height / 2,
+                GameConsumer.game_states[self.game_id]['player_two']['paddle_y']))
         ball = GameConsumer.game_states[self.game_id]['ball']
         ball['x'] += ball['dx']
         ball['y'] += ball['dy']
         # Check collision with top or bottom walls
-        if ball['y'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_height'] / 2 or ball['y'] - 10 <= -GameConsumer.game_states[self.game_id][
+        if ball['y'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_height'] / 2 or ball['y'] - 10 <= - \
+        GameConsumer.game_states[self.game_id][
             'canvas_height'] / 2:
             ball['dy'] = -ball['dy']
 

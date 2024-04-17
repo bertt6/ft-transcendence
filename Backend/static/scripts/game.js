@@ -55,24 +55,27 @@ function setPlayerData(state)
     name = detailsWrapper.querySelector(".player-name");
     name.innerText = details.player2.nickname;
 }
-function handleInitialState(state)
+function handleInitialState(state,paddleState)
 {
-  setCurrentPoints(state)
-  setPlayerData(state);
-  draw(state.game);
+    if(state.details.player2.nickname === localStorage.getItem("activeUserNickname"))
+      paddleState.paddle = "player_two";
+    setCurrentPoints(state)
+    setPlayerData(state);
+    draw(state.game);
 }
-async function connectToServer()
+function handleEvent(socket)
 {
-  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
-  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
-    socket.onopen = (ev) => {
-         console.log("Connected to server");
-    };
+    let state = {
+        paddle: "player_one",
+        dy: 0
+    }
+    let initState = false;
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
-        handleInitialState(data);
+        initState = true;
+        handleInitialState(data,state);
         handleMovement(socket,data);
       }
       else if(data.state_type === "game_state")
@@ -81,6 +84,21 @@ async function connectToServer()
         setCurrentPoints(data);
       }
     };
+    setInterval(() => {
+      if(!initState)
+          return;
+        socket.send(JSON.stringify(state));
+    },1000/60);
+}
+async function connectToServer()
+{
+  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
+  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    socket.onopen = (ev) => {
+         console.log("Connected to server");
+         handleEvent(socket);
+    };
+
     return socket;
 }
 function handleMovement(socket,data)
