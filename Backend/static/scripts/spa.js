@@ -155,6 +155,8 @@ const routes = new Map([
         auth_required: true,
         url: [/profile\/[A-Za-z]+/],
         html: `
+
+
               <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -181,6 +183,7 @@ const routes = new Map([
               <button class="header-wrapper" id="history-button"><span>MATCH HISTORY</span></button>
               <button class="header-wrapper" id="friends-button"><span> FRIENDS </span></button>
               <button class="header-wrapper" id="stats-button"><span>STATS</span></button>
+              <button class="header-wrapper" id="blocked-users-button"><span>BLOCKED</span></button>
             </div>
           <div id="data-wrapper">
                 <div class="friends-wrapper" style="display: none">
@@ -644,7 +647,6 @@ function loadSpecificScript()
 {
 let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    console.log(value,pathName)
     if(!value)
         return;
     if(document.getElementById('script'))
