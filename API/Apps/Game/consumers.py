@@ -2,6 +2,7 @@ import asyncio
 import json
 import random
 import threading
+import time
 
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
@@ -105,6 +106,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'details': data,
             'game': GameConsumer.game_states[self.game_id]
         }))
+
     @database_sync_to_async
     def get_game(self):
         game = Game.objects.get(id=self.game_id)
@@ -112,8 +114,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         return serializer.data
 
     async def game_loop(self):
+        start = time.time()
+        count = 0
         while True:
-            self.update()
             await self.channel_layer.group_send(
                 self.game_group_name,
                 {
@@ -121,7 +124,15 @@ class GameConsumer(AsyncWebsocketConsumer):
                     'game': GameConsumer.game_states[self.game_id]
                 }
             )
-            await asyncio.sleep(0.0001)
+            # await asyncio.sleep(0.00166)
+            self.update()
+            count += 1
+            if time.time() - start >= 1:
+                print(count)
+                count = 0
+                print('---------')
+                start = time.time()
+
     async def send_state(self, event):
         await self.send(text_data=json.dumps({
             'state_type': 'game_state',
