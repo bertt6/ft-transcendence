@@ -8,6 +8,11 @@ const paddleWidth = 10;
 const paddleHeight = 200;
 const ballSize = 20;
 let lastRenderedState = null;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   ctx.save();  // Save the current state of the context
@@ -63,7 +68,7 @@ function handleInitialState(state)
 }
 async function connectToServer()
 {
-  const id = "f6c10af0-41b4-480a-909e-8cea089b5218";
+  const id = "77a18eba-6940-4912-a2f8-c34a3cf69e40";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
   var startTime = new Date().getTime();
   var count = 0
@@ -75,11 +80,18 @@ async function connectToServer()
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
+        console.log(data.game.ball)
         handleInitialState(data);
         handleMovement(socket,data);
+      } else if (data.state_type === "score_state") {
+        console.log(data.game.ball)
+        draw(data.game);
+        setCurrentPoints(data);
+
       }
       else if(data.state_type === "game_state")
       {
+        console.log(data.game.ball)
         draw(data.game);
         setCurrentPoints(data);
         count++
