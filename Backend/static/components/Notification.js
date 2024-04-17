@@ -84,6 +84,9 @@ class Notification extends BaseComponent {
         div.id = "not-wrapper";
         div.style.top = "72px";
         div.style.transform = "translateX(100%)";
+        setTimeout(() => {
+            div.style.transform = "translateX(0)";
+        },100);
         this.parentElement.appendChild(div);
         this.div = div;
     }
