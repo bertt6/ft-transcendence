@@ -11,7 +11,8 @@ from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
 from Apps.Game.api.serializers import GameSerializer
-from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que
+from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que, get_players_in_game, \
+    add_player_in_game, clear_player_in_game
 from Apps.Game.models import Game
 from Apps.Profile.api.Serializers import ProfileGetSerializer
 from Apps.Profile.models import Profile
