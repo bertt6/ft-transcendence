@@ -3,7 +3,7 @@ import {request} from "./Request.js";
 
 import {notify} from "../components/Notification.js";
 let inputs = document.querySelectorAll('.row input[type="number"]');
-document.getElementById('singleDigitInput1').addEventListener('paste', function() {
+document.getElementById('singleDigitInput1').addEventListener('paste', function(event) {
     let pastedData = (event.clipboardData || window.clipboardData).getData('text');
     for (let i = 0; i < Math.min(pastedData.length, inputs.length); i++) {
         inputs[i].value = pastedData[i];
@@ -50,7 +50,6 @@ async function postVerificationCode(value) {
             }),
         });
 
-         console.log(response.tokens)
         setCookie('access_token', response.tokens.access, 1);
         setCookie('refresh_token', response.tokens.refresh, 1);
         loadPage('/home/')
@@ -60,3 +59,26 @@ async function postVerificationCode(value) {
         console.log(e.json())
     }
 }
+
+function startTimer()
+{
+    let minutes = 14;
+    let seconds = 59;
+    let timer = setInterval(function() {
+        document.getElementById('timer').innerText = `${minutes}:${seconds}`;
+        if(minutes === 0 && seconds === 0)
+        {
+            clearInterval(timer);
+            document.getElementById('timer').innerText = '0:0';
+        }
+    if(seconds === 0 )
+        {
+            minutes--;
+            seconds = 59;
+        }
+        else
+            seconds--;
+
+    }, 1000)
+}
+startTimer()

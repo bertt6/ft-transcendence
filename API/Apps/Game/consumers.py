@@ -1,43 +1,40 @@
 import asyncio
 import json
+import threading
+import time
+from asgiref.sync import async_to_sync
+from channels.generic.websocket import WebsocketConsumer
 import random
 import threading
 import time
-
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
 from Apps.Game.api.serializers import GameSerializer
-from Apps.Game.cache import get_players_in_que, add_player_in_que, clear_players_in_que, add_player_in_game, \
-    get_players_in_game, clear_player_in_game
+from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que
 from Apps.Game.models import Game
 from Apps.Profile.api.Serializers import ProfileGetSerializer
 from Apps.Profile.models import Profile
+from Apps.Game.matchmaking import match
 
 
 class MatchMakingConsumer(WebsocketConsumer):
     def connect(self):
-        self.profile = ProfileGetSerializer(
-            Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
+        self.profile = ProfileGetSerializer(Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
         async_to_sync(self.channel_layer.group_add)(
-            'matchmaking',
+            'player-%s' %self.profile['nickname'],
             self.channel_name
         )
-        self.send(text_data=json.dumps({
-            'message': 'Searching for a game...'
-        }))
         add_player_in_que(self.profile)
         self.check_game()
         self.accept()
 
     def disconnect(self, close_code):
+        remove_player_in_que(self.profile)
         self.channel_layer.group_discard(
             'matchmaking',
             self.channel_name,
         )
-
-    def receive(self, text_data):
-        pass
 
     def match_making_message(self, event):
         self.send(text_data=json.dumps({
@@ -47,21 +44,37 @@ class MatchMakingConsumer(WebsocketConsumer):
 
     def check_game(self):
         players_in_que = get_players_in_que()
-        if len(players_in_que) == 1:
-            self.send(text_data=json.dumps({
-                'message': 'Waiting for another player...'
-            }))
-        else:
-            player1, player2 = players_in_que
-            clear_players_in_que()
-            game = Game.objects.create(player1_id=player1['id'], player2_id=player2['id'])
-            async_to_sync(self.channel_layer.group_send)(
-                'matchmaking', {
-                    'type': 'match_making_message',
-                    'message': 'Game found! You are now playing!',
-                    'game': GameSerializer(game).data,
-                }
-            )
+        self.send(text_data=json.dumps({
+            'message': 'Searching for a game...'
+        }))
+        if len(players_in_que) == 2:
+            threading.Thread(target=self.match_making).start()  # opening thread because socket time out while true
+
+    def match_making(self):
+        players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
+        while len(players) != 0:
+            ideal_mmr = 1
+            while True and len(players) > 1:
+                matched_players = match(players, ideal_mmr)
+                if len(matched_players) == 2:
+                    game = Game.objects.create(player1=Profile.objects.get(id=matched_players[0]['id']),
+                                               player2=Profile.objects.get(id=matched_players[1]['id']))
+                    self.send(text_data=json.dumps({
+                        'message': f'Match found! Ready for playing!',
+                        'game': GameSerializer(game).data,
+                    }))
+                    async_to_sync(self.channel_layer.group_send)(
+                        f'player-{matched_players[1]['nickname'] if self.profile['nickname'] == matched_players[0]['nickname'] else matched_players[0]['nickname']}',
+                        {
+                            "type": "match_making_message",
+                            "message": 'Match found! Ready for playing!',
+                            "game": GameSerializer(game).data,
+                        }
+                    )
+                    break
+                time.sleep(0.1)
+                ideal_mmr += 0.5  # up to value and time intervals can be added
+                players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
 
 
 class GameConsumer(AsyncWebsocketConsumer):
