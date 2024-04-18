@@ -11,7 +11,8 @@ from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
 from Apps.Game.api.serializers import GameSerializer
-from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que
+from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que, get_players_in_game, \
+    add_player_in_game, clear_player_in_game
 from Apps.Game.models import Game
 from Apps.Profile.api.Serializers import ProfileGetSerializer
 from Apps.Profile.models import Profile
@@ -85,6 +86,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_id = None
         self.game_group_name = None
         self.gameState = {}
+        self.stop_event = threading.Event()
 
     async def connect(self):
         await self.accept()
@@ -104,7 +106,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         add_player_in_game(self.game_id)
         await self.send_initial_state()
         if 'task' not in GameConsumer.game_states[self.game_id] and get_players_in_game(self.game_id) == 2:
-            asyncio.ensure_future(self.game_loop())
+            # asyncio.ensure_future(self.game_loop())
+            self.thread = threading.Thread(target=asyncio.run, args=(self.game_loop(),))
+            self.thread.start()
             GameConsumer.game_states[self.game_id]['task'] = True
 
     async def disconnect(self, close_code):
@@ -167,7 +171,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         game.save()
 
     async def game_loop(self):
-        while True:
+        while not self.stop_event.is_set():
             await self.update()
             await self.channel_layer.group_send(
                 self.game_group_name,
@@ -186,8 +190,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def update(self):
         paddle_height = 200
-
-
         ball_speed = 1.0001
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']
@@ -252,6 +254,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'winner': self.player2
                     }
                 )
+                self.stop_event.set()
             else:
                 await self.channel_layer.group_send(
                     self.game_group_name,
@@ -278,6 +281,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'winner': self.player1
                     }
                 )
+                self.stop_event.set()
             else:
                 await self.channel_layer.group_send(
                     self.game_group_name,
