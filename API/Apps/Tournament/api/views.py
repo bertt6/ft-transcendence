@@ -45,7 +45,7 @@ def get_tournaments(request, profile_id, tournament_id):
 
     if request.method == 'GET':
         tournament_serializer = TournamentGetSerializer(tournament)
-        rounds = tournament.rounds.all().prefetch_related('matches')  # Tüm maçları tek bir sorgu ile al
+        rounds = tournament.rounds.all().prefetch_related('matches')
         round_serializer = RoundSerializer(rounds, many=True)
         tournament_data = tournament_serializer.data
         tournament_data['rounds'] = round_serializer.data
@@ -143,6 +143,9 @@ def MatchRound(request, tournament_id):
                 if i + 1 < len(participants):
                     match = Match.objects.create(player1=participants[i], player2=participants[i + 1])
                     round_obj.matches.add(match)
+                    round_obj.participants.remove(participants[i])
+                    round_obj.participants.remove(participants[i + 1])
+
 
             return Response({"message": "Maçlar başarıyla oluşturuldu."}, status=status.HTTP_200_OK)
 
@@ -168,11 +171,6 @@ def PlayMatch(request,profile_id,tournament_id):
                     new_round_number = last_round.round_number + 1
                     new_round = Round.objects.create(round_number=new_round_number)
 
-                if len(last_round.participants.all()) == 1:
-                    tournament.winner = last_round.participants.all()[0]
-                    tournament.is_finished = True
-                    tournament.save()
-
                 player_participated = False
                 for match in last_round.matches.all():
                     if match.player1.id == profile_id or match.player2.id == profile_id:
@@ -184,17 +182,28 @@ def PlayMatch(request,profile_id,tournament_id):
                             return Response({'message': 'Maçı player 2 kazandı'})
 
 
+                if last_round.matches.count() == 1 and not last_round.participants.exists():
+                    match = last_round.matches.first()
+                    tournament.winner = match.winner
+                    tournament.is_finished = True
+                    tournament.save()
                 if not player_participated:
                     return Response({'error': 'Profile maçlarda yok'},
                                     status=status.HTTP_404_NOT_FOUND)
 
                 winners = [match.winner for match in last_round.matches.all()]
+                if len(last_round.participants.all()) == 1:
+                    winners.append(last_round.participants.first())
+
                 new_round.participants.set(winners)
                 tournament.rounds.add(new_round)
+
                 for i in range(0, len(winners), 2):
                     if i + 1 < len(winners):
                         match = Match.objects.create(player1=winners[i], player2=winners[i + 1])
                         new_round.matches.add(match)
+                        new_round.participants.remove(winners[i])
+                        new_round.participants.remove(winners[i + 1])
                 new_round.save()
         return Response({'error': 'Mesaj'},
                         status=status.HTTP_404_NOT_FOUND)
