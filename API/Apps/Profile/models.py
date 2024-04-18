@@ -24,10 +24,23 @@ class Profile(models.Model):
     is_verified = models.BooleanField(default=False)
     friends = models.ManyToManyField('Profile', blank=True, related_name='profile_friends')
     bio = models.TextField(blank=True, null=True, default=None)
+    mmr = models.IntegerField(default=1000)
     blocked_users = models.ManyToManyField('Profile', blank=True, related_name='users_blocked')
 
     def __str__(self):
         return self.nickname
+
+    def win_games(self, opponent_mmr):
+        k_factor = 32
+        expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
+        self.mmr += k_factor * (1 - expected_score)
+
+    def lose_games(self, opponent_mmr):
+        k_factor = 32
+        expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
+        self.mmr += k_factor * (0 - expected_score)
+
+
 
 
 @receiver(m2m_changed, sender=Profile.friends.through)
