@@ -41,7 +41,7 @@ export function getSocket() {
     if (socket === null || socket.readyState === WebSocket.CLOSED) {
         const nickname = localStorage.getItem('activeUserNickname');
         if (!nickname)
-            throw new Error('No active user nickname found');
+            return null;
         socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
     }
         return socket;
@@ -62,6 +62,8 @@ function addSocketTestButton(){
 }
 async function App() {
     let socket = getSocket();
+    if (!socket)
+        return;
     socket.onopen = function (e) {
     }
     socket.onmessage = async function (e) {
