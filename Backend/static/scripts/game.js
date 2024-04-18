@@ -70,7 +70,7 @@ async function connectToServer()
 {
   //"f6c10af0-41b4-480a-909e-8cea089b5218" product
   //'77a18eba-6940-4912-a2f8-c34a3cf69e40'
-  const id = "f6c10af0-41b4-480a-909e-8cea089b5218";
+  const id = "77a18eba-6940-4912-a2f8-c34a3cf69e40";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
   var startTime = new Date().getTime();
   var count = 0
