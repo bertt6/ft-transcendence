@@ -150,3 +150,56 @@ def MatchRound(request, tournament_id):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+
+@api_view(['GET', 'POST'])
+def PlayMatch(request,profile_id,tournament_id):
+    try:
+        tournament = Tournament.objects.get(pk=tournament_id)
+        last_round = tournament.rounds.order_by('-round_number').first()
+        if tournament.is_finished == True:
+            return Response({"message": "Tournament is Finish"})
+        print(last_round)
+
+        if last_round:
+                all_matches_have_winner = all(match.winner is not None for match in last_round.matches.all())
+                if all_matches_have_winner:
+                    new_round_number = last_round.round_number + 1
+                    new_round = Round.objects.create(round_number=new_round_number)
+
+                if len(last_round.participants.all()) == 1:
+                    tournament.winner = last_round.participants.all()[0]
+                    tournament.is_finished = True
+                    tournament.save()
+
+                player_participated = False
+                for match in last_round.matches.all():
+                    if match.player1.id == profile_id or match.player2.id == profile_id:
+                        print(match.player1.id, match.player2.id)
+                        player_participated = True
+                        if match.winner is None:
+                            match.winner = match.player2
+                            match.save()
+                            return Response({'message': 'Maçı player 2 kazandı'})
+
+
+                if not player_participated:
+                    return Response({'error': 'Profile maçlarda yok'},
+                                    status=status.HTTP_404_NOT_FOUND)
+
+                winners = [match.winner for match in last_round.matches.all()]
+                new_round.participants.set(winners)
+                tournament.rounds.add(new_round)
+                for i in range(0, len(winners), 2):
+                    if i + 1 < len(winners):
+                        match = Match.objects.create(player1=winners[i], player2=winners[i + 1])
+                        new_round.matches.add(match)
+                new_round.save()
+        return Response({'error': 'Mesaj'},
+                        status=status.HTTP_404_NOT_FOUND)
+
+
+    except Tournament.DoesNotExist:
+        return Response({'error': ''},
+                        status=status.HTTP_404_NOT_FOUND)

@@ -22,4 +22,6 @@ class Tournament(models.Model):
     current_participants = models.ManyToManyField(Profile, related_name='current_participants')
     is_started = models.BooleanField(default=False)
     rounds = models.ManyToManyField('Round', blank=True, related_name='tournaments')
+    winner = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True,blank=True, related_name='won_tournaments')
+    is_finished = models.BooleanField(default=False)
     #all_games = models.ManyToManyField('Game', blank=True, related_name='all_games')
