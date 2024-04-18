@@ -7,11 +7,8 @@ const canvasHeight = canvas.height;
 const paddleWidth = 10;
 const paddleHeight = 200;
 const ballSize = 20;
-let lastRenderedState = null;
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 
 function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -74,7 +71,7 @@ async function connectToServer()
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
   var startTime = new Date().getTime();
   var count = 0
-    socket.onopen = (ev) => {
+    socket.onopen = () => {
          console.log("Connected to server");
     };
 
@@ -137,7 +134,7 @@ function handleMovement(socket,data)
 }
 async function App()
 {
-  let socket = await connectToServer();
+  await connectToServer();
 }
 App().catch((e) => {
     console.error(e);
