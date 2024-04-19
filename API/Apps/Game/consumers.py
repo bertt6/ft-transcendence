@@ -3,6 +3,8 @@ import json
 import random
 import threading
 import time
+import uuid
+
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
@@ -24,7 +26,6 @@ class MatchMakingConsumer(WebsocketConsumer):
             self.channel_name
         )
         add_player_in_que(self.profile)
-        self.check_game()
         self.accept()
 
     def disconnect(self, close_code):
@@ -40,13 +41,6 @@ class MatchMakingConsumer(WebsocketConsumer):
             'game': event['game']
         }))
 
-    def check_game(self):
-        players_in_que = get_players_in_que()
-        self.send(text_data=json.dumps({
-            'message': 'Searching for a game...'
-        }))
-        if len(players_in_que) == 2:
-            threading.Thread(target=self.match_making).start()
 
     def match_making(self):
         players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
@@ -80,6 +74,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
+        self.error = False
         self.game_id = None
         self.game_group_name = None
         self.gameState = {}
@@ -88,7 +83,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         await self.accept()
-        print("connected")
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.game_group_name = f'game_{self.game_id}'
         await self.channel_layer.group_add(
@@ -128,6 +122,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             GameConsumer.game_states[self.game_id]['task'] = True
 
     async def receive(self, text_data):
+        if self.error:
+            return
         text_data_json = json.loads(text_data)
         try:
             if text_data_json['send_type'] == 'join':
@@ -143,6 +139,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def send_initial_state(self):
         data = await self.get_game()
+        if data is None:
+            await self.send(text_data=json.dumps({
+                'state_type': 'error_state',
+                'status': '404',
+                'title': 'Game not found',
+                'message': 'Game with this ID does not exist.'
+            })
+            )
+            self.error = True
+            await self.close()
+            return
         self.current_game = data
         if data['is_finished'] is True:
             await self.send(text_data=json.dumps({
@@ -179,6 +186,10 @@ class GameConsumer(AsyncWebsocketConsumer):
     def get_game(self):
         if self.current_game is not None:
             return self.current_game
+        try:
+            uuid_obj = uuid.UUID(self.game_id)
+        except ValueError:
+            return None
         try:
             game = Game.objects.get(id=self.game_id)
         except Game.DoesNotExist:

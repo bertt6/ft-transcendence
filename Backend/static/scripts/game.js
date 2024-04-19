@@ -1,4 +1,4 @@
-import {BASE_URL, loadPage} from "./spa.js";
+import {BASE_URL, loadError, loadPage} from "./spa.js";
 import {getProfile} from "./utils.js";
 import BaseComponent from "../components/Component.js";
 
@@ -144,10 +144,15 @@ function handleParticipants(data) {
 
 async function connectToServer()
 {
-  //"f6c10af0-41b4-480a-909e-8cea089b5218" product
-  //'77a18eba-6940-4912-a2f8-c34a3cf69e40'
-  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
-  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    const path = window.location.pathname;
+    const id = path.split("/")[2];
+         let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    socket.onerror = () =>   {
+        loadError(500,"Server error", "redirecting to home page");
+        setTimeout(() => {
+            loadPage("/home/");
+        }, 3000);
+    }
     let connectedProfile = await getProfile()
     socket.onopen = () => {
      socket.send(JSON.stringify({
@@ -177,7 +182,11 @@ async function connectToServer()
         setCurrentPoints(data);
         handleParticipants(data);
       }
-
+      else if(data.state_type === "error_state")
+      {
+          loadError(data.status,data.title, data.message);
+          socket.close()
+      }
     };
     return socket;
 }
