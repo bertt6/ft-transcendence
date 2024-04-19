@@ -66,7 +66,7 @@ async function handleGameAcceptedCallback(data)
             game_id: response.game_id,
         }
         socket.send(JSON.stringify(sendBody));
-        console.log("redirected to game")
+        loadPage(`/game/${response.game_id}/`);
     }
     catch (error)
     {
