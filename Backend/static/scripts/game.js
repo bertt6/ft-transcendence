@@ -1,5 +1,6 @@
-import {BASE_URL, loadPage} from "./spa.js";
+import {BASE_URL, loadError, loadPage} from "./spa.js";
 import {getProfile} from "./utils.js";
+import BaseComponent from "../components/Component.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -10,7 +11,34 @@ const paddleHeight = 200;
 const ballSize = 20;
 
 
-
+class Participants extends BaseComponent
+{
+    constructor(state,parentElement)
+    {
+        super(state,parentElement);
+    }
+    handleHTML()
+    {
+        return `
+         ${this.state.spectators.map((spectator) => `
+         <div class="spectator-image">
+            <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+        </div>
+         `).join("")}
+        `
+    }
+    render() {
+        this.parentElement.innerHTML = this.handleHTML();
+    }
+    setState(newState)
+    {
+        this.state = {...this.state,...newState};
+    }
+}
+let element = document.getElementById('spectators-wrapper')
+let participantsComponent = new Participants({
+    spectators: []
+},element);
 function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   ctx.save();  // Save the current state of the context
@@ -79,7 +107,8 @@ function printWinner(winner,socket){
     document.body.appendChild(element);
     setTimeout(() => {
         element.remove();
-    }, 5000);
+        loadPage("/home/");
+        }, 5000);
 }
 function printCountdown()
 {
@@ -102,12 +131,28 @@ function printCountdown()
         }
     }, 1000);
 }
+function handleParticipants(data) {
+    const currentSpectators = participantsComponent.state.spectators;
+    if (JSON.stringify(currentSpectators) !== JSON.stringify(data.spectators))
+    {
+        participantsComponent.setState({
+            spectators: data.spectators
+        });
+        participantsComponent.render();
+    }
+}
+
 async function connectToServer()
 {
-  //"f6c10af0-41b4-480a-909e-8cea089b5218" product
-  //'77a18eba-6940-4912-a2f8-c34a3cf69e40'
-  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
-  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    const path = window.location.pathname;
+    const id = path.split("/")[2];
+         let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    socket.onerror = () =>   {
+        loadError(500,"Server error", "redirecting to home page");
+        setTimeout(() => {
+            loadPage("/home/");
+        }, 3000);
+    }
     let connectedProfile = await getProfile()
     socket.onopen = () => {
      socket.send(JSON.stringify({
@@ -133,9 +178,14 @@ async function connectToServer()
       }
       else if(data.state_type === "game_state")
       {
-          console.log("game state",data)
         draw(data.game);
         setCurrentPoints(data);
+        handleParticipants(data);
+      }
+      else if(data.state_type === "error_state")
+      {
+          loadError(data.status,data.title, data.message);
+          socket.close()
       }
     };
     return socket;
