@@ -689,7 +689,6 @@ function loadSpecificScript() {
 function assignLocalStorage() {
     let profile = getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
-
 }
 
 const App = async () => {

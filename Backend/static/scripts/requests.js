@@ -40,7 +40,7 @@ async function handleRejectedCallback(request_id)
 export function getSocket() {
     if (socket === null || socket.readyState === WebSocket.CLOSED) {
         const nickname = localStorage.getItem('activeUserNickname');
-        if (!nickname)
+        if (nickname === null || nickname === undefined)
             return null;
         socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
     }
@@ -76,7 +76,8 @@ async function App() {
                      {profile},
                      () => handleAcceptCallback(profile,data.request_id),
                 () => handleRejectedCallback(data.request_id));
-        } catch (error) {
+        }
+        catch (error) {
             console.error(error)
         }
     }
