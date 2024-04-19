@@ -110,11 +110,11 @@ async function connectToServer()
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
     let connectedProfile = await getProfile()
     socket.onopen = () => {
-         socket.send(JSON.stringify({
-            nickname: connectedProfile.nickname,
-            profile_picture: connectedProfile.profile_picture,
-             send_type: "join",
-         }));
+     socket.send(JSON.stringify({
+        nickname: connectedProfile.nickname,
+        profile_picture: connectedProfile.profile_picture,
+         send_type: "join",
+     }));
     };
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -133,6 +133,7 @@ async function connectToServer()
       }
       else if(data.state_type === "game_state")
       {
+          console.log("game state",data)
         draw(data.game);
         setCurrentPoints(data);
       }

@@ -88,6 +88,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         await self.accept()
+        print("connected")
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.game_group_name = f'game_{self.game_id}'
         await self.channel_layer.group_add(
@@ -102,12 +103,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dy': random.choice([-5, 5]),
             })
         await self.send_initial_state()
-        if ('task' not in GameConsumer.game_states[self.game_id]
-                and get_player_count_in_game(self.game_id) == 2):
-            # asyncio.ensure_future(self.game_loop())
-            self.thread = threading.Thread(target=asyncio.run, args=(self.game_loop(),))
-            self.thread.start()
-            GameConsumer.game_states[self.game_id]['task'] = True
 
     async def disconnect(self, close_code):
         clear_player_in_game(self.game_id, self.channel_name)
@@ -116,21 +111,27 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    def handle_join(self, data):
+    async def handle_join(self, data):
         player1_nickname = self.current_game['player1']['nickname']
         player2_nickname = self.current_game['player2']['nickname']
         if data['nickname'] == player1_nickname:
-            add_player_in_game(self.game_id, 'player_one',data, self.channel_name)
+            add_player_in_game(self.game_id, 'player_one', data, self.channel_name)
         elif data['nickname'] == player2_nickname:
-            add_player_in_game(self.game_id, 'player_two',data, self.channel_name)
+            add_player_in_game(self.game_id, 'player_two', data, self.channel_name)
         else:
-            add_player_in_game(self.game_id, 'spectator',data, self.channel_name)
+            add_player_in_game(self.game_id, 'spectator', data, self.channel_name)
+        if ('task' not in GameConsumer.game_states[self.game_id]
+                and get_player_count_in_game(self.game_id) == 2):
+            await asyncio.sleep(3)
+            self.thread = threading.Thread(target=asyncio.run, args=(self.game_loop(),))
+            self.thread.start()
+            GameConsumer.game_states[self.game_id]['task'] = True
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         try:
             if text_data_json['send_type'] == 'join':
-                self.handle_join(text_data_json)
+                await self.handle_join(text_data_json)
             return
         except KeyError:
             pass
@@ -140,18 +141,15 @@ class GameConsumer(AsyncWebsocketConsumer):
         elif paddle == 'player_two':
             GameConsumer.game_states[self.game_id]['player_two']['dy'] = text_data_json['dy']
 
-
     async def send_initial_state(self):
         data = await self.get_game()
-        if self.current_game is None:
-            self.current_game = data
+        self.current_game = data
         if data['is_finished'] is True:
             await self.send(text_data=json.dumps({
                 'state_type': 'finish_state',
                 'game': GameConsumer.game_states[self.game_id],
                 'winner': data['winner']
             }))
-            print(data)
             await self.close()
             return
         self.player1 = data['player1']
@@ -161,7 +159,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             'details': data,
             'game': GameConsumer.game_states[self.game_id]
         }))
-        await asyncio.sleep(3.2)
 
     async def send_score_state(self, event):
         await asyncio.sleep(0.1)
@@ -206,7 +203,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'send_state',
                     'game': GameConsumer.game_states[self.game_id],
-                    'spectators ':[player for player in data if player['player'] == 'spectator']
+                    'spectators ': [player for player in data if player['player'] == 'spectator']
                 }
             )
             await asyncio.sleep(0.016)
