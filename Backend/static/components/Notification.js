@@ -139,9 +139,8 @@ function animateNotification(notification) {
         }, 700);
 }
 notify.request = function (message,state,acceptCallback,rejectCallback) {
-
     let parentElement = document.getElementById('main');
-    const notification = new Notification({ type:"friendRequest" , message:message,profile:state.profile}, parentElement);
+    const notification = new Notification({ type:"friendRequest" , message:message,profile:state.sender_profile}, parentElement);
     notification.render();
     let createdNotification = notification.getNotificationElement();
     setTimeout(() => {

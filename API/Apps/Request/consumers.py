@@ -24,10 +24,27 @@ class RequestConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+
+    async def redirect_to_game(self, event):
+        print("Redirecting to game")
+        await self.send(text_data=json.dumps({
+            'game_id': event['game_id'],
+            'request_type': event['request_type']
+        }))
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        await self.create_request(text_data_json)
-
+        if text_data_json["request_type"] == "created_game":
+            await self.channel_layer.group_send(
+                text_data_json["sender"],
+                {
+                    "type": "redirect_to_game",
+                    "request_type": "created_game",
+                    "game_id": text_data_json["game_id"]
+                }
+            )
+        else:
+            print("Request type not recognized!")
+            await self.create_request(text_data_json)
 
     async def create_request_message(self, event):
         await self.send(text_data=json.dumps({

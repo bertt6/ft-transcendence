@@ -482,7 +482,7 @@ const routes = new Map([
     }],
     ['game', {
         auth_required: true,
-        url: [/game\/(\d+)/],
+        url: [/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
         html: `
           <div class="container">
                 <div class="player">
@@ -519,7 +519,7 @@ const routeToFile = [
     [['/social/', '/social/\\w+/g'], 'social'],
     [['/home/'], 'home'],
     [['/verification/'], 'verification'],
-    [[/game\/(\d+)/], 'game'],
+    [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -686,8 +686,8 @@ function loadSpecificScript() {
     handleStyles(value)
 }
 
-function assignLocalStorage() {
-    let profile = getProfile();
+async function assignLocalStorage() {
+    let profile =await  getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
 }
 
@@ -696,7 +696,7 @@ const App = async () => {
     loadSpecificScript();
     await checkForAuth();
     assignRouting()
-    assignLocalStorage();
+    await assignLocalStorage();
 }
 window.addEventListener('popstate', (event) => {
         let pathName = window.location.pathname;

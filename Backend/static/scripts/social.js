@@ -612,7 +612,6 @@ async function handleAddFriend(element)
         spinner.setState({isVisible: false});
         friendRequestButton.innerText = 'Add Friend'
         notify('Friend request sent', 3, 'success');
-
     }
     catch(error)
     {
@@ -620,12 +619,25 @@ async function handleAddFriend(element)
         notify('Error adding friend', 3, 'error');
     }
 }
+function handleInviteToPong(element)
+{
+    let socket = getSocket();
+    let nickname = element.children[1].children[0].innerText;
+    let sendBody = {
+        request_type: "game",
+        sender: localStorage.getItem('activeUserNickname'),
+        receiver: nickname
+    }
+    socket.send(JSON.stringify(sendBody));
+    notify('Invite sent', 3, 'success');
+}
 function addContextListeners(element)
 {
     let addFriendButton = document.getElementById('options-add-friend');
     let blockUserButton = document.getElementById('options-block-user');
+    let inviteToPongButton = document.getElementById('options-invite-to-pong');
     addFriendButton.addEventListener('click',() => handleAddFriend(element));
-
+    inviteToPongButton.addEventListener('click',() => handleInviteToPong(element));
 }
 function handleRightClick(event,element) {
       event.preventDefault();

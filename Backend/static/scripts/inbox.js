@@ -14,11 +14,12 @@ class Inbox  extends BaseComponent{
         `
     }
     parseMessage(request){
+        console.log(request.type)
         switch (request.type){
             case 'friend':
                 return `You have a friend request from ${request.sender.nickname}`;
-            case 'pong':
-                return `${request.sender} invited you to a game of pong`;
+            case 'game':
+                return `${request.sender.nickname} invited you to a game of pong`;
             default:
                 return `You have a new notification from ${request.sender.nickname}`;
         }
