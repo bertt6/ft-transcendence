@@ -484,16 +484,51 @@ const routes = new Map([
         auth_required: true,
         url: [/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
         html: `
-          <div class="container">
-                <div class="player">
-                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 1">
-                  <p>Player 1 &nbsp <br>Point: 2000&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</p>
-                  <p>Player 2 &nbsp <br>Point: 2000</p>
-                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 2">
-                </div>
-                <canvas class="canvas-class" id="pongCanvas" width="800" height="400"></canvas>
-              </div>
 
+     <div
+        class="background container-fluid social-background"
+        style="padding: 0"
+      >
+    <div class="game-container">
+
+        <div class="game-wrapper">
+            <div class="game-data-wrapper">
+                
+            <div class="game-player-data" id="player-one">
+                <div class="player-image">
+                     <img src="https://picsum.photos/seed/picsum/200/300" alt="Player 2">
+                </div>
+                <div class="player-description" id="player-one-details">
+                    <span class="player-name">Player 1</span>
+                    <span class="player-points">Points?</span>
+                </div>
+            </div>
+            <div class="game-points">
+                <h1 id="game-points" class="skeleton">
+
+                </h1>
+            </div>
+            <div class="game-player-data" id="player-two">
+                <div class="player-image">
+                     <img src="https://picsum.photos/seed/picsum/200/300" alt="Player 2">
+                </div>
+                <div class="player-description" id="player-two-details">
+                    <span class="player-name">Player 2</span>
+                    <span class="player-name">Points?</span>
+                </div>
+            </div>
+
+        </div>
+           <div class="" id="canvas-wrapper">
+        <div class="spectators-wrapper" id="spectators-wrapper">
+        </div>
+               <div class="canvas-wrapper">
+                <canvas class="canvas-class" id="pongCanvas" width="1368" height="600"></canvas>
+               </div>
+           </div>
+        </div>
+    </div>
+        </div>
             `
     }],
     ['error', {
@@ -596,7 +631,6 @@ export function loadPage(fileName) {
     let data = findRouteFile(fileName);
     const route = routes.get(data);
     let isMatch = false;
-
     if (Array.isArray(route.url)) {
         isMatch = route.url.some(url => {
             if (url instanceof RegExp) {
@@ -610,9 +644,16 @@ export function loadPage(fileName) {
     } else {
         isMatch = window.location.pathname.includes(route.url);
     }
-
+        let split = fileName.split('/').filter(Boolean);
     if (!isMatch) {
-        history.pushState({}, '', window.location.origin + route.url);
+        if(split.length > 1)
+        {
+            console.log("split",split)
+            history.pushState({}, '', window.location.origin + `/${split[0]}/${split[1]}/`);
+        }
+        else
+            history.pushState({}, '', window.location.origin + route.url);
+
     }
     let content = document.getElementById('main');
     content.innerHTML = route.html;
