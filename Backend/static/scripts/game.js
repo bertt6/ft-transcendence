@@ -1,4 +1,5 @@
 import {BASE_URL, loadPage} from "./spa.js";
+import {getProfile} from "./utils.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -78,7 +79,6 @@ function printWinner(winner,socket){
     document.body.appendChild(element);
     setTimeout(() => {
         element.remove();
-        loadPage('/home/')
     }, 5000);
 }
 function printCountdown()
@@ -108,8 +108,13 @@ async function connectToServer()
   //'77a18eba-6940-4912-a2f8-c34a3cf69e40'
   const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    let connectedProfile = await getProfile()
     socket.onopen = () => {
-         console.log("Connected to server");
+     socket.send(JSON.stringify({
+        nickname: connectedProfile.nickname,
+        profile_picture: connectedProfile.profile_picture,
+         send_type: "join",
+     }));
     };
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -128,6 +133,7 @@ async function connectToServer()
       }
       else if(data.state_type === "game_state")
       {
+          console.log("game state",data)
         draw(data.game);
         setCurrentPoints(data);
       }
