@@ -124,6 +124,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def send_initial_state(self):
         data = await self.get_game()
+        if data['is_finished']:
+            await self.send(text_data=json.dumps({
+                'state_type': 'finish_state',
+                'game': GameConsumer.game_states[self.game_id],
+                'winner': data['winner']
+            }))
+            await self.close()
+            return
         self.player1 = data['player1']
         self.player2 = data['player2']
         await self.send(text_data=json.dumps({

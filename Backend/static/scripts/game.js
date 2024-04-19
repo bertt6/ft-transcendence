@@ -1,4 +1,4 @@
-import {BASE_URL} from "./spa.js";
+import {BASE_URL, loadPage} from "./spa.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -63,7 +63,7 @@ function handleInitialState(state)
   setPlayerData(state);
   draw(state.game);
 }
-function printWinner(winner){
+function printWinner(winner,socket){
   let winnerHTML = `
           <div class="winner-wrapper">
           <div class="winner-image-wrapper">
@@ -76,6 +76,10 @@ function printWinner(winner){
     element.id = "game-message-wrapper";
     element.innerHTML = winnerHTML;
     document.body.appendChild(element);
+    setTimeout(() => {
+        element.remove();
+        loadPage('/home/')
+    }, 5000);
 }
 function printCountdown()
 {
@@ -102,7 +106,6 @@ async function connectToServer()
 {
   //"f6c10af0-41b4-480a-909e-8cea089b5218" product
   //'77a18eba-6940-4912-a2f8-c34a3cf69e40'
-  printWinner({nickname: "Player-1", profile_picture: "/media/profile-pictures/default.svg"});
   const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
     socket.onopen = () => {
@@ -121,6 +124,7 @@ async function connectToServer()
       } else if (data.state_type === 'finish_state') {
         draw(data.game);
         setCurrentPoints(data);
+        printWinner(data.winner);
       }
       else if(data.state_type === "game_state")
       {
