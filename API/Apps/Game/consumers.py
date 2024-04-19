@@ -218,7 +218,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def update(self):
         paddle_height = 200
         ball_speed = 1.0001
-        winner_ball_count = 50
+        winner_ball_count = 5
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']
         player2_score = GameConsumer.game_states[self.game_id]['player_two']['score']
@@ -272,7 +272,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dx': -5,
                 'dy': random.choice([-5, 5])
             })
-            if GameConsumer.game_states[self.game_id]['player_two']['score'] == winner_ball_count:
+            if GameConsumer.game_states[self.game_id]['player_two']['score'] >= winner_ball_count:
                 self.finish_game(self.player2['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,
@@ -300,7 +300,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dx': 5,
                 'dy': random.choice([-5, 5])
             })
-            if GameConsumer.game_states[self.game_id]['player_one']['score'] == winner_ball_count:
+            if GameConsumer.game_states[self.game_id]['player_one']['score'] >= winner_ball_count:
                 self.finish_game(self.player1['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,

@@ -107,7 +107,8 @@ function printWinner(winner,socket){
     document.body.appendChild(element);
     setTimeout(() => {
         element.remove();
-    }, 5000);
+        loadPage("/home/");
+        }, 5000);
 }
 function printCountdown()
 {
