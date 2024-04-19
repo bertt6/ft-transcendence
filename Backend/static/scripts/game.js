@@ -63,26 +63,46 @@ function handleInitialState(state)
   setPlayerData(state);
   draw(state.game);
 }
+function printWinner(winner){
+  let winnerHTML = `
+          <div class="winner-wrapper">
+          <div class="winner-image-wrapper">
+            <img src="${BASE_URL}${winner.profile_picture}" alt="" />
+          </div>
+          <h1>Winner is ${winner.nickname}</h1>
+        </div>
+  `
+   let element = document.createElement("div");
+    element.id = "game-message-wrapper";
+    element.innerHTML = winnerHTML;
+    document.body.appendChild(element);
+}
 function printCountdown()
 {
-  let countdown = 3;
-  let element = document.createElement("div");
-  element.innerText = countdown.toString();
-  element.id = "countdown";
-  document.body.appendChild(element);
-  setInterval(() => {
-    countdown--;
-    element.innerText = countdown.toString();
-    if(countdown === 0)
-    {
-      element.remove();
-    }
-  }, 1000);
+    let countdown = 3;
+    let element = document.createElement("div");
+    element.id = "game-message-wrapper";
+    let textElement = document.createElement("h1");
+    textElement.id = "countdown";
+    textElement.innerText = countdown.toString();
+    element.appendChild(textElement);
+    document.body.appendChild(element);
+    let interval = setInterval(() => {
+        countdown -= 1;
+        textElement.classList.add("fade-in");
+        textElement.innerText = countdown.toString();
+        if(countdown === 0)
+        {
+            clearInterval(interval);
+            element.remove();
+        }
+    }, 1000);
 }
 async function connectToServer()
 {
   //"f6c10af0-41b4-480a-909e-8cea089b5218" product
   //'77a18eba-6940-4912-a2f8-c34a3cf69e40'
+  printWinner({nickname: "Player-1", profile_picture: "/media/profile-pictures/default.svg"});
   const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
     socket.onopen = () => {
@@ -92,21 +112,18 @@ async function connectToServer()
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
-        console.log(data.game.ball)
         handleInitialState(data);
         handleMovement(socket,data);
       } else if (data.state_type === "score_state") {
         draw(data.game);
         setCurrentPoints(data);
-
+        printCountdown();
       } else if (data.state_type === 'finish_state') {
-        //finish game
         draw(data.game);
         setCurrentPoints(data);
       }
       else if(data.state_type === "game_state")
       {
-        console.log(data.game.ball)
         draw(data.game);
         setCurrentPoints(data);
       }
