@@ -339,7 +339,6 @@ async function fetchBlockedUsers() {
     ];
     return users;
 }
-
 async function fetchStats() {
     try {
         let response = await request(`${API_URL}/profile/stats`, {
@@ -369,6 +368,7 @@ async function fetchFriends() {
 async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
+    const activeUserNickname = localStorage.getItem('activeUserNickname');
     if (hash === '#history') {
         const history = new History({ histories: [1] }, parentElement);
         history.render();
@@ -383,13 +383,18 @@ async function handleRouting() {
         const statsInfo = new Stats({ statsInfo: data }, parentElement);
         statsInfo.render();
     }
-    if (hash === '#blockedusers') {
+    if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
         let data = await fetchBlockedUsers();
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
 }
-
+function getUsernameFromURL()
+{
+    const pathName = window.location.pathname;
+    const pathParts = pathName.split('/');
+    return pathParts[pathParts.length - 1];
+}
 const App = async () => {
     await fetchProfile();
     await fetchBlockedUsers();

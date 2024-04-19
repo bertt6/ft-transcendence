@@ -9,7 +9,6 @@ class Stats(models.Model):
     total_wins = models.IntegerField()
     total_losses = models.IntegerField()
     points = models.IntegerField()
-    # match_history = models.ManyToManyField('Game', blank=True)
 
     def __str__(self):
         return f"Total Games: {self.total_games}, Total Wins: {self.total_wins}, Total Losses: {self.total_losses}, Points: {self.points}"
@@ -39,8 +38,6 @@ class Profile(models.Model):
         k_factor = 32
         expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
         self.mmr += k_factor * (0 - expected_score)
-
-
 
 
 @receiver(m2m_changed, sender=Profile.friends.through)

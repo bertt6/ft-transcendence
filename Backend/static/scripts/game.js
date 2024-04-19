@@ -1,4 +1,4 @@
-import {BASE_URL} from "./spa.js";
+import {BASE_URL, loadPage} from "./spa.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -7,11 +7,8 @@ const canvasHeight = canvas.height;
 const paddleWidth = 10;
 const paddleHeight = 200;
 const ballSize = 20;
-let lastRenderedState = null;
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 
 function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -66,47 +63,73 @@ function handleInitialState(state)
   setPlayerData(state);
   draw(state.game);
 }
+function printWinner(winner,socket){
+  let winnerHTML = `
+          <div class="winner-wrapper">
+          <div class="winner-image-wrapper">
+            <img src="${BASE_URL}${winner.profile_picture}" alt="" />
+          </div>
+          <h1>Winner is ${winner.nickname}</h1>
+        </div>
+  `
+   let element = document.createElement("div");
+    element.id = "game-message-wrapper";
+    element.innerHTML = winnerHTML;
+    document.body.appendChild(element);
+    setTimeout(() => {
+        element.remove();
+        loadPage('/home/')
+    }, 5000);
+}
+function printCountdown()
+{
+    let countdown = 3;
+    let element = document.createElement("div");
+    element.id = "game-message-wrapper";
+    let textElement = document.createElement("h1");
+    textElement.id = "countdown";
+    textElement.innerText = countdown.toString();
+    element.appendChild(textElement);
+    document.body.appendChild(element);
+    let interval = setInterval(() => {
+        countdown -= 1;
+        textElement.classList.add("fade-in");
+        textElement.innerText = countdown.toString();
+        if(countdown === 0)
+        {
+            clearInterval(interval);
+            element.remove();
+        }
+    }, 1000);
+}
 async function connectToServer()
 {
   //"f6c10af0-41b4-480a-909e-8cea089b5218" product
   //'77a18eba-6940-4912-a2f8-c34a3cf69e40'
-  const id = "77a18eba-6940-4912-a2f8-c34a3cf69e40";
+  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
   let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
-  var startTime = new Date().getTime();
-  var count = 0
-    socket.onopen = (ev) => {
+    socket.onopen = () => {
          console.log("Connected to server");
     };
-
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
-        console.log(data.game.ball)
         handleInitialState(data);
         handleMovement(socket,data);
       } else if (data.state_type === "score_state") {
-        console.log(data.game.ball)
         draw(data.game);
         setCurrentPoints(data);
-
+        printCountdown();
       } else if (data.state_type === 'finish_state') {
-        //finish game
-        console.log(data)
         draw(data.game);
         setCurrentPoints(data);
+        printWinner(data.winner);
       }
       else if(data.state_type === "game_state")
       {
-        console.log(data.game.ball)
         draw(data.game);
         setCurrentPoints(data);
-        count++
-        if (new Date().getTime() - startTime > 1000) {
-          console.log(count)
-          count = 0
-          startTime = new Date().getTime()
-        }
       }
     };
     return socket;
@@ -137,7 +160,7 @@ function handleMovement(socket,data)
 }
 async function App()
 {
-  let socket = await connectToServer();
+  await connectToServer();
 }
 App().catch((e) => {
     console.error(e);

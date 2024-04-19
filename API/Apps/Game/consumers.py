@@ -1,9 +1,5 @@
 import asyncio
 import json
-import threading
-import time
-from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer
 import random
 import threading
 import time
@@ -21,9 +17,10 @@ from Apps.Game.matchmaking import match
 
 class MatchMakingConsumer(WebsocketConsumer):
     def connect(self):
-        self.profile = ProfileGetSerializer(Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
+        self.profile = ProfileGetSerializer(
+            Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
         async_to_sync(self.channel_layer.group_add)(
-            'player-%s' %self.profile['nickname'],
+            'player-%s' % self.profile['nickname'],
             self.channel_name
         )
         add_player_in_que(self.profile)
@@ -87,7 +84,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_group_name = None
         self.gameState = {}
         self.stop_event = threading.Event()
-
     async def connect(self):
         await self.accept()
         self.game_id = self.scope['url_route']['kwargs']['game_id']
@@ -128,8 +124,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def send_initial_state(self):
         data = await self.get_game()
-        self.player1 = data['player1']['nickname']
-        self.player2 = data['player2']['nickname']
+        if data['is_finished']:
+            await self.send(text_data=json.dumps({
+                'state_type': 'finish_state',
+                'game': GameConsumer.game_states[self.game_id],
+                'winner': data['winner']
+            }))
+            await self.close()
+            return
+        self.player1 = data['player1']
+        self.player2 = data['player2']
         await self.send(text_data=json.dumps({
             'state_type': 'initial_state',
             'details': data,
@@ -143,7 +147,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'state_type': 'score_state',
             'game': event['game'],
         }))
-        await asyncio.sleep(3.2)
+
 
     async def send_finish_state(self, event):
         await self.send(text_data=json.dumps({
@@ -171,7 +175,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         game.save()
 
     async def game_loop(self):
-        while not self.stop_event.is_set():
+        while True:
             await self.update()
             await self.channel_layer.group_send(
                 self.game_group_name,
@@ -191,6 +195,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def update(self):
         paddle_height = 200
         ball_speed = 1.0001
+        winner_ball_count = 5
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']
         player2_score = GameConsumer.game_states[self.game_id]['player_two']['score']
@@ -215,7 +220,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Check collision with top or bottom walls
         if ball['y'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_height'] / 2 or ball['y'] - 10 <= - \
                 GameConsumer.game_states[self.game_id][
-            'canvas_height'] / 2:
+                    'canvas_height'] / 2:
             ball['dy'] = -ball['dy']
 
         paddle_one_y = GameConsumer.game_states[self.game_id]['player_one']['paddle_y']
@@ -244,8 +249,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dx': -5,
                 'dy': random.choice([-5, 5])
             })
-            if GameConsumer.game_states[self.game_id]['player_two']['score'] == 1:
-                await self.finish_game(self.player2)
+            if GameConsumer.game_states[self.game_id]['player_two']['score'] == winner_ball_count:
+                self.finish_game(self.player2['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,
                     {
@@ -263,6 +268,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'game': GameConsumer.game_states[self.game_id]
                     }
                 )
+                await asyncio.sleep(3.2)
         elif ball['x'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_width'] / 2:
             GameConsumer.game_states[self.game_id]['player_one']['score'] += 1
             GameConsumer.game_states[self.game_id] = self.initialize_game_state({
@@ -271,8 +277,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dx': 5,
                 'dy': random.choice([-5, 5])
             })
-            if GameConsumer.game_states[self.game_id]['player_one']['score'] == 1:
-                await self.finish_game(self.player2)
+            if GameConsumer.game_states[self.game_id]['player_one']['score'] == winner_ball_count:
+                self.finish_game(self.player1['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,
                     {
@@ -290,6 +296,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'game': GameConsumer.game_states[self.game_id]
                     }
                 )
+                await asyncio.sleep(3.2)
 
     def initialize_game_state(self, data):
         canvas_width = 1368
