@@ -1,5 +1,6 @@
 import {BASE_URL, loadPage} from "./spa.js";
 import {getProfile} from "./utils.js";
+import BaseComponent from "../components/Component.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -10,7 +11,34 @@ const paddleHeight = 200;
 const ballSize = 20;
 
 
-
+class Participants extends BaseComponent
+{
+    constructor(state,parentElement)
+    {
+        super(state,parentElement);
+    }
+    handleHTML()
+    {
+        return `
+         ${this.state.spectators.map((spectator) => `
+         <div class="spectator-image">
+            <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+        </div>
+         `).join("")}
+        `
+    }
+    render() {
+        this.parentElement.innerHTML = this.handleHTML();
+    }
+    setState(newState)
+    {
+        this.state = {...this.state,...newState};
+    }
+}
+let element = document.getElementById('spectators-wrapper')
+let participantsComponent = new Participants({
+    spectators: []
+},element);
 function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   ctx.save();  // Save the current state of the context
@@ -102,6 +130,17 @@ function printCountdown()
         }
     }, 1000);
 }
+function handleParticipants(data) {
+    const currentSpectators = participantsComponent.state.spectators;
+    if (JSON.stringify(currentSpectators) !== JSON.stringify(data.spectators))
+    {
+        participantsComponent.setState({
+            spectators: data.spectators
+        });
+        participantsComponent.render();
+    }
+}
+
 async function connectToServer()
 {
   //"f6c10af0-41b4-480a-909e-8cea089b5218" product
@@ -133,10 +172,11 @@ async function connectToServer()
       }
       else if(data.state_type === "game_state")
       {
-          console.log("game state",data)
         draw(data.game);
         setCurrentPoints(data);
+        handleParticipants(data);
       }
+
     };
     return socket;
 }

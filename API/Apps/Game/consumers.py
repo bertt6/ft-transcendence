@@ -203,7 +203,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'send_state',
                     'game': GameConsumer.game_states[self.game_id],
-                    'spectators ': [player for player in data if player['player'] == 'spectator']
+                    'spectators': [player for player in data if player['player'] == 'spectator']
                 }
             )
             await asyncio.sleep(0.016)
@@ -211,7 +211,8 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def send_state(self, event):
         await self.send(text_data=json.dumps({
             'state_type': 'game_state',
-            'game': event['game']
+            'game': event['game'],
+            'spectators': event['spectators']
         }))
 
     async def update(self):
