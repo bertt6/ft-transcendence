@@ -24,13 +24,12 @@ class RequestConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-
     async def redirect_to_game(self, event):
-        print("Redirecting to game")
         await self.send(text_data=json.dumps({
             'game_id': event['game_id'],
             'request_type': event['request_type']
         }))
+
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         if text_data_json["request_type"] == "created_game":
