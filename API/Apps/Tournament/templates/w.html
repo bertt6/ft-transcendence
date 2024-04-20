@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <input type="text" id="messageInput" placeholder="Mesajınızı girin">
+    <button id="sendButton">Gönder</button>
+    <button id="endButton" onclick="endButtonClicked()">Maçı oyna</button>
+
+
+    <script>
+
+        const url = window.location.pathname;
+        const param = url.split("/");
+        const profile_id = param[param.length - 2];
+        const tournament_id = 19;
+        const socket = new WebSocket('ws://localhost:8000/ws/tournament/?profile_id=' + profile_id + '&tournament_id=' + tournament_id);
+
+        socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log('Backendden gelen cevap:', data);
+    // Burada cevaba göre gerekli işlemleri yapabilirsiniz
+};
+
+        document.getElementById("sendButton").addEventListener("click", function() {
+            var messageToSend = document.getElementById("messageInput").value;
+
+            // Mesajı JSON formatına dönüştür
+            var messageData = {
+                "profile_id": profile_id,
+                "tournament_id": tournament_id,
+                "message": messageToSend,
+            };
+
+            // JSON formatındaki mesajı gönder
+            socket.send(JSON.stringify(messageData));
+            console.log('Sunucuya mesaj gönderildi:', messageData);
+        });
+          function endButtonClicked() {
+            var messageToSend = "Turnuvayı Sonlandır";
+
+            // Mesajı JSON formatına dönüştür
+            var messageData = {
+                "profile_id": profile_id,
+                "tournament_id": tournament_id,
+                "message": messageToSend,
+            };
+
+            // JSON formatındaki mesajı gönder
+            socket.send(JSON.stringify(messageData));
+            console.log('Sunucuya mesaj gönderildi:', messageData);
+        }
+    </script>
+</body>
+</html>

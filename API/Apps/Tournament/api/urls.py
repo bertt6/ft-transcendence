@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create, get_tournaments, join, delete, StartTournament, MatchRound, PlayMatch
+from .views import create, get_tournaments, join, delete, StartTournament, MatchRound, PlayMatch, websocket_test
 
 
 urlpatterns = [
@@ -9,6 +9,7 @@ urlpatterns = [
     path('profile/<int:profile_id>/delete/<int:tournament_id>', delete) ,
     path('profile/<int:tournament_id>/start', StartTournament),
     path('profile/<int:tournament_id>/match', MatchRound),
-    path('profile/<int:profile_id>/<int:tournament_id>/play', PlayMatch)
+    path('profile/<int:profile_id>/<int:tournament_id>/play', PlayMatch),
+    path('profile/w/<int:profile_id>/', websocket_test)
 
 ]

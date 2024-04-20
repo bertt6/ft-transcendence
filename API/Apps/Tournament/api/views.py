@@ -4,9 +4,14 @@ from rest_framework import status
 from ...Profile.models import Profile
 from ..models import Tournament, Round, Match
 from django.http import HttpResponse
+from django.shortcuts import render
 from rest_framework.response import Response
 from ..Serializers import TournamentGetSerializer, TournamentPostSerializer,RoundSerializer
 from rest_framework.decorators import api_view, permission_classes
+
+def websocket_test(request, profile_id):
+    return render(request, 'w.html', {'profile_id': profile_id})
+
 
 @api_view(['GET', 'POST'])
 def create(request, profile_id):
@@ -120,11 +125,14 @@ def StartTournament(request, tournament_id):
         if tournament.rounds.exists():
             return Response({"message": "Turnuva zaten başlatıldı."},
                             status=status.HTTP_400_BAD_REQUEST)
-        round_number = 1
-        round_obj = Round.objects.create(round_number=round_number)
-        round_obj.participants.set(participants)
-        tournament.rounds.add(round_obj)
-        return Response({"message": "Turnuva başarıyla başlatıldı."}, status=status.HTTP_200_OK)
+        if tournament.current_participants.count() > 1 :
+            round_number = 1
+            round_obj = Round.objects.create(round_number=round_number)
+            round_obj.participants.set(participants)
+            tournament.rounds.add(round_obj)
+            return Response({"message": "Turnuva başarıyla başlatıldı."}, status=status.HTTP_200_OK)
+        else :
+            return Response({"message": "Katılımcı Sayısı 1 den büyük olmalı."}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -182,7 +190,7 @@ def PlayMatch(request,profile_id,tournament_id):
                             return Response({'message': 'Maçı player 2 kazandı'})
 
 
-                if last_round.matches.count() == 1 and not last_round.participants.exists():
+                if last_round.matches.count() == 1 and not last_round.participants.exists() and last_round.matches.first().winner:
                     match = last_round.matches.first()
                     tournament.winner = match.winner
                     tournament.is_finished = True
@@ -205,7 +213,7 @@ def PlayMatch(request,profile_id,tournament_id):
                         new_round.participants.remove(winners[i])
                         new_round.participants.remove(winners[i + 1])
                 new_round.save()
-        return Response({'error': 'Mesaj'},
+        return Response({'error': 'Yeni Turnuva'},
                         status=status.HTTP_404_NOT_FOUND)
 
 
