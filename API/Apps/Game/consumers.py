@@ -168,7 +168,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         }))
 
     async def send_score_state(self, event):
-        await asyncio.sleep(0.1)
         await self.send(text_data=json.dumps({
             'state_type': 'score_state',
             'game': event['game'],
@@ -228,7 +227,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def update(self):
         paddle_height = 200
-        ball_speed = 1.0001
+        ball_speed = 1.0006
+
         winner_ball_count = 5
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']

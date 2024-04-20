@@ -146,21 +146,24 @@ async function connectToServer()
 {
     const path = window.location.pathname;
     const id = path.split("/")[2];
-         let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+
+    socket.onopen = async function (event) {
+        let connectedProfile = await getProfile()
+        socket.send(JSON.stringify({
+            nickname: connectedProfile.nickname,
+            profile_picture: connectedProfile.profile_picture,
+            send_type: "join",
+        }));
+    };
+
     socket.onerror = () =>   {
         loadError(500,"Server error", "redirecting to home page");
         setTimeout(() => {
             loadPage("/home/");
         }, 3000);
     }
-    let connectedProfile = await getProfile()
-    socket.onopen = () => {
-     socket.send(JSON.stringify({
-        nickname: connectedProfile.nickname,
-        profile_picture: connectedProfile.profile_picture,
-         send_type: "join",
-     }));
-    };
+
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")

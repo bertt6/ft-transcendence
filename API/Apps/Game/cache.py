@@ -42,7 +42,6 @@ def get_player_count_in_game(game_id):
 
 
 def add_player_in_game(game_id, participant_type, data, websocket_id):
-    print(data)
     all_keys = get_players_in_game(game_id)
     participant = {
         'player': participant_type,
@@ -51,7 +50,6 @@ def add_player_in_game(game_id, participant_type, data, websocket_id):
         'profile_picture': data['profile_picture'],
     }
     all_keys.append(participant)
-    print(all_keys)
     cache.set(game_id, json.dumps(all_keys))
 
 
