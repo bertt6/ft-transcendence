@@ -1,16 +1,11 @@
 from django.db import models
 from ..Profile.models import Profile
-
-
-class Match(models.Model):
-    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player1_matches')
-    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player2_matches')
-    winner = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True, related_name='won_matches')
+from ..Game.models import Game
 
 
 class Round(models.Model):
     round_number = models.PositiveIntegerField()
-    matches = models.ManyToManyField('Match', blank=True, related_name='rounds')
+    matches = models.ManyToManyField(Game, blank=True, related_name='rounds')
     participants = models.ManyToManyField(Profile, related_name='round_participants')
 
 
@@ -21,7 +16,7 @@ class Tournament(models.Model):
     max_participants = models.IntegerField()
     current_participants = models.ManyToManyField(Profile, related_name='current_participants')
     is_started = models.BooleanField(default=False)
-    rounds = models.ManyToManyField('Round', blank=True, related_name='tournaments')
+    rounds = models.ManyToManyField('Round', blank=True, related_name='Rounds')
     winner = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True,blank=True, related_name='won_tournaments')
     is_finished = models.BooleanField(default=False)
     #all_games = models.ManyToManyField('Game', blank=True, related_name='all_games')

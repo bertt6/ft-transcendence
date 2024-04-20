@@ -4,9 +4,10 @@ from django.http import JsonResponse
 from channels.generic.websocket import WebsocketConsumer
 from ..Tournament.Serializers import TournamentPostSerializer
 import urllib.parse
+from ..Game.models import Game
 import json
 from ..Profile.models import Profile
-from .models import Tournament, Round, Match
+from .models import Tournament, Round
 
 
 class TournamentConsumer(WebsocketConsumer):
@@ -98,8 +99,8 @@ class TournamentConsumer(WebsocketConsumer):
                 participants = round_obj.participants.all()
                 for i in range(0, len(participants), 2):
                     if i + 1 < len(participants):
-                        match = Match.objects.create(player1=participants[i], player2=participants[i + 1])
-                        round_obj.matches.add(match)
+                        game = Game.objects.create(player1=participants[i], player2=participants[i + 1])
+                        round_obj.matches.add(game)
                         round_obj.participants.remove(participants[i])
                         round_obj.participants.remove(participants[i + 1])
 
@@ -125,33 +126,33 @@ class TournamentConsumer(WebsocketConsumer):
             return
         print(last_round)
         if last_round:
-            all_matches_have_winner = all(match.winner is not None for match in last_round.matches.all())
+            all_matches_have_winner = all(game.winner is not None for match in last_round.matches.all())
             if all_matches_have_winner:
                 new_round_number = last_round.round_number + 1
                 new_round = Round.objects.create(round_number=new_round_number)
 
             player_participated = False
-            for match in last_round.matches.all():
-                if match.player1.id == profile_id or match.player2.id == profile_id:
-                    print(match.player1.id, match.player2.id)
+            for game in last_round.matches.all():
+                if game.player1.id == profile_id or game.player2.id == profile_id:
+                    print(game.player1.id, game.player2.id)
                     player_participated = True
-                    if match.winner is None:
-                        match.winner = match.player2
-                        match.save()
+                    if game.winner is None:
+                        game.winner = game.player2
+                        game.save()
                         print("Maçı Player 2 kazandı")
                         return
 
 
             if last_round.matches.count() == 1 and not last_round.participants.exists() and last_round.matches.first().winner:
-                match = last_round.matches.first()
-                tournament.winner = match.winner
+                game = last_round.matches.first()
+                tournament.winner = game.winner
                 tournament.is_finished = True
                 tournament.save()
             if not player_participated:
                 print("Player Maclarda Yok")
                 return
 
-            winners = [match.winner for match in last_round.matches.all()]
+            winners = [game.winner for game in last_round.matches.all()]
             if len(last_round.participants.all()) == 1:
                 winners.append(last_round.participants.first())
             new_round.participants.set(winners)
@@ -159,8 +160,8 @@ class TournamentConsumer(WebsocketConsumer):
 
             for i in range(0, len(winners), 2):
                 if i + 1 < len(winners):
-                    match = Match.objects.create(player1=winners[i], player2=winners[i + 1])
-                    new_round.matches.add(match)
+                    game = Game.objects.create(player1=winners[i], player2=winners[i + 1])
+                    new_round.matches.add(game)
                     new_round.participants.remove(winners[i])
                     new_round.participants.remove(winners[i + 1])
                 new_round.save()
