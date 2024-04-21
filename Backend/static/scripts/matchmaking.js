@@ -1,3 +1,5 @@
+import {loadPage} from "./spa.js";
+
 function handleText() {
   const BASE_TEXT = "FINDING A MATCH";
   const text = document.getElementById("matchmaking text");
@@ -20,8 +22,11 @@ function handleTimer() {
     timer.innerText = `${minutes}:${seconds}`;
   }, 1000);
 }
+async function connectToSocket() {
+}
 async function App() {
   handleText();
   handleTimer();
+  await connectToSocket();
 }
 App();
