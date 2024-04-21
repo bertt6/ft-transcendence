@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'styles/matchmaking.css' %}" />
+    <link rel="stylesheet" href="{% static 'styles/main.css' %}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="main">
+    <div class="main-profile-data">
+        <pong-redirect class="inbox-profile-wrapper" id="profile-image-wrapper">
+          <img src="" id="profile-image" alt="" />
+        </pong-redirect>
+        <div class="inbox-wrapper">
+          <input type="checkbox" id="input-button" />
+          <label for="input-button" class="input-label">
+            <img src="{% static 'public/inbox.svg' %}" alt="cannot load" />
+          </label>
+          <ul class="inbox-list" id="inbox-list">
+          </ul>
+        </div>
+      </div>
+      <div
+        class="container-fluid position-relative matchmaking-wrapper"
+        style="padding: 0"
+      >
+        <div class="matchmaking-container">
+          <div class="matchmaking-text-wrapper">
+            <h1 id="matchmaking text">FINDING A MATCH</h1>
+            <button id="close-matchmaking">X</button>
+          </div>
+          <div><h1 id="matchmaking-timer">00:00</h1></div>
+        </div>
+      </div>
+    </main>
+    <script src="{% static 'scripts/spa.js' %}" type="module"></script>
+  </body>
+</html>

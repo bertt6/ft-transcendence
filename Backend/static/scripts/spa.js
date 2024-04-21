@@ -545,6 +545,25 @@ const routes = new Map([
         </div>
       </div>
             `
+    }],
+    ['matchmaking',{
+        auth_required: true,
+        url: ['/matchmaking/'],
+        html: `
+              <div
+        class="container-fluid position-relative matchmaking-wrapper"
+        style="padding: 0"
+      >
+        <div class="matchmaking-container">
+          <div class="matchmaking-text-wrapper">
+            <h1 id="matchmaking text">FINDING A MATCH</h1>
+            <button id="close-matchmaking">X</button>
+          </div>
+          <div><h1 id="matchmaking-timer">00:00</h1></div>
+        </div>
+      </div>
+        `
+
     }]
 ]);
 const routeToFile = [
@@ -555,6 +574,7 @@ const routeToFile = [
     [['/home/'], 'home'],
     [['/verification/'], 'verification'],
     [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
+    [['/matchmaking/'], 'matchmaking'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
