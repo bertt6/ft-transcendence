@@ -42,8 +42,8 @@ class TournamentConsumer(WebsocketConsumer):
         print(message)
         print("selam")
 
-        #self.PlayMatch(self.profile_id, self.tournament_id)
-        self.StartTournament(self.profile_id, self.tournament_id)
+        self.PlayMatch(self.profile_id, self.tournament_id)
+        #self.StartTournament(self.profile_id, self.tournament_id)
 
 
 
@@ -113,10 +113,7 @@ class TournamentConsumer(WebsocketConsumer):
                             profile2 = Profile.objects.get(id=participants_ids[i + 1])
                         except Profile.DoesNotExist:
                             return
-                        print("Hello")
                         game = Game.objects.create(player1=profile1, player2=profile2)
-                        print(game.player1.id)
-                        print("Hello123")
                         round_obj.matches.add(game)
                         round_obj.participants.remove(participants_ids[i])
                         round_obj.participants.remove(participants_ids[i + 1])
@@ -131,7 +128,6 @@ class TournamentConsumer(WebsocketConsumer):
             profile_id = int(profile_id1)  # Metni tamsayıya dönüştür
         except ValueError:
             print("Tournament ID metin olarak beklenen türde değil.")
-        print("pd", profile_id)
         try:
             tournament = Tournament.objects.get(pk=tournament_id)
             last_round = tournament.rounds.order_by('-round_number').first()
@@ -143,7 +139,7 @@ class TournamentConsumer(WebsocketConsumer):
             return
         print(last_round)
         if last_round:
-            all_matches_have_winner = all(game.winner is not None for match in last_round.matches.all())
+            all_matches_have_winner = all(Game.winner is not None for match in last_round.matches.all())
             if all_matches_have_winner:
                 new_round_number = last_round.round_number + 1
                 new_round = Round.objects.create(round_number=new_round_number)
