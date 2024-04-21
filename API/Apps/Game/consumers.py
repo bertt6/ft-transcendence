@@ -41,7 +41,6 @@ class MatchMakingConsumer(WebsocketConsumer):
             'game': event['game']
         }))
 
-
     def match_making(self):
         players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
         while len(players) != 0:
