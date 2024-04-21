@@ -5,9 +5,8 @@ from ..Game.models import Game
 
 class Round(models.Model):
     round_number = models.PositiveIntegerField()
-    matches = models.ManyToManyField(Game, blank=True, related_name='rounds')
+    matches = models.ManyToManyField(Game, blank=True, related_name='game')
     participants = models.ManyToManyField(Profile, related_name='round_participants')
-
 
 
 class Tournament(models.Model):

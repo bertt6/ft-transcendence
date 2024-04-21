@@ -1,11 +1,8 @@
 import uuid
 
 from django.db import models
-
+from django.apps import apps
 from Apps.Profile.models import Profile
-from Apps.Tournament.models import Tournament
-
-
 # Create your models here.
 
 
@@ -14,13 +11,18 @@ class Game(models.Model):
     player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player1')
     player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player2')
     winner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='winner', null=True, blank=True,default=None)
-    tournament = models.ForeignKey(Tournament, on_delete=models.SET_NULL, blank=True, null=True)
     is_finished = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
-    def __str__(self):
+
+    @property
+    def tournament(self):
+        Tournament = apps.get_model('Tournament', 'Tournament')
+        return models.ForeignKey(Tournament, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def str(self):
         return f'{self.player1} vs {self.player2} on {self.date} with Id {self.id}'
 
-    def save(self, *args, **kwargs):
+    def save(self, args, **kwargs):
         if self.winner:
             self.is_finished = True
-        super().save(*args, **kwargs)
+        super().save(args, **kwargs)

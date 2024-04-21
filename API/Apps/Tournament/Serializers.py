@@ -1,15 +1,16 @@
 from rest_framework import serializers
 from ..Profile.models import Profile
-from .models import Tournament, Match, Round
+from .models import Tournament, Round
+from ..Game.api.serializers import GameSerializer
+from ..Game.models import Game
 
-
-class MatchGetSerializer(serializers.ModelSerializer):
+class GameGetSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Match
+        model = Game
         fields = "__all__"
 
 class RoundSerializer(serializers.ModelSerializer):
-    matches = MatchGetSerializer(many=True)
+    matches = GameGetSerializer(many=True, read_only=True)
     class Meta:
         model = Round
         fields = ['round_number', 'matches', 'participants']

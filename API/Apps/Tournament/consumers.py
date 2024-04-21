@@ -42,7 +42,7 @@ class TournamentConsumer(WebsocketConsumer):
         print(message)
         print("selam")
 
-        self.PlayMatch(self.profile_id, self.tournament_id)
+        #self.PlayMatch(self.profile_id, self.tournament_id)
         self.StartTournament(self.profile_id, self.tournament_id)
 
 
@@ -77,14 +77,17 @@ class TournamentConsumer(WebsocketConsumer):
                 tournament.save()
         print(f"Kullanıcı {self.profile_id} bağlantısı kesildi.")
 
-    def StartTournament(self, profile_id,tournament_id):
-        print("tournament_id= ", tournament_id)
+    def StartTournament(self, profile_id,tournament_id1):
+        try:
+            tournament_id = int(tournament_id1)  # Metni tamsayıya dönüştür
+        except ValueError:
+            print("Tournament ID metin olarak beklenen türde değil.")
         try:
             tournament = Tournament.objects.get(id=tournament_id)
         except Tournament.DoesNotExist:
             print("No tournament")
 
-
+        print("tournament_id= ", tournament_id)
         participants = tournament.current_participants.all()
         if tournament.rounds.exists():
             self.send_error("Tournament Already Started")
@@ -96,16 +99,30 @@ class TournamentConsumer(WebsocketConsumer):
             tournament.rounds.add(round_obj)
             try:
                 round_obj = tournament.rounds.first()
-                participants = round_obj.participants.all()
-                for i in range(0, len(participants), 2):
-                    if i + 1 < len(participants):
-                        game = Game.objects.create(player1=participants[i], player2=participants[i + 1])
+                participants_ids = [participant.id for participant in round_obj.participants.all()]
+                print(participants_ids)
+                print("Merr")
+                print(participants)
+                for i in range(0, len(participants_ids), 2):
+                    if i + 1 < len(participants_ids):
+                        try:
+                            profile1 = Profile.objects.get(id=participants_ids[i])
+                        except Profile.DoesNotExist:
+                            return
+                        try:
+                            profile2 = Profile.objects.get(id=participants_ids[i + 1])
+                        except Profile.DoesNotExist:
+                            return
+                        print("Hello")
+                        game = Game.objects.create(player1=profile1, player2=profile2)
+                        print(game.player1.id)
+                        print("Hello123")
                         round_obj.matches.add(game)
-                        round_obj.participants.remove(participants[i])
-                        round_obj.participants.remove(participants[i + 1])
-
+                        round_obj.participants.remove(participants_ids[i])
+                        round_obj.participants.remove(participants_ids[i + 1])
             except Exception as e:
-                print("Error")
+                print("Error", e)
+
             print("Turnuva Başlatıldı")
 
 
