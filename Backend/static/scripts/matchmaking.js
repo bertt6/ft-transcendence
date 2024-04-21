@@ -23,6 +23,16 @@ function handleTimer() {
   }, 1000);
 }
 async function connectToSocket() {
+  const nickname = localStorage.getItem("activeUserNickname")
+    const socket = new WebSocket(`ws://localhost:8000/ws/matchmaking/${nickname}`);
+    socket.onopen = () => {
+        console.log("Successfully connected to the server");
+    }
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+      console.log(data)
+        loadPage(`/game/${data.game_id}`);
+    }
 }
 async function App() {
   handleText();
