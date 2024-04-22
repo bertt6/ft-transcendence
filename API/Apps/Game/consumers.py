@@ -308,6 +308,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'game': GameConsumer.game_states[self.game_id]
                     }
                 )
+                GameConsumer.game_states[self.game_id]['ball']['dx'] = 5
+                GameConsumer.game_states[self.game_id]['ball']['dy'] = 5
                 await asyncio.sleep(3.2)
         elif ball['x'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_width'] / 2:
             GameConsumer.game_states[self.game_id]['player_one']['score'] += 1
@@ -336,6 +338,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'game': GameConsumer.game_states[self.game_id]
                     }
                 )
+                GameConsumer.game_states[self.game_id]['ball']['dx'] = 5
+                GameConsumer.game_states[self.game_id]['ball']['dy'] = 5
                 await asyncio.sleep(3.2)
 
     def initialize_game_state(self, data):
