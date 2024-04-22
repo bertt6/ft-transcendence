@@ -11,28 +11,64 @@ const paddleHeight = 200;
 const ballSize = 20;
 
 
-class Participants extends BaseComponent
-{
-    constructor(state,parentElement)
-    {
-        super(state,parentElement);
+class Participants extends BaseComponent {
+    constructor(state, parentElement) {
+        super(state, parentElement);
+        this.popupContainer = null;
     }
-    handleHTML()
-    {
+
+    handleHTML() {
         return `
-         ${this.state.spectators.map((spectator) => `
-         <div class="spectator-image">
-            <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
-        </div>
-         `).join("")}
-        `
+            <div class="spectators-container">
+                ${this.state.spectators.map((spectator, index) => `
+                    <div class="spectator-image" data-index="${index}">
+                        <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                    </div>
+                `).join("")}
+            </div>
+        `;
     }
+
+    showSpectatorDetails(index) {
+        this.popupContainer = document.createElement('div');
+        this.popupContainer.classList.add('popup-container');
+        this.parentElement.appendChild(this.popupContainer);
+
+        this.popupContainer.innerHTML = `
+        <div>
+            <h6>Spectators - ${this.state.spectators.length}</h6>
+                ${this.state.spectators.map((spectator, index) => `
+                    <div class="popup-content">
+                        <img class='spectator-image' src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                        <a>${spectator.nickname}</a>
+                    </div>
+                `).join('')}
+        </div>
+       `;
+        this.popupContainer.style.display = 'block';
+    }
+
+    hideSpectatorDetails() {
+        this.popupContainer.style.display = 'none';
+    }
+
+    attachEventListeners() {
+        const spectatorImages = this.parentElement.querySelectorAll('.spectators-container');
+        spectatorImages.forEach((image, index) => {
+            image.addEventListener('mouseover', () => this.showSpectatorDetails(index));
+            image.addEventListener('mouseleave', () => this.hideSpectatorDetails())
+
+        });
+    }
+
     render() {
         this.parentElement.innerHTML = this.handleHTML();
+        this.attachEventListeners();
     }
-    setState(newState)
-    {
-        this.state = {...this.state,...newState};
+
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.render();
     }
 }
 let element = document.getElementById('spectators-wrapper')
