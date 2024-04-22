@@ -1,15 +1,6 @@
 groups:
 - name: AllInstances
   rules:
-  - alert: InstanceDown
-    expr: up == 0
-    for: 1m
-    annotations:
-      title: 'Instance {{ $labels.instance }} down'
-      description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute.'
-    labels:
-      severity: 'critical'
-
   - alert: PrometheusJobMissing
     expr: absent(up{job="prometheus"})
     for: 0m
@@ -19,35 +10,9 @@ groups:
       summary: Prometheus job missing (instance {{ $labels.instance }})
       description: "A Prometheus job has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-  - alert: PrometheusTargetMissing
-    expr: up == 0
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Prometheus target missing (instance {{ $labels.instance }})
-      description: "A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-  - alert: PostgresqlDown
-    expr: pg_up == 0
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Postgresql down (instance {{ $labels.instance }})
-      description: "Postgresql instance is down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-  - alert: PostgresqlTableNotAutoAnalyzed
-    expr: (pg_stat_user_tables_last_autoanalyze > 0) and (time() - pg_stat_user_tables_last_autoanalyze) > 24 * 60 * 60 * 10
-    for: 0m
-    labels:
-      severity: warning
-    annotations:
-      summary: Postgresql table not auto analyzed (instance {{ $labels.instance }})
-      description: "Table {{ $labels.relname }} has not been auto analyzed for 10 days\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
   - alert: HostHighCpuLoad
-    expr: (sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.001) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+    expr: (sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
     for: 10m
     labels:
       severity: warning
@@ -55,11 +20,4 @@ groups:
       summary: Host high CPU load (instance {{ $labels.instance }})
       description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-  - alert: RedisDown
-    expr: redis_up == 0
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Redis down (instance {{ $labels.instance }})
-      description: "Redis instance is down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+  

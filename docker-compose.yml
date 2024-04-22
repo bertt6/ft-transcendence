@@ -4,16 +4,19 @@ services:
   postgres:
     build:
       context: psql
-      dockerfile: Dockerfile
+      dockerfile: db.Dockerfile
     ports:
       - "5432:5432"
     volumes:
       - ./psql/data:/var/lib/postgresql/data
+    networks:
+      - backend
+      - monitoring
 
   frontend:
     build:
       context: Backend
-      dockerfile: Dockerfile
+      dockerfile: frontend.Dockerfile
     ports:
       - "3030:3030"
     depends_on:
@@ -24,7 +27,7 @@ services:
   backend:
     build:
       context: API
-      dockerfile: Dockerfile
+      dockerfile: backend.Dockerfile
     ports:
       - "8000:8000"
     depends_on:
@@ -34,10 +37,15 @@ services:
       - DATABASE_URL=postgres://postgres:123@db:5432/transcendenceDB
     volumes:
       - ./API/backendVol:/app/backend
-    command: sh -c "python manage.py migrate &&
+    command: sh -c "sleep 10 && python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - backend
   redis:
     image: "redis:alpine"
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
 
   nginx:
     build:
@@ -71,6 +79,10 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+    volumes:
+      - ./Devops/grafana-prometheus/grafana/grafana_data:/var/lib/grafana
+      - ./Devops/grafana-prometheus/grafana/grafana-datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./Devops/grafana-prometheus/grafana/grafana-dashboards/dashboard.json:/etc/grafana/provisioning/dashboards/dashboard.json
     restart: always
     networks:
       - monitoring
@@ -121,6 +133,8 @@ services:
 
 networks:
   monitoring:
+    driver: bridge
+  backend:
     driver: bridge
 
 volumes:

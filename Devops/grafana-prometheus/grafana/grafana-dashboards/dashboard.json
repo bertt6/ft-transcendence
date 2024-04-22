@@ -1,0 +1,14 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "aaaaaaaaas",
+    "title": "Your Dashboard Title",
+    "tags": [],
+    "timezone": "browser",
+    "editable": true,
+    "rows": [],
+    "schemaVersion": 22,
+    "version": 0
+  },
+  "overwrite": false
+}
