@@ -11,8 +11,6 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class RoomSerializer(serializers.ModelSerializer):
-    messages = MessageSerializer(read_only=True, many=True)
-
     class Meta:
         model = Room
         fields = '__all__'

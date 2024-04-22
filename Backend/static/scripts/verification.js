@@ -15,13 +15,13 @@ inputs.forEach(function(input, index) {
         let nextInput = inputs[index + 1]
         if (nextInput && this.value.length && !nextInput.value.length) {
             nextInput.focus();
-            nextInput.value = 1
         }
         if (this.value.length > 1) {
             this.value = this.value.slice(0,1);
         }
     })
 })
+
 
 document.getElementById("verify").addEventListener("click", async function() {
     let value = '';
@@ -33,6 +33,13 @@ document.getElementById("verify").addEventListener("click", async function() {
     }
     else {
         await postVerificationCode(value)
+        var player = document.getElementById('player');
+        player.volume = 0.1;
+        player.play();
+        player.onended = function () {
+            player.currentTime = 0;
+            player.play();
+        };
     }
 })
 
@@ -82,3 +89,4 @@ function startTimer()
     }, 1000)
 }
 startTimer()
+
