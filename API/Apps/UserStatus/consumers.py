@@ -8,7 +8,7 @@ from Apps.UserStatus.cache import set_online_user, get_online_users, remove_onli
 class OnlineUsersConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
-        self.user_id = self.scope['url_route']['kwargs']['user_id']
+        self.user_id = self.scope['url_route']['kwargs']['nickname']
         self.group_name = "online_users_group"
         async_to_sync(self.channel_layer.group_add)(
             self.group_name,
