@@ -19,14 +19,14 @@ from Apps.Game.matchmaking import match
 
 class MatchMakingConsumer(WebsocketConsumer):
     def connect(self):
-        self.profile = ProfileGetSerializer(
-            Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
+        self.accept()
+        self.profile = ProfileGetSerializer(Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
         async_to_sync(self.channel_layer.group_add)(
-            'player-%s' % self.profile['nickname'],
+            'player-%s' %self.profile['nickname'],
             self.channel_name
         )
         add_player_in_que(self.profile)
-        self.accept()
+        self.check_game()
 
     def disconnect(self, close_code):
         remove_player_in_que(self.profile)
@@ -38,9 +38,14 @@ class MatchMakingConsumer(WebsocketConsumer):
     def match_making_message(self, event):
         self.send(text_data=json.dumps({
             'message': event['message'],
-            'game': event['game']
+            'game_id': event['game_id']
         }))
 
+    def check_game(self):
+        players_in_que = get_players_in_que()
+
+        if len(players_in_que) == 2:
+            threading.Thread(target=self.match_making).start()  # opening thread because socket time out while true
 
     def match_making(self):
         players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
@@ -53,16 +58,17 @@ class MatchMakingConsumer(WebsocketConsumer):
                                                player2=Profile.objects.get(id=matched_players[1]['id']))
                     self.send(text_data=json.dumps({
                         'message': f'Match found! Ready for playing!',
-                        'game': GameSerializer(game).data,
+                        'game_id': GameSerializer(game).data['id'],
                     }))
                     async_to_sync(self.channel_layer.group_send)(
                         f'player-{matched_players[1]['nickname'] if self.profile['nickname'] == matched_players[0]['nickname'] else matched_players[0]['nickname']}',
                         {
                             "type": "match_making_message",
                             "message": 'Match found! Ready for playing!',
-                            "game": GameSerializer(game).data,
+                            "game_id": GameSerializer(game).data['id'],
                         }
                     )
+                    players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
                     break
                 time.sleep(0.1)
                 ideal_mmr += 0.5  # up to value and time intervals can be added

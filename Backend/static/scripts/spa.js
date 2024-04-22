@@ -417,34 +417,22 @@ const routes = new Map([
         url: ['/home/'],
         html: `
       <div
-        class="background container-fluid position-relative"
+        class="container-fluid position-relative home-wrapper"
         style="padding: 0"
       >
-        <div class="main-buttons-wrapper">
-          <div class="play-wrapper">
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <h1>WELCOME TO PONG</h1>
-            </div>
-            <div class="button-wrapper">
-              <button class="play-button">LEADERBOARD</button>
-              <button class="play-button" id="multiplayer-button">
-                MULTIPLAYER
-              </button>
-              <button class="play-button">SINGLEPLAYER</button>
-              <pong-redirect href="/social/">
-                  <button class="play-button">SOCIAL</button>
-              </pong-redirect>
-            </div>
-          </div>
-        </div>
+        <pong-redirect  class="home-element menu-element" id="single-menu" href="/play/">
+          <h1>Singleplayer</h1>
+        </pong-redirect >
+        <pong-redirect class="home-element menu-element" id="multi-menu" href="/matchmaking/">
+          <h1>Multiplayer</h1>
+        </pong-redirect>
+        <pong-redirect  class="home-element" id="tournament-menu" href="/tournaments/">
+          <h1>Tournament</h1>
+        </pong-redirect >
+        <pong-redirect  class="home-element" id="social-menu" href="/social/">
+          <h1>Social</h1>
+        </pong-redirect >
       </div>
-
               `
     }],
     ['verification', {
@@ -545,6 +533,25 @@ const routes = new Map([
         </div>
       </div>
             `
+    }],
+    ['matchmaking',{
+        auth_required: true,
+        url: ['/matchmaking/'],
+        html: `
+              <div
+        class="container-fluid position-relative matchmaking-wrapper"
+        style="padding: 0"
+      >
+        <div class="matchmaking-container">
+          <div class="matchmaking-text-wrapper">
+            <h1 id="matchmaking text">FINDING A MATCH</h1>
+            <button id="close-matchmaking">X</button>
+          </div>
+          <div><h1 id="matchmaking-timer">00:00</h1></div>
+        </div>
+      </div>
+        `
+
     }]
 ]);
 const routeToFile = [
@@ -555,6 +562,7 @@ const routeToFile = [
     [['/home/'], 'home'],
     [['/verification/'], 'verification'],
     [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
+    [['/matchmaking/'], 'matchmaking'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -629,7 +637,12 @@ function findRouteFile(pathName) {
 
 export function loadPage(fileName) {
     let data = findRouteFile(fileName);
+    if(!data){
+        console.error("No route found for",fileName);
+        return;
+    }
     const route = routes.get(data);
+
     let isMatch = false;
     if (Array.isArray(route.url)) {
         isMatch = route.url.some(url => {

@@ -17,7 +17,8 @@ def add_player_in_que(player):
 
 def remove_player_in_que(player):
     all_keys = get_players_in_que()
-    all_keys.remove(player)
+    if player in all_keys:
+        all_keys.remove(player)
     cache.set('players-in-que', json.dumps(all_keys))
 
 
