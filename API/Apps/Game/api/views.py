@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from Apps.Game.models import Game
 from Apps.Profile.models import Profile
+from Apps.Request.models import Request
 from Apps.Tournament.models import Tournament
 
 
@@ -10,8 +11,15 @@ from Apps.Tournament.models import Tournament
 @permission_classes([IsAuthenticated])
 def create_game(request):
     try:
-        player1 = Profile.objects.get(id=request.data['player1'])
-        player2 = Profile.objects.get(id=request.data['player2'])
+        request_id = request.data['request_id']
+        request_data = Request.objects.get(id=request_id)
+        request_data.status = 'accepted'
+        request_data.save()
+    except Request.DoesNotExist:
+        return Response({'message': 'Request does not exist!'}, status=400)
+    try:
+        player1 = Profile.objects.get(nickname=request.data['player1'])
+        player2 = Profile.objects.get(nickname=request.data['player2'])
     except Profile.DoesNotExist:
         return Response({'message': 'One of the players does not exist!'}, status=400)
 
@@ -23,8 +31,8 @@ def create_game(request):
     else:
         tournament = None
 
-    Game.objects.create(player1=player1, player2=player2, tournament=tournament)
-    return Response({'message': 'Game Created!'}, status=201)
+    game = Game.objects.create(player1=player1, player2=player2, tournament=tournament)
+    return Response({'message': 'Game Created!', 'game_id': game.id}, status=201)
 
 
 @api_view(['PUT'])

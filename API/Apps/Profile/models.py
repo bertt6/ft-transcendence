@@ -9,7 +9,6 @@ class Stats(models.Model):
     total_wins = models.IntegerField()
     total_losses = models.IntegerField()
     points = models.IntegerField()
-    # match_history = models.ManyToManyField('Game', blank=True)
 
     def __str__(self):
         return f"Total Games: {self.total_games}, Total Wins: {self.total_wins}, Total Losses: {self.total_losses}, Points: {self.points}"
@@ -24,11 +23,21 @@ class Profile(models.Model):
     is_verified = models.BooleanField(default=False)
     friends = models.ManyToManyField('Profile', blank=True, related_name='profile_friends')
     bio = models.TextField(blank=True, null=True, default=None)
+    mmr = models.IntegerField(default=1000)
     blocked_users = models.ManyToManyField('Profile', blank=True, related_name='users_blocked')
 
-
     def __str__(self):
-        return f"{self.nickname if self.nickname else self.user.username}"
+        return self.nickname
+
+    def win_games(self, opponent_mmr):
+        k_factor = 32
+        expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
+        self.mmr += k_factor * (1 - expected_score)
+
+    def lose_games(self, opponent_mmr):
+        k_factor = 32
+        expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
+        self.mmr += k_factor * (0 - expected_score)
 
 
 @receiver(m2m_changed, sender=Profile.friends.through)

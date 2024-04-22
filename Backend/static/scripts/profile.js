@@ -1,5 +1,5 @@
 import BaseComponent from "../components/Component.js";
-import { API_URL, BASE_URL, getCookie, loadPage } from "./spa.js";
+import { API_URL, BASE_URL, loadPage } from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
 import { escapeHTML } from "./utils.js";
@@ -80,8 +80,6 @@ class Stats extends BaseComponent {
     }
 
     handleHTML() {
-
-        console.log(this.state)
         return `
     <div class="stats-wrapper">
     <div class="stats-row">
@@ -146,7 +144,7 @@ class Friends extends BaseComponent {
                 </div>
                 <div class="friend-more">
                   <div><img src="/static/public/image.svg" alt="" /></div>
-                  <div><img src="/static/public/chat-bubble.svg"/></div>
+                  <div><img src="/static/public/chat-bubble.svg" alt=""/></div>
                   <div><img src="/static/public/more.svg" alt="" /></div>
                 </div>
               </div>
@@ -169,7 +167,7 @@ class ProfileInfo extends BaseComponent {
 
 
     handleEditHTML() {
-        const { nickname, first_name, last_name, bio, profile_picture } = this.state.profile;
+        const { nickname, first_name, bio, profile_picture } = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -204,7 +202,7 @@ class ProfileInfo extends BaseComponent {
         `
     }
     handleHTML() {
-        const { nickname, first_name, last_name, bio, profile_picture } = this.state.profile;
+        const { nickname, first_name, bio, profile_picture } = this.state.profile;
         return `
         <div class="profile-info-wrapper">
                 <div class="profile-edit">
@@ -231,7 +229,7 @@ class ProfileInfo extends BaseComponent {
               </div>`
     }
 
-    updateProfile = async (formData) => {
+updateProfile = async (formData) => {
 
         try {
             let response = await request(`${API_URL}/profile/`, {
@@ -241,6 +239,7 @@ class ProfileInfo extends BaseComponent {
             notify('Profile updated', 3, 'success');
 
             this.setState({ ...this.state, profile: response });
+            localStorage.setItem('activeUserNickname', response.nickname);
         }
         catch (error) {
             console.error('Error:', error);
@@ -312,19 +311,19 @@ async function assignDataRouting() {
     const friendsButton = document.getElementById('friends-button');
     const statsButton = document.getElementById('stats-button');
     const blockedUsersButton = document.getElementById('blocked-users-button');
-    historyButton.addEventListener('click', (e) => {
+    historyButton.addEventListener('click', () => {
         history.replaceState(null, null, '#history')
         handleRouting()
     });
-    friendsButton.addEventListener('click', (e) => {
+    friendsButton.addEventListener('click', () => {
         history.replaceState(null, null, '#friends')
         handleRouting()
     });
-    statsButton.addEventListener('click', (e) => {
+    statsButton.addEventListener('click', () => {
         history.replaceState(null, null, '#stats')
         handleRouting()
     });
-    blockedUsersButton.addEventListener('click', (e) => {
+    blockedUsersButton.addEventListener('click', () => {
         history.replaceState(null, null, '#blockedusers')
         handleRouting()
     });
@@ -340,7 +339,6 @@ async function fetchBlockedUsers() {
     ];
     return users;
 }
-
 async function fetchStats() {
     try {
         let response = await request(`${API_URL}/profile/stats`, {
@@ -370,6 +368,7 @@ async function fetchFriends() {
 async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
+    const activeUserNickname = localStorage.getItem('activeUserNickname');
     if (hash === '#history') {
         const history = new History({ histories: [1] }, parentElement);
         history.render();
@@ -384,13 +383,18 @@ async function handleRouting() {
         const statsInfo = new Stats({ statsInfo: data }, parentElement);
         statsInfo.render();
     }
-    if (hash === '#blockedusers') {
+    if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
         let data = await fetchBlockedUsers();
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
 }
-
+function getUsernameFromURL()
+{
+    const pathName = window.location.pathname;
+    const pathParts = pathName.split('/');
+    return pathParts[pathParts.length - 1];
+}
 const App = async () => {
     await fetchProfile();
     await fetchBlockedUsers();
