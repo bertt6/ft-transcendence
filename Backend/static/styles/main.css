@@ -346,11 +346,23 @@ pong-redirect{
   transform: translateX(100%);
 }
 .main-profile-data {
-  max-width: 112px;
+  max-width: 180px;
   max-height: 80px;
   display: flex;
   position: absolute;
-  right: 0;
+  right: 30px;
   top: 0;
   z-index: 10;
+  gap: 5px;
+}
+
+.logout-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-wrapper label {
+  cursor: pointer;
 }

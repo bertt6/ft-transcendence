@@ -50,4 +50,5 @@ async function connectToSocket() {
 async function App() {
   await connectToSocket();
 }
+
 App();
