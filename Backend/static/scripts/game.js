@@ -1,6 +1,7 @@
 import {BASE_URL, loadError, loadPage} from "./spa.js";
 import {getProfile} from "./utils.js";
 import BaseComponent from "../components/Component.js";
+import {getStatusSocket} from "./Status.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -147,7 +148,6 @@ async function connectToServer()
     const path = window.location.pathname;
     const id = path.split("/")[2];
     let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
-
     socket.onopen = async function (event) {
         let connectedProfile = await getProfile()
         socket.send(JSON.stringify({
@@ -164,10 +164,21 @@ async function connectToServer()
         }, 3000);
     }
 
-    socket.onmessage = (event) => {
+    socket.onmessage = async  (event) => {
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
+          try {
+            const statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({
+                request_type: "set_status",
+                status: "in_game",
+                nickname: localStorage.getItem("activeUserNickname"),
+            }));
+          }catch(e)
+          {
+              console.error(e);
+          }
         handleInitialState(data);
         handleMovement(socket,data);
       } else if (data.state_type === "score_state") {

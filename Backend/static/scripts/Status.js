@@ -1,9 +1,14 @@
 let socket;
 
-function getStatusSocket(url) {
+export function getStatusSocket(url) {
     return new Promise((resolve, reject) => {
         if (socket) {
-            resolve(socket);
+            if (socket.readyState === WebSocket.OPEN) {
+                resolve(socket);
+            } else {
+                socket.onopen = () => resolve(socket);
+                socket.onerror = (error) => reject(error);
+            }
         } else {
             socket = new WebSocket(url);
 
@@ -20,11 +25,7 @@ function getStatusSocket(url) {
 
 async function App()
 {
-    let socket = await getStatusSocket(`ws://localhost:8000/ws/status/`);
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log(data);
-    }
+    let nickname = localStorage.getItem('activeUserNickname');
+    let socket = await getStatusSocket(`ws://localhost:8000/ws/status/${nickname}`);
 }
 App().catch(e => console.error(e))
-export default getStatusSocket;
