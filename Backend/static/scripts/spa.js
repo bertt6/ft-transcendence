@@ -572,6 +572,7 @@ const requiredScripts = [
     '/static/components/spinner.js',
     '/static/scripts/utils.js',
     '/static/scripts/inbox.js',
+    '/static/scripts/Status.js',
 ]
 
 export function loadError(statusCode,title,message) {
