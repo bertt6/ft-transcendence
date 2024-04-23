@@ -6,7 +6,7 @@ function handleText() {
   console.log(text);
   let textIndex = 0;
   return setInterval(() => {
-    text.innerText = BASE_TEXT + ".".repeat(textIndex % 3);
+      text.innerText = BASE_TEXT + ".".repeat(textIndex % 4);
     textIndex += 1;
   }, 1000);
 }
