@@ -47,6 +47,7 @@
     transform: translate(-50%, -50%);
     user-select: none;
     transition: background-position 0.8s ease;
+    text-shadow: 2px 2px 0px black;
 }
 
 #single-menu {
