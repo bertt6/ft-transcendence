@@ -1,7 +1,7 @@
 .matchmaking-wrapper {
   height: 80%;
   width: 100%;
-  background: url("/static/public/SocialCloud.png") no-repeat;
+  background: url("/static/public/8351324.gif") no-repeat;
   background-size: cover;
   display: flex;
   align-items: center;
@@ -25,4 +25,8 @@
   color: red;
   font-size: 2rem;
   user-select: none;
+}
+
+.matchmaking-container h1 {
+  text-shadow: 2px 2px 0px #000000;
 }
