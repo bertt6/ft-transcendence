@@ -353,7 +353,7 @@ pong-redirect{
   right: 30px;
   top: 0;
   z-index: 10;
-  gap: 5px;
+  gap: 10px;
 }
 
 .logout-wrapper {
@@ -365,4 +365,8 @@ pong-redirect{
 
 .logout-wrapper label {
   cursor: pointer;
+}
+
+.logout-wrapper img {
+  width: 2rem;
 }
