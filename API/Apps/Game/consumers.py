@@ -35,6 +35,11 @@ class MatchMakingConsumer(WebsocketConsumer):
             self.channel_name,
         )
 
+    def receive(self, text_data=None, bytes_data=None):
+        text_data_json = json.loads(text_data)
+        if text_data_json['request_type'] == 'disconnect':
+            self.close()
+
     def match_making_message(self, event):
         self.send(text_data=json.dumps({
             'message': event['message'],

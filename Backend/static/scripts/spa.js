@@ -573,6 +573,7 @@ const requiredScripts = [
     '/static/components/spinner.js',
     '/static/scripts/utils.js',
     '/static/scripts/inbox.js',
+    '/static/scripts/Status.js',
 ]
 
 export function loadError(statusCode,title,message) {
@@ -760,3 +761,17 @@ window.addEventListener('popstate', (event) => {
 );
 
 document.addEventListener('DOMContentLoaded', App);
+
+document.getElementById('logout-wrapper').addEventListener('click', async () => {
+    const refresh_token = getCookie('refresh_token')
+    await request(`${API_URL}/token/blacklist`, {
+        method: 'POST',
+        body: JSON.stringify({
+            refresh: refresh_token
+        }),
+    });
+    localStorage.clear()
+    setCookie('access_token', null, 1);
+    setCookie('refresh_token', null, 1);
+    loadPage('/auth/login/')
+})

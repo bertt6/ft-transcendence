@@ -6,7 +6,7 @@ function handleText() {
   console.log(text);
   let textIndex = 0;
   return setInterval(() => {
-    text.innerText = BASE_TEXT + ".".repeat(textIndex % 3);
+      text.innerText = BASE_TEXT + ".".repeat(textIndex % 4);
     textIndex += 1;
   }, 1000);
 }
@@ -41,13 +41,20 @@ async function connectToSocket() {
       handleTimer();
     }
   socket.onmessage = async (event) => {
-        const data = JSON.parse(event.data);
+    const data = JSON.parse(event.data);
     clearInterval(interval)
     await matchFounded()
-        loadPage(`/game/${data.game_id}`);
+    loadPage(`/game/${data.game_id}`);
     }
+  document.getElementById("close-matchmaking").addEventListener('click', () => {
+    socket.send(JSON.stringify({
+      request_type: "disconnect",
+    }))
+    loadPage('/home/')
+  })
 }
 async function App() {
   await connectToSocket();
 }
+
 App();
