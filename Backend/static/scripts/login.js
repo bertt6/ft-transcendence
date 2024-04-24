@@ -44,7 +44,6 @@ async function handle42APICallback(code) {
                     }),
                 })
                 response.json().then((response) => {
-                    console.log(response)
                     localStorage.setItem('username', response.user.username);
                     loadPage('/auth/verification/');
                 })
