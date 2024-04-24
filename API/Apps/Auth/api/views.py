@@ -1,14 +1,13 @@
-import os
-
 from pytz import timezone
 
-from API.serializers import RegisterSerializer, ChangePasswordSerializer
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from Apps.Auth.serializers import RegisterSerializer, ChangePasswordSerializer, RegisterWith42Serializer
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from ..utils import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsEmailVerified
+from ...Profile.api.Serializers import UserSerializer
 
 
 @api_view(['POST'])
@@ -106,3 +105,15 @@ def change_password(request):
         user.set_password(new_password)
         user.save()
         return Response({'success': 'password changed successfully'}, status=200)
+
+
+@api_view(['POST'])
+def login_with_42(request):
+    User.objects.filter(username=request.data['username']).exists()
+    if not User.objects.filter(username=request.data['username']).exists():
+        serializer = RegisterWith42Serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+    user = User.objects.get(username=request.data['username'])
+    send_email(user)
+    return Response(data={'user': UserSerializer(user).data}, status=200)

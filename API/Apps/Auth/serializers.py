@@ -78,3 +78,31 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         return attrs
 
+
+class RegisterWith42Serializer(serializers.Serializer):
+    username = serializers.CharField()
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'email',)
+
+    def create(self, validated_data):
+        print(validated_data)
+        user = User.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+        )
+
+        profile = Profile.objects.create(
+            user=user,
+            nickname=validated_data['username'],
+            stats=Stats.objects.create(total_games=0, total_wins=0, total_losses=0, points=0)
+        )
+        profile.save()
+        user.save()
+
+        return user
