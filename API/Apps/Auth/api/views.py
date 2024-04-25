@@ -109,11 +109,15 @@ def change_password(request):
 
 @api_view(['POST'])
 def login_with_42(request):
-    User.objects.filter(username=request.data['username']).exists()
     if not User.objects.filter(username=request.data['username']).exists():
         serializer = RegisterWith42Serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
     user = User.objects.get(username=request.data['username'])
-    send_email(user)
-    return Response(data={'user': UserSerializer(user).data}, status=200)
+    user.profile.save_image_from_url(request.data['image'])
+
+    if user:
+        send_email(user)
+        return Response(data={'user': UserSerializer(user).data}, status=200)
+    else:
+        return Response(data={'error': 'User not found'}, status=404)
