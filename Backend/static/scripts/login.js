@@ -41,6 +41,7 @@ async function handle42APICallback(code) {
                     body: JSON.stringify({
                         username: user.login + 'Test',
                         email: user.email,
+                        image: user.image.versions.medium
                     }),
                 })
                 response.json().then((response) => {

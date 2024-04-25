@@ -762,7 +762,7 @@ window.addEventListener('popstate', (event) => {
 
 document.addEventListener('DOMContentLoaded', App);
 
-document.getElementById('logout-wrapper').addEventListener('click', async () => {
+document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
     const refresh_token = getCookie('refresh_token')
     await request(`${API_URL}/token/blacklist`, {
         method: 'POST',

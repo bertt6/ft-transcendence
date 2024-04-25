@@ -370,3 +370,17 @@ pong-redirect{
 .logout-wrapper img {
   width: 2rem;
 }
+
+.profile-photoo {
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  height: 15rem;
+  width: 15rem;
+}
+
+.profile-photoo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
