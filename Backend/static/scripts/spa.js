@@ -537,7 +537,7 @@ const routes = new Map([
       </div>
             `
     }],
-    ['matchmaking',{
+    ['matchmaking', {
         auth_required: true,
         url: ['/matchmaking/'],
         html: `
@@ -556,60 +556,17 @@ const routes = new Map([
         `
 
     }],
-    [
-        'tournaments', {
+    ['tournaments', {
         auth_required: true,
         url: ['/tournaments/'],
         html: `
-              <div class="background social-background">
+      <div class="background social-background">
         <div class="tournament-container">
           <div class="tournament-header">
             <h1>Tournaments</h1>
           </div>
           <div class="tournament-data-container">
-            <div class="tournament-wrapper">
-              <div class="tournament-element">
-                <div class="element-data">
-                  <div class="tournament-img">
-                    <img
-                      src="https://picsum.photos/seed/picsum/200/300"
-                      alt=""
-                    />
-                  </div>
-                  <div>
-                    <h2>Agalarla Turnuva</h2>
-                  </div>
-                </div>
-                <div class="images-style">
-                  <div class="players-img">
-                    <img
-                      src="https://picsum.photos/seed/picsum/200/300"
-                      alt=""
-                    />
-                  </div>
-                  <div class="players-img">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
-                  </div>
-                  <div class="players-img">
-                    <img src="https://picsum.photos/200/300?grayscale" alt="" />
-                  </div>
-                  <div class="players-img">
-                    <img
-                      src="https://picsum.photos/seed/picsum/200/300"
-                      alt=""
-                    />
-                  </div>
-                </div>
-                <div class="tournament-point">
-                  <h2>IN GAME</h2>
-                </div>
-                <div class="tournament-order">
-                  <h2>3 MIN AGO</h2>
-                </div>
-                <div>
-                  <img src="/static/public/more.svg" alt="" />
-                </div>
-              </div>
+            <div class="tournament-wrapper" id="tournament-wrapper">
             </div>
           </div>
           <button class="create-tournament-button">CREATE TOURNAMENT</button>
@@ -617,8 +574,50 @@ const routes = new Map([
         </div>
       </div>
 `
-    }
-    ]
+    }],
+        ['create-tournament', {
+        auth_required: true,
+        url: ['/create-tournament/'],
+        html: `
+              <div
+        class="background container-fluid social-background"
+        style="padding: 0"
+      >
+        <div class="create-container">
+          <div class="create-header">
+            <h1>Create Tournament</h1>
+          </div>
+          <form id="create-form">
+            <div class="create-group">
+              <label for="tournament-name-input">Tournament Name :</label>
+              <input
+                type="text"
+                id="tournament-name-input"
+                name="name"
+                required
+              />
+            </div>
+            <div class="create-group">
+              <label for="range-input" id="range-label">Player Count :</label>
+              <div class="range-wrapper">
+                <input
+                  type="range"
+                  id="max_participants"
+                  min="4"
+                  max="16"
+                  value="2"
+                />
+                <span id="range-value">2</span>
+              </div>
+            </div>
+            <div class="button-wrapper">
+              <button id="create-button">CREATE</button>
+            </div>
+          </form>
+        </div>
+      </div>
+        `
+    }]
 ]);
 const routeToFile = [
     [["/auth/login/"], 'login'],
@@ -630,6 +629,7 @@ const routeToFile = [
     [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
     [['/matchmaking/'], 'matchmaking'],
     [['/tournaments/'], 'tournaments'],
+    [['/create-tournament/'], 'create-tournament'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -642,7 +642,7 @@ const requiredScripts = [
     '/static/scripts/Status.js',
 ]
 
-export function loadError(statusCode,title,message) {
+export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
     content.innerHTML = routes.get('error').html;
     history.pushState({}, '', '/error/');
@@ -704,8 +704,8 @@ function findRouteFile(pathName) {
 
 export function loadPage(fileName) {
     let data = findRouteFile(fileName);
-    if(!data){
-        console.error("No route found for",fileName);
+    if (!data) {
+        console.error("No route found for", fileName);
         return;
     }
     const route = routes.get(data);
@@ -723,9 +723,9 @@ export function loadPage(fileName) {
     } else {
         isMatch = window.location.pathname.includes(route.url);
     }
-        let split = fileName.split('/').filter(Boolean);
+    let split = fileName.split('/').filter(Boolean);
     if (!isMatch) {
-        if(split.length > 1)
+        if (split.length > 1)
             history.pushState({}, '', window.location.origin + `/${split[0]}/${split[1]}/`);
         else
             history.pushState({}, '', window.location.origin + route.url);
@@ -733,7 +733,7 @@ export function loadPage(fileName) {
     }
     let content = document.getElementById('main');
     content.innerHTML = route.html;
-    App();
+    renderPage();
 }
 
 async function tryRefreshToken() {
@@ -802,10 +802,21 @@ function loadSpecificScript() {
 }
 
 async function assignLocalStorage() {
-    let profile =await  getProfile();
+    let profile = await getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
 }
-
+export function checkIfAuthRequired(pathName) {
+    let value = findRouteKey(pathName);
+    if (!value)
+        return false;
+    const route = routes.get(value);
+    return route.auth_required;
+}
+async function renderPage() {
+    loadSpecificScript();
+    await checkForAuth();
+    assignRouting()
+}
 const App = async () => {
     loadRequiredScripts();
     loadSpecificScript();
@@ -823,7 +834,7 @@ document.addEventListener('DOMContentLoaded', App);
 
 document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
     const refresh_token = getCookie('refresh_token')
-    if(refresh_token === 'null')
+    if (refresh_token === 'null')
         return
     await request(`${API_URL}/token/blacklist`, {
         method: 'POST',

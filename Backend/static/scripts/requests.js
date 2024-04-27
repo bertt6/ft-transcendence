@@ -1,7 +1,7 @@
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
-import {API_URL, loadPage} from "./spa.js";
-import {getProfile} from "./utils.js";
+import {API_URL, checkIfAuthRequired, loadPage} from "./spa.js";
+import {getActiveUserNickname, getProfile} from "./utils.js";
 let socket = null;
 
 async function handleAcceptCallback(profile,request_id)
@@ -38,7 +38,7 @@ async function handleRejectedCallback(request_id)
 }
 export function getSocket() {
     if (socket === null || socket.readyState === WebSocket.CLOSED) {
-        const nickname = localStorage.getItem('activeUserNickname');
+        const nickname = getActiveUserNickname();
         if (nickname === null || nickname === undefined)
             return null;
         socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
@@ -54,7 +54,7 @@ async function handleGameAcceptedCallback(data)
         request_id:data.request_id
     }
     try{
-        let response = await request(`${API_URL}/create-game`,{
+        let response = await request(`${API_URL}/create-game/`,{
             'method':'POST',
             body:JSON.stringify(bodyToSend),
         })
@@ -87,6 +87,8 @@ function addSocketTestButton(){
     });
 }
 async function App() {
+    if(!checkIfAuthRequired(window.location.pathname))
+        return;
     let socket = getSocket();
     if (!socket)
         return;

@@ -25,3 +25,11 @@ export async function getProfile(nickname = null)
         console.error(error)
     }
 }
+
+export function getActiveUserNickname()
+{
+    const nickname = localStorage.getItem('activeUserNickname');
+    if (nickname === null || nickname === undefined)
+        return null;
+    return nickname;
+}

@@ -16,7 +16,7 @@ def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     serializer.save()
-    return Response(serializer.data, status=200)
+    return Response(serializer.data, status=201)
 
 
 @api_view(['POST'])
