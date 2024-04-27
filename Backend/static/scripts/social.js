@@ -5,6 +5,7 @@ import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
 import {getSocket} from "./requests.js";
 import {escapeHTML} from "./utils.js";
+import {getStatusSocket} from "./Status.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
         super(state,parentElement);
@@ -25,17 +26,29 @@ class ChatFriendsComponent extends  BaseComponent{
                     <div
                       class="d-flex align-items-center justify-content-center gap-2"
                     >
-                      <h6>${friend.nickname.length <=0 ? friend.user.username: friend.nickname}</h6>
-                      <div class="online-icon"></div>
+                      <h6>${friend.nickname}</h6>
+                      ${this.checkStatus(friend.nickname) ? `<div class="online-icon"></div>` : ''}
                     </div>
-                    <span>Active Now</span>
+                    <span>${this.checkStatus(friend.nickname) ? this.getStatus(friend.nickname): 'Offline'}</span>
             </div>
             </div>
               `).join('')}
 `
     }
+        getStatus(nickname)
+    {
+        return this.state.status.online_users.find(user => user.nickname === nickname).status;
+    }
+    checkStatus(nickname)
+    {
+            return this.state.status.online_users.some(user => user.nickname === nickname);
+    }
     render() {
         super.render();
+          let allUsers = document.getElementsByClassName("user-wrapper");
+        for (let i = 0; i < allUsers.length; i++) {
+    allUsers[i].addEventListener("click", toggleChat);
+  }
     }
     setState(newState)
     {
@@ -293,6 +306,16 @@ class ConversationComponent extends BaseComponent
     }
     handleHtml()
     {
+        this.state.messages = [
+            {
+                content: "Hello",
+                user: {id: 1, nickname: "test"}
+            },
+            {
+                content: "Hi",
+                user: {id: 2, nickname: "MKM"}
+            }
+        ]
         return `
         ${
             this.state.messages.map(message => `
@@ -370,18 +393,20 @@ const fetchChatFriends = async () => {
         let response = await request(endpoint, {
             method: 'GET',
         });
-        let parentElement = document.getElementById('user-data-wrapper');
-        let chatFriendsComponent = new ChatFriendsComponent({friends: response},parentElement);
-        let input = document.getElementById('friend-search-input');
-        input.addEventListener('keyup', async (event) => {
-            let value = event.target.value;
-               let filteredFriends = response.filter(friend => {
-        let nameToCheck = friend.user.username;
-        return nameToCheck.toLowerCase().includes(value.toLowerCase());
-           });
-            chatFriendsComponent.setState({friends: filteredFriends});
+        try {
+            let statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({request_type: 'get_user_status',from:"social"}));
+            statusSocket.addEventListener('message', (event) => {
+            let userStatus  = JSON.parse(event.data);
+            let parentElement = document.getElementById('user-data-wrapper');
+            let chatFriendsComponent = new ChatFriendsComponent({friends: response,status:userStatus},parentElement);
+            chatFriendsComponent.render();
         });
-        chatFriendsComponent.render();
+        }
+        catch(e)
+        {
+            console.error(e);
+        }
 
     }
     catch (error) {
@@ -612,7 +637,6 @@ async function handleAddFriend(element)
         spinner.setState({isVisible: false});
         friendRequestButton.innerText = 'Add Friend'
         notify('Friend request sent', 3, 'success');
-
     }
     catch(error)
     {
@@ -620,12 +644,25 @@ async function handleAddFriend(element)
         notify('Error adding friend', 3, 'error');
     }
 }
+function handleInviteToPong(element)
+{
+    let socket = getSocket();
+    let nickname = element.children[1].children[0].innerText;
+    let sendBody = {
+        request_type: "game",
+        sender: localStorage.getItem('activeUserNickname'),
+        receiver: nickname
+    }
+    socket.send(JSON.stringify(sendBody));
+    notify('Invite sent', 3, 'success');
+}
 function addContextListeners(element)
 {
     let addFriendButton = document.getElementById('options-add-friend');
     let blockUserButton = document.getElementById('options-block-user');
+    let inviteToPongButton = document.getElementById('options-invite-to-pong');
     addFriendButton.addEventListener('click',() => handleAddFriend(element));
-
+    inviteToPongButton.addEventListener('click',() => handleInviteToPong(element));
 }
 function handleRightClick(event,element) {
       event.preventDefault();
@@ -655,6 +692,20 @@ function handleRightClick(event,element) {
         { once: true }
       );
 }
+async function fetchMessages(roomId)
+{
+    try{
+        let response = await request(`${API_URL}/get-messages/${roomId}`, {
+            method: 'GET'
+        });
+        return response.results;
+    }
+    catch(error)
+    {
+        console.error('Error:', error);
+        notify('Error fetching messages', 3, 'error');
+    }
+}
 async function connectToRoom(room,conversationComponent)
 {
     const nickname = localStorage.getItem('activeUserNickname');
@@ -669,17 +720,14 @@ async function connectToRoom(room,conversationComponent)
         socket.send(JSON.stringify({message: content}));
         chatInput.value = '';
     });
-    console.log("submit form",chatSendForm)
     socket.onmessage = (event) => {
         let data = JSON.parse(event.data);
-        console.log(data)
         let message = {
         content: data.message,
         user: {nickname: data.user,id: data.id},
         created_date: new Date()
         }
         conversationComponent.setState({messages: [message,...conversationComponent.state.messages ]});
-        console.log("state",conversationComponent.state)
     }
 }
 async function fetchRoomData(element) {
@@ -695,11 +743,11 @@ async function fetchRoomData(element) {
             body: JSON.stringify({nickname: nickname})
         });
         let {room} = data;
+        let response = await fetchMessages(room.id);
         let conversationWrapper = document.getElementById('conversation-wrapper');
         conversationWrapper.classList.remove('no-chat-wrapper')
         let conversationComponent = new ConversationComponent(
         {
-            messages: room.messages.toReversed(),
             senderId: parseInt(localStorage.getItem("activeUserId")),
             receiverId: room.second_user
             },
@@ -714,20 +762,10 @@ async function fetchRoomData(element) {
         notify('Error starting chat', 3, 'error');
     }
 }
-function handleChatState() {
 
-    let chatContainer = document.getElementById("chat-container");
-  let socialWrapper = document.getElementById("social-container");
-  let chatCloseButton = document.getElementById("chat-close-button");
-  chatCloseButton.addEventListener("click", () => {
-    chatContainer.classList.add("chat-transition");
-    setTimeout(() => {
-      chatContainer.classList.remove("chat-transition");
-      socialWrapper.classList.add("social-wrapper-chat-closed");
-    }, 1000);
-    chatContainer.classList.add("chat-closed");
-  });
   async function toggleChat() {
+    let chatContainer = document.getElementById("chat-container");
+    let socialWrapper = document.getElementById("social-container");
       await fetchRoomData(this);
       if (chatContainer.classList.contains("chat-closed")) {
       chatContainer.classList.add("chat-transition");
@@ -738,12 +776,9 @@ function handleChatState() {
       socialWrapper.classList.add("social-wrapper-open");
       socialWrapper.classList.remove("social-wrapper-chat-closed");
     }
+  }
+function handleChatState() {
 
-  }
-  let allUsers = document.getElementsByClassName("user-wrapper");
-  for (let i = 0; i < allUsers.length; i++) {
-    allUsers[i].addEventListener("click", toggleChat);
-  }
 }
 function handleChatEvents() {
   let elements = document.getElementsByClassName("user-wrapper");

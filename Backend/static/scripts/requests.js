@@ -1,6 +1,6 @@
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
-import {API_URL} from "./spa.js";
+import {API_URL, loadPage} from "./spa.js";
 import {getProfile} from "./utils.js";
 let socket = null;
 
@@ -21,7 +21,6 @@ async function handleAcceptCallback(profile,request_id)
      {
          console.log(error)
     }
-
 }
 async function handleRejectedCallback(request_id)
 {
@@ -40,11 +39,38 @@ async function handleRejectedCallback(request_id)
 export function getSocket() {
     if (socket === null || socket.readyState === WebSocket.CLOSED) {
         const nickname = localStorage.getItem('activeUserNickname');
-        if (!nickname)
-            throw new Error('No active user nickname found');
+        if (nickname === null || nickname === undefined)
+            return null;
         socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
     }
         return socket;
+}
+async function handleGameAcceptedCallback(data)
+{
+    console.log(data)
+    let bodyToSend = {
+        player1: data.receiver,
+        player2:data.sender,
+        request_id:data.request_id
+    }
+    try{
+        let response = await request(`${API_URL}/create-game`,{
+            'method':'POST',
+            body:JSON.stringify(bodyToSend),
+        })
+        console.log("Game created",response)
+        let sendBody = {
+            request_type: "created_game",
+            sender: data.sender,
+            game_id: response.game_id,
+        }
+        socket.send(JSON.stringify(sendBody));
+        loadPage(`/game/${response.game_id}/`);
+    }
+    catch (error)
+    {
+        console.error(error)
+    }
 }
 function addSocketTestButton(){
     const socket = getSocket();
@@ -62,19 +88,35 @@ function addSocketTestButton(){
 }
 async function App() {
     let socket = getSocket();
+    if (!socket)
+        return;
     socket.onopen = function (e) {
+        console.log("connected to Request socket")
     }
     socket.onmessage = async function (e) {
         try {
             const data = JSON.parse(e.data);
-            const profile = await getProfile(data.sender);
+            const sender_profile = await getProfile(data.sender);
             if (data.request_type === "friend")
                 notify.request(
                     `You have a friend request from ${data.sender}`,
-                     {profile},
-                     () => handleAcceptCallback(profile,data.request_id),
+                     {sender_profile},
+                     () => handleAcceptCallback({profile:sender_profile},data.request_id),
                 () => handleRejectedCallback(data.request_id));
-        } catch (error) {
+            else if (data.request_type === "game")
+                notify.request(
+                    `You have a game request from ${data.sender}`,
+                    {sender_profile},
+                    () => handleGameAcceptedCallback(data),
+                    () => handleRejectedCallback(data.request_id)
+                );
+            else if (data.request_type === "created_game")
+            {
+                console.log(data)
+                loadPage(`/game/${data.game_id}/`);
+            }
+        }
+        catch (error) {
             console.error(error)
         }
     }

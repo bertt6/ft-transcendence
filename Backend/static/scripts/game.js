@@ -1,4 +1,7 @@
-import {BASE_URL} from "./spa.js";
+import {BASE_URL, loadError, loadPage} from "./spa.js";
+import {getProfile} from "./utils.js";
+import BaseComponent from "../components/Component.js";
+import {getStatusSocket} from "./Status.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -7,7 +10,72 @@ const canvasHeight = canvas.height;
 const paddleWidth = 10;
 const paddleHeight = 200;
 const ballSize = 20;
-let lastRenderedState = null;
+
+
+class Participants extends BaseComponent {
+    constructor(state, parentElement) {
+        super(state, parentElement);
+        this.popupContainer = null;
+    }
+
+    handleHTML() {
+        return `
+            <div class="spectators-container">
+                ${this.state.spectators.map((spectator, index) => `
+                    <div class="spectator-image" data-index="${index}">
+                        <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                    </div>
+                `).join("")}
+            </div>
+        `;
+    }
+
+    showSpectatorDetails(index) {
+        this.popupContainer = document.createElement('div');
+        this.popupContainer.classList.add('popup-container');
+        this.parentElement.appendChild(this.popupContainer);
+
+        this.popupContainer.innerHTML = `
+        <div>
+            <h6>Spectators - ${this.state.spectators.length}</h6>
+                ${this.state.spectators.map((spectator, index) => `
+                    <div class="popup-content">
+                        <img class='spectator-image' src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                        <a>${spectator.nickname}</a>
+                    </div>
+                `).join('')}
+        </div>
+       `;
+        this.popupContainer.style.display = 'block';
+    }
+
+    hideSpectatorDetails() {
+        this.popupContainer.style.display = 'none';
+    }
+
+    attachEventListeners() {
+        const spectatorImages = this.parentElement.querySelectorAll('.spectators-container');
+        spectatorImages.forEach((image, index) => {
+            image.addEventListener('mouseover', () => this.showSpectatorDetails(index));
+            image.addEventListener('mouseleave', () => this.hideSpectatorDetails())
+
+        });
+    }
+
+    render() {
+        this.parentElement.innerHTML = this.handleHTML();
+        this.attachEventListeners();
+    }
+
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.render();
+    }
+}
+let element = document.getElementById('spectators-wrapper')
+let participantsComponent = new Participants({
+    spectators: []
+},element);
 function draw(data) {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   ctx.save();  // Save the current state of the context
@@ -61,24 +129,113 @@ function handleInitialState(state)
   setPlayerData(state);
   draw(state.game);
 }
+function printWinner(winner,socket){
+  let winnerHTML = `
+          <div class="winner-wrapper">
+          <div class="winner-image-wrapper">
+            <img src="${BASE_URL}${winner.profile_picture}" alt="" />
+          </div>
+          <h1>Winner is ${winner.nickname}</h1>
+        </div>
+  `
+   let element = document.createElement("div");
+    element.id = "game-message-wrapper";
+    element.innerHTML = winnerHTML;
+    document.body.appendChild(element);
+    setTimeout(() => {
+        element.remove();
+        loadPage("/home/");
+        }, 5000);
+}
+function printCountdown()
+{
+    let countdown = 3;
+    let element = document.createElement("div");
+    element.id = "game-message-wrapper";
+    let textElement = document.createElement("h1");
+    textElement.id = "countdown";
+    textElement.innerText = countdown.toString();
+    element.appendChild(textElement);
+    document.body.appendChild(element);
+    let interval = setInterval(() => {
+        countdown -= 1;
+        textElement.classList.add("fade-in");
+        textElement.innerText = countdown.toString();
+        if(countdown === 0)
+        {
+            clearInterval(interval);
+            element.remove();
+        }
+    }, 1000);
+}
+function handleParticipants(data) {
+    const currentSpectators = participantsComponent.state.spectators;
+    if (JSON.stringify(currentSpectators) !== JSON.stringify(data.spectators))
+    {
+        participantsComponent.setState({
+            spectators: data.spectators
+        });
+        participantsComponent.render();
+    }
+}
+
 async function connectToServer()
 {
-  const id = "9864aae0-c225-4d16-b17d-2893ee66338b";
-  let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
-    socket.onopen = (ev) => {
-         console.log("Connected to server");
+    const path = window.location.pathname;
+    const id = path.split("/")[2];
+    let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    socket.onopen = async function (event) {
+        let connectedProfile = await getProfile()
+        socket.send(JSON.stringify({
+            nickname: connectedProfile.nickname,
+            profile_picture: connectedProfile.profile_picture,
+            send_type: "join",
+        }));
     };
-    socket.onmessage = (event) => {
+
+    socket.onerror = () =>   {
+        loadError(500,"Server error", "redirecting to home page");
+        setTimeout(() => {
+            loadPage("/home/");
+        }, 3000);
+    }
+
+    socket.onmessage = async  (event) => {
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
+          try {
+            const statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({
+                request_type: "set_status",
+                status: "in_game",
+                nickname: localStorage.getItem("activeUserNickname"),
+            }));
+          }catch(e)
+          {
+              console.error(e);
+          }
         handleInitialState(data);
         handleMovement(socket,data);
+      } else if (data.state_type === "score_state") {
+        draw(data.game);
+        setCurrentPoints(data);
+        printCountdown();
+      } else if (data.state_type === 'finish_state') {
+        draw(data.game);
+        setCurrentPoints(data);
+        printWinner(data.winner);
       }
       else if(data.state_type === "game_state")
       {
         draw(data.game);
         setCurrentPoints(data);
+        handleParticipants(data);
+      }
+      else if(data.state_type === "error_state")
+      {
+          loadError(data.status,data.title, data.message);
+          socket.close()
       }
     };
     return socket;
@@ -89,9 +246,9 @@ function handleMovement(socket,data)
     paddle: "spectator",
     dy: 0
   }
-  if(data.details.player1.nickname === localStorage.getItem("activeUserNickname"))
+  if (data.details.player1.nickname === localStorage.getItem("username"))
     currentPaddle.paddle = "player_one";
-    else if(data.details.player2.nickname === localStorage.getItem("activeUserNickname"))
+  else if (data.details.player2.nickname === localStorage.getItem("username"))
         currentPaddle.paddle = "player_two";
   document.addEventListener("keydown", (event) => {
     if (event.key === "w" || event.key === "s")
@@ -109,7 +266,7 @@ function handleMovement(socket,data)
 }
 async function App()
 {
-  let socket = await connectToServer();
+  await connectToServer();
 }
 App().catch((e) => {
     console.error(e);

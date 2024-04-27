@@ -21,6 +21,25 @@
     <title>profile</title>
   </head>
   <body>
+      <div class="main-profile-data">
+        <pong-redirect class="inbox-profile-wrapper" id="profile-image-wrapper">
+          <img src="" id="profile-image" alt="" />
+        </pong-redirect>
+        <div class="inbox-wrapper">
+          <input type="checkbox" id="input-button" />
+          <label for="input-button" class="input-label">
+            <img src="{% static 'public/inbox.svg' %}" alt="cannot load" />
+          </label>
+          <ul class="inbox-list" id="inbox-list">
+          </ul>
+        </div>
+          <div class="logout-wrapper" id="logout-wrapper">
+              <label id="logout-button">
+                  <img src="{% static 'public/logout.svg' %}" alt="cannot load">
+              </label>
+          </div>
+      </div>
+
     <main class="main" id="main">
       <div
         class="background container-fluid social-background"
@@ -48,7 +67,7 @@
               <button class="header-wrapper" id="history-button"><span>MATCH HISTORY</span></button>
               <button class="header-wrapper" id="friends-button"><span> FRIENDS </span></button>
               <button class="header-wrapper" id="stats-button"><span>STATS</span></button>
-              <button class="header-wrapper" id="blocked-users-button"><span>BLOKED</span></button>
+              <button class="header-wrapper" id="blocked-users-button"><span>BLOCKED</span></button>
             </div>
           <div id="data-wrapper">
                 <div class="friends-wrapper" style="display: none">

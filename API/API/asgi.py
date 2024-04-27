@@ -18,9 +18,9 @@ django_asgi_app = get_asgi_application()
 
 websocket_urlpatterns = [
     re_path(r'^ws/chat/(?P<room_name>[^/]+)/(?P<nickname>[^/]+)$', ChatConsumer.as_asgi()),
-    re_path(r'^ws/online/(?P<user_id>[^/]+)$', OnlineUsersConsumer.as_asgi()),
+    re_path(r'^ws/status/(?P<nickname>[^/]+)$', OnlineUsersConsumer.as_asgi()),
     re_path(r'^ws/requests/(?P<nickname>[^/]+)$', RequestConsumer.as_asgi()),
-    re_path(r'^ws/match-making/(?P<nickname>[^/]+)$', MatchMakingConsumer.as_asgi()),
+    re_path(r'^ws/matchmaking/(?P<nickname>[^/]+)$', MatchMakingConsumer.as_asgi()),
     re_path(r'^ws/game/(?P<game_id>[^/]+)$', GameConsumer.as_asgi()),
     re_path(r'^ws/tournament/$', TournamentConsumer.as_asgi()),
 
