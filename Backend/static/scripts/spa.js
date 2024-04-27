@@ -555,7 +555,70 @@ const routes = new Map([
       </div>
         `
 
-    }]
+    }],
+    [
+        'tournaments', {
+        auth_required: true,
+        url: ['/tournaments/'],
+        html: `
+              <div class="background social-background">
+        <div class="tournament-container">
+          <div class="tournament-header">
+            <h1>Tournaments</h1>
+          </div>
+          <div class="tournament-data-container">
+            <div class="tournament-wrapper">
+              <div class="tournament-element">
+                <div class="element-data">
+                  <div class="tournament-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                  <div>
+                    <h2>Agalarla Turnuva</h2>
+                  </div>
+                </div>
+                <div class="images-style">
+                  <div class="players-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                  <div class="players-img">
+                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                  </div>
+                  <div class="players-img">
+                    <img src="https://picsum.photos/200/300?grayscale" alt="" />
+                  </div>
+                  <div class="players-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <div class="tournament-point">
+                  <h2>IN GAME</h2>
+                </div>
+                <div class="tournament-order">
+                  <h2>3 MIN AGO</h2>
+                </div>
+                <div>
+                  <img src="/static/public/more.svg" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="create-tournament-button">CREATE TOURNAMENT</button>
+          <div class="tooltip" id="tooltip"></div>
+        </div>
+      </div>
+`
+    }
+    ]
 ]);
 const routeToFile = [
     [["/auth/login/"], 'login'],
@@ -566,6 +629,7 @@ const routeToFile = [
     [['/verification/'], 'verification'],
     [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
     [['/matchmaking/'], 'matchmaking'],
+    [['/tournaments/'], 'tournaments'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',

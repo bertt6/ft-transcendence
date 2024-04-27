@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     "Apps.Profile.apps.ProfileConfig",
     "Apps.SocialMedia.apps.SocialMediaConfig",
     "Apps.Game.apps.GameConfig",
-    "Apps.Matchmaking.apps.MatchmakingConfig"
+    "Apps.Matchmaking.apps.MatchmakingConfig",
+    "Apps.Tournament.apps.TournamentConfig"
 ]
 
 MIDDLEWARE = [

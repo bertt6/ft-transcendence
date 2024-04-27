@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 
 
 @permission_classes([IsAuthenticated])
-def create(request):
+def tournaments(request):
     if request.method == 'GET':
         Tournaments = Tournament.objects.all()
         serializer = TournamentGetSerializer(Tournaments, many=True)
@@ -43,9 +43,9 @@ def get_tournaments(request, tournament_id):
     elif request.method == 'DELETE':
         if tournament.created_by.id == request.user.profile.id:
             tournament.delete()
-            return Response(status=200)
+            return Response(data= {"message":"tournament successfully deleted"},status=200)
         else:
-            return Response(status=400)
+            return Response({{'error': 'Profile is not authorized to delete'}},status=400)
 
 
 
@@ -78,7 +78,6 @@ def delete(request, tournament_id):
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
         return Response(data={"error": "invalid tournament"}, status=400)
-
     participants = tournament.current_participants.filter(id=request.user.profile.id)
     if participants.exists():
         tournament.current_participants.remove(request.user.profile.id)

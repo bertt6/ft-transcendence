@@ -39,7 +39,6 @@ async function handleRejectedCallback(request_id)
 export function getSocket() {
     if (socket === null || socket.readyState === WebSocket.CLOSED) {
         const nickname = localStorage.getItem('activeUserNickname');
-        console.log(nickname)
         if (nickname === null || nickname === undefined)
             return null;
         socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
@@ -97,7 +96,6 @@ async function App() {
     socket.onmessage = async function (e) {
         try {
             const data = JSON.parse(e.data);
-            console.log(data)
             const sender_profile = await getProfile(data.sender);
             if (data.request_type === "friend")
                 notify.request(
