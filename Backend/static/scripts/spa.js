@@ -4,6 +4,7 @@ import {getProfile} from "./utils.js";
 
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
+export const API_42_URL = 'https://api.intra.42.fr'
 
 export function setCookie(name, value, days) {
     let expires = "";
@@ -756,7 +757,7 @@ window.addEventListener('popstate', (event) => {
 
 document.addEventListener('DOMContentLoaded', App);
 
-document.getElementById('logout-wrapper').addEventListener('click', async () => {
+document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
     const refresh_token = getCookie('refresh_token')
     if(refresh_token === 'null')
         return

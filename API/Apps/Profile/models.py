@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
+import urllib.request
 
 
 class Stats(models.Model):
@@ -38,6 +41,12 @@ class Profile(models.Model):
         k_factor = 32
         expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
         self.mmr += k_factor * (0 - expected_score)
+
+    def save_image_from_url(self, url):
+        img_temp = NamedTemporaryFile()
+        img_temp.write(urllib.request.urlopen(url).read())
+        img_temp.flush()
+        self.profile_picture.save(f"{self.pk}.jpeg", File(img_temp), save=True)
 
 
 @receiver(m2m_changed, sender=Profile.friends.through)
