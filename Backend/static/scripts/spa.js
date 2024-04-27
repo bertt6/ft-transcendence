@@ -439,15 +439,15 @@ const routes = new Map([
         auth_required: false,
         url: ['/verification/'],
         html: `
-            <div class="background container-fluid">
+             <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
             <div class="verification-wrapper">
                 <h2>E-mail Verification</h2>
                 
                 <p>Please type verification code sent to your e-mail address</p>
                 
-                <p>The verification code will expire in 15 minutes</p>
-                
+                <p>The verification code will expire in</p>
+                <h1 id="timer">15:00</h1>
                 <div class="row">
                     <input type="number" id="singleDigitInput1">
                     <input type="number" id="singleDigitInput2">
@@ -457,15 +457,17 @@ const routes = new Map([
                     <input type="number" id="singleDigitInput6">
                 </div>
                 
-                <button type="button" id="verify">Verify</button>
+
+                <button class='verification-wrapper-button' type="button" id="verify">Verify</button>
                 
                 <p>
                     Didn't receive code? 
-                    <a id="request">Send again!</a>
+                    <a href="" id="request">Send again!</a>
                 </p>
             </div>
         </div>
     </div>
+
         `
     }],
     ['game', {
@@ -632,7 +634,6 @@ function findRouteFile(pathName) {
             return pathName.includes(url);
         }
     }));
-
     return route ? route[1] : null;
 }
 
@@ -643,7 +644,6 @@ export function loadPage(fileName) {
         return;
     }
     const route = routes.get(data);
-
     let isMatch = false;
     if (Array.isArray(route.url)) {
         isMatch = route.url.some(url => {
@@ -661,10 +661,7 @@ export function loadPage(fileName) {
         let split = fileName.split('/').filter(Boolean);
     if (!isMatch) {
         if(split.length > 1)
-        {
-            console.log("split",split)
             history.pushState({}, '', window.location.origin + `/${split[0]}/${split[1]}/`);
-        }
         else
             history.pushState({}, '', window.location.origin + route.url);
 
@@ -699,8 +696,6 @@ async function checkForAuth() {
     if (getCookie('access_token'))
         return;
     await tryRefreshToken();
-    if (getCookie('access_token'))
-        return;
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
     if (!value)
@@ -763,6 +758,8 @@ document.addEventListener('DOMContentLoaded', App);
 
 document.getElementById('logout-wrapper').addEventListener('click', async () => {
     const refresh_token = getCookie('refresh_token')
+    if(refresh_token === 'null')
+        return
     await request(`${API_URL}/token/blacklist`, {
         method: 'POST',
         body: JSON.stringify({

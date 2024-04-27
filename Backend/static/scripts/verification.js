@@ -33,13 +33,16 @@ document.getElementById("verify").addEventListener("click", async function() {
     }
     else {
         await postVerificationCode(value)
-        var player = document.getElementById('player');
+       /*
+    var player = document.getElementById('player');
         player.volume = 0.1;
         player.play();
         player.onended = function () {
             player.currentTime = 0;
             player.play();
         };
+       */
+
     }
 })
 
