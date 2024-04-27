@@ -7,7 +7,7 @@ from Apps.Profile.models import Profile
 class GameProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['nickname', 'profile_picture']
+        fields = ['nickname', 'profile_picture',]
 
 
 class GameSerializer(serializers.ModelSerializer):
