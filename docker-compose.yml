@@ -33,14 +33,17 @@ services:
     depends_on:
       - postgres
       - redis
+      - logstash  # Logstash'e bağımlı
     environment:
       - DATABASE_URL=postgres://postgres:123@db:5432/transcendenceDB
     volumes:
-      - ./API/backendVol:/app/backend
+      - logs_volume:/API/logs
     command: sh -c "sleep 10 && python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     networks:
       - backend
+      - elk
+
   redis:
     image: "redis:alpine"
     restart: unless-stopped
@@ -50,7 +53,7 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: nginx.Dockerfile
     ports:
       - "443:443"
     depends_on:
@@ -68,7 +71,6 @@ services:
     volumes:
       - ./Devops/grafana-prometheus/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./Devops/grafana-prometheus/prometheus/rules.yml:/etc/prometheus/rules.yml
-
     restart: always
     networks:
       - monitoring
@@ -82,7 +84,8 @@ services:
     volumes:
       - ./Devops/grafana-prometheus/grafana/grafana_data:/var/lib/grafana
       - ./Devops/grafana-prometheus/grafana/grafana-datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ./Devops/grafana-prometheus/grafana/grafana-dashboards/dashboard.json:/etc/grafana/provisioning/dashboards/dashboard.json
+      - ./Devops/grafana-prometheus/grafana/grafana-dashboards:/var/lib/grafana/dashboards
+      - ./Devops/grafana-prometheus/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
     restart: always
     networks:
       - monitoring
@@ -131,11 +134,67 @@ services:
     deploy:
       mode: global
 
+  filebeat:
+    image: filebeat:latest
+    build:
+      context: ./Devops/elk-stack/filebeat
+      dockerfile: filebeat.Dockerfile
+    volumes:
+      - logs_volume:/logs:ro
+    command: filebeat -c /etc/filebeat/filebeat.yml -e -d "*" -strict.perms=false
+    depends_on:
+      - backend
+
+  # ELK Server
+  logstash:
+    image: logstash:latest
+    restart: always
+    #ports:
+    #  - 5959:5959
+    #  - 5044:5044
+    build:
+      context: ./Devops/elk-stack/logstash
+      dockerfile: logstash.Dockerfile
+    depends_on:
+      - elasticsearch
+    volumes:
+      - logs_volume:/app/API/logs:ro
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
+    restart: always
+    #ports:
+    #  - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - http.host=0.0.0.0
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms750m -Xmx750m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./Devops/elk-stack/elasticsearch_volume:/usr/share/elasticsearch/data
+  kibana:
+    image: kibana:latest
+    build:
+      context: ./Devops/elk-stack/kibana
+      dockerfile: kibana.Dockerfile
+    restart: always
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+      - logstash
+
 networks:
   monitoring:
     driver: bridge
   backend:
     driver: bridge
+  elk:
+    driver: bridge
 
 volumes:
   alertmanager-data:
+  logs_volume:

@@ -17,3 +17,8 @@ pillow==10.2.0
 channels==4.0.0
 channels-redis==4.2.0
 daphne==4.1.0
+django-elasticsearch-dsl
+python-logstash==0.4.8
+python-logstash-async
+json_log_formatter
+config

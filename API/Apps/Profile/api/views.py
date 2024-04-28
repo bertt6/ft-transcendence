@@ -8,6 +8,13 @@ from rest_framework.response import Response
 from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer
 from ...Request.models import Request
 
+import logging
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+logger = logging.getLogger(__name__)
+
 
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -69,6 +76,7 @@ class ProfileStatsView(APIView):
             return Response({"error": "Profile not found"}, status=404)
         stats = profile.stats
         serializer = ProfileStatsSerializer(stats)
+        logger.info('Profile stats retrieved', extra={'profile': profile.nickname})
         return Response(serializer.data, status=200)
 
     def post(self, request,profile_id):

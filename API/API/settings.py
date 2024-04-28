@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 import datetime
 
 import Apps.Tournament.apps
+from Apps.Profile.logger import CustomisedJSONFormatter
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -61,8 +62,48 @@ INSTALLED_APPS = [
     "Apps.Chat.apps.ChatConfig",
     "Apps.UserStatus.apps.OnlineusersConfig",
     "Apps.Request.apps.RequestConfig",
-    "Apps.Game.apps.GameConfig"
+    "Apps.Game.apps.GameConfig",
 ]
+
+
+STATIC_URL = '/static/'
+APP_ID = 'elk_demo'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s|%(name)s|%(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        "json": {
+            '()': CustomisedJSONFormatter,
+        },
+    },
+    'handlers': {
+        'applogfile': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': Path(BASE_DIR).resolve().joinpath('logs', 'app.log'),
+            'maxBytes': 1024 * 1024 * 15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'json',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        }
+    },
+    'root': {
+        'handlers': ['applogfile', 'console'],
+        'level': 'DEBUG',
+    }
+}
+
+STATIC_ROOT = Path(BASE_DIR).resolve().joinpath('staticfiles');
+STATICFILES_DIRS = []
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

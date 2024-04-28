@@ -1,8 +1,8 @@
 FROM python:3.12.2-bullseye
 
-WORKDIR /app/API
+WORKDIR /API
 
-COPY . /app/API
+COPY . /API
 
 RUN pip install --no-cache-dir -r requirements.txt
 
