@@ -25,5 +25,5 @@ urlpatterns = [
     path('social/', include('Apps.SocialMedia.urls')),
     path('game/', include('Apps.Game.urls')),
     path('matchmaking/', include('Apps.Matchmaking.urls')),
-    path('tournaments/', include('Apps.Tournament.urls'))
+    path('', include('Apps.Tournament.urls'))
 ]

@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from ..Profile.models import Profile
 from ..Game.models import Game
@@ -10,6 +12,7 @@ class Round(models.Model):
 
 
 class Tournament(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False,default=uuid.uuid4)
     name = models.CharField(max_length=100, unique=True)
     created_by = models.ForeignKey(Profile, on_delete=models.CASCADE, default=None)
     max_participants = models.IntegerField()

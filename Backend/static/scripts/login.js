@@ -64,7 +64,7 @@ async function loginForm(event)
         username: username,
         password: password
     };
-    const endpoint = `${API_URL}/send-email-for-verification`;
+    const endpoint = `${API_URL}/send-email-for-verification/`;
     const loginButton = document.getElementById('login-button');
     loginButton.disabled = true;
     const spinner = new Spinner({isVisible:true,className:"login-button-loader"}, loginButton);
@@ -88,7 +88,6 @@ async function loginForm(event)
             loginButton.disabled = false;
             loginButton.innerText = "Login";
             notify('Invalid username or password', 3, 'error');
-            let data = await response.json();
         }
     } catch (error) {
         notify("An error occurred. Please try again later", 3, "error");

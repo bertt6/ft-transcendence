@@ -4,7 +4,7 @@ import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
 import {getSocket} from "./requests.js";
-import {escapeHTML} from "./utils.js";
+import {escapeHTML, getActiveUserNickname} from "./utils.js";
 import {getStatusSocket} from "./Status.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
@@ -504,7 +504,7 @@ async function assignEventListeners() {
 async function getProfile()
 {
     try{
-        let data = await request(`${API_URL}/profile`, {
+        let data = await request(`${API_URL}/profile/`, {
             method: 'GET'
         });
         localStorage.setItem('activeUserId', data.id);
@@ -520,11 +520,11 @@ async function getProfile()
     }
 }
 const renderIndividualPost = async (tweetId) => {
-    let response = await request(`${API_URL}/get-tweet-and-comments/${tweetId}`, {
+    let response = await request(`${API_URL}/get-tweet-and-comments/${tweetId}/`, {
         method: 'GET',
     });
 
-        let data = await request(`${API_URL}/profile`, {
+        let data = await request(`${API_URL}/profile/`, {
             method: 'GET',
         });
     let parentElement = document.getElementById('social-container');
@@ -537,7 +537,7 @@ const renderIndividualPost = async (tweetId) => {
     event.preventDefault();
     let inputValue = document.getElementById('comment-input').value;
         try {
-            let data = await request(`${API_URL}/post-comment`, {
+            let data = await request(`${API_URL}/post-comment/`, {
                 method: 'POST',
                 body: JSON.stringify({content: inputValue, tweet: tweetId})
             });
@@ -556,7 +556,7 @@ const renderIndividualPost = async (tweetId) => {
 
 async function getProfile2() {
     try {
-        let data = await request(`${API_URL}/profile`, {
+        let data = await request(`${API_URL}/profile/`, {
             method: 'GET'
         });
         return data.profile_picture;
@@ -627,7 +627,7 @@ async function handleAddFriend(element)
     try{
         let spinner = new Spinner({isVisible:true,className:"options-spinner"},friendRequestButton);
         spinner.render();
-        let activeUserNickname = localStorage.getItem('activeUserNickname');
+        let activeUserNickname =getActiveUserNickname()
         let body = {
             request_type: "friend",
             sender: activeUserNickname,
@@ -650,7 +650,7 @@ function handleInviteToPong(element)
     let nickname = element.children[1].children[0].innerText;
     let sendBody = {
         request_type: "game",
-        sender: localStorage.getItem('activeUserNickname'),
+        sender: getActiveUserNickname(),
         receiver: nickname
     }
     socket.send(JSON.stringify(sendBody));
@@ -695,7 +695,7 @@ function handleRightClick(event,element) {
 async function fetchMessages(roomId)
 {
     try{
-        let response = await request(`${API_URL}/get-messages/${roomId}`, {
+        let response = await request(`${API_URL}/get-messages/${roomId}/`, {
             method: 'GET'
         });
         return response.results;
@@ -708,7 +708,7 @@ async function fetchMessages(roomId)
 }
 async function connectToRoom(room,conversationComponent)
 {
-    const nickname = localStorage.getItem('activeUserNickname');
+    const nickname =getActiveUserNickname()
     const socket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
     let chatSendForm = document.getElementById('chat-send');
     let chatInput = document.getElementById('chat-input');
@@ -738,7 +738,7 @@ async function fetchRoomData(element) {
     let spinner = new Spinner({isVisible:true},wrapper);
     spinner.render();
     try {
-        let data = await  request(`${API_URL}/start-chat`, {
+        let data = await  request(`${API_URL}/start-chat/`, {
             method: 'POST',
             body: JSON.stringify({nickname: nickname})
         });

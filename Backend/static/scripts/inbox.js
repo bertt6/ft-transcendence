@@ -1,6 +1,7 @@
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
-import {API_URL, BASE_URL} from "./spa.js";
+import {API_URL, BASE_URL, checkIfAuthRequired} from "./spa.js";
+import {getActiveUserNickname} from "./utils.js";
 
 class Inbox  extends BaseComponent{
     constructor(state,parentElement=null){
@@ -57,14 +58,14 @@ class Inbox  extends BaseComponent{
         let acceptButton = buttonWrapper.querySelector('[data-type="accept"]');
         let rejectButton = buttonWrapper.querySelector('[data-type="reject"]');
         acceptButton.addEventListener('click',async ()=>{
-            let response = await request(`${API_URL}/request/${request.sender.nickname}`,{
+            let response = await request(`${API_URL}/request/${request.sender.nickname}/`,{
                 'method':'PUT',
                 body:JSON.stringify({status:'accepted'}),
             })
             console.log(response)
         })
         rejectButton.addEventListener('click',async ()=>{
-            let response = await request(`${API_URL}/request/${request.sender.nickname}`,{
+            let response = await request(`${API_URL}/request/${request.sender.nickname}/`,{
                 'method':'PUT',
                 body:JSON.stringify({status:'rejected'}),
             })
@@ -96,7 +97,7 @@ async function handleProfileImage(){
     document.getElementById('profile-image-wrapper').setAttribute('href',`/profile/${profile.nickname}`)
 }
 async function App(){
-    if(localStorage.getItem('activeUserNickname') === null)
+    if(getActiveUserNickname() === null || !checkIfAuthRequired(window.location.pathname))
         return;
     const inboxList = document.getElementById('inbox-list');
     if(!inboxList)

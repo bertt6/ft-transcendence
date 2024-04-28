@@ -1,4 +1,3 @@
-
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 from channels.generic.websocket import WebsocketConsumer
@@ -11,27 +10,26 @@ from .models import Tournament, Round
 
 
 class TournamentConsumer(WebsocketConsumer):
+
     def connect(self):
         self.accept()
         query_string = self.scope['query_string'].decode()
         params = urllib.parse.parse_qs(query_string)
-        self.profile_id = params.get('profile_id', [None])[0]  # Kullanıcının profile_id'sini sakla
+        self.nickname = params.get('nickname', [None])[0]
         self.tournament_id = params.get('tournament_id', [None])[0]
-        print("Connected to", self.profile_id)
-        print("Connected to Tournament", self.tournament_id)
+
 
         try:
-            instance = Profile.objects.get(id=self.profile_id)
+            instance = Profile.objects.get(nickname=self.nickname)
         except Profile.DoesNotExist:
             self.send_error("invalid_profile")
-            self.close(code=1000)  # WebSocket bağlantısını kapat
+            self.close(code=1000)
             return
-
         try:
             tournament = Tournament.objects.get(id=self.tournament_id)
         except Tournament.DoesNotExist:
             self.send_error("invalid_tournament")
-            self.close(code=1000)  # WebSocket bağlantısını kapat
+            self.close(code=1000)
             return
         tournament.current_participants.add(instance)
         tournament.save()
@@ -39,13 +37,8 @@ class TournamentConsumer(WebsocketConsumer):
     def receive(self, text_data):
         data = json.loads(text_data)
         message = data['tournament_id']
-        print(message)
-        print("selam")
-
-        self.PlayMatch(self.profile_id, self.tournament_id)
-        #self.StartTournament(self.profile_id, self.tournament_id)
-
-
+        self.PlayMatch(self.nickname, self.tournament_id)
+        # self.StartTournament(self.profile_id, self.tournament_id)
 
     def send_error(self, error_type):
         if error_type == "invalid_profile":
@@ -55,39 +48,37 @@ class TournamentConsumer(WebsocketConsumer):
         elif error_type == "Tournament Already Started":
             self.send(text_data=json.dumps({"error": "Tournament Already Started"}))
 
-    def disconnect(self,close_code):
+    def disconnect(self, close_code):
         try:
             tournament = Tournament.objects.get(id=self.tournament_id)
-            participants = tournament.current_participants.filter(id=self.profile_id)
+            participants = tournament.current_participants.filter(nickname=self.nickname)
 
         except Tournament.DoesNotExist:
             self.send_error("invalid_tournament")
-            self.close(code=1000)  # WebSocket bağlantısını kapat
+            self.close(code=1000)
             return
 
         if tournament.current_participants.count() == 0:
             tournament.delete()
         if participants.exists():
-            if tournament.created_by_id == self.profile_id and tournament.current_participants.count() > 1:
-                first_participant = tournament.current_participants.exclude(id=self.profile_id).first()
+            if tournament.created_by_id == self.nickname and tournament.current_participants.count() > 1:
+                first_participant = tournament.current_participants.exclude(nickname=self.nickname).first()
                 tournament.created_by = first_participant
                 tournament.save()
             else:
-                tournament.current_participants.remove(self.profile_id)
+                tournament.current_participants.remove(self.nickname)
                 tournament.save()
-        print(f"Kullanıcı {self.profile_id} bağlantısı kesildi.")
 
-    def StartTournament(self, profile_id,tournament_id1):
+    def StartTournament(self):
         try:
-            tournament_id = int(tournament_id1)  # Metni tamsayıya dönüştür
+            tournament_id = int(self.tournament_id)
         except ValueError:
             print("Tournament ID metin olarak beklenen türde değil.")
         try:
-            tournament = Tournament.objects.get(id=tournament_id)
+            tournament = Tournament.objects.get(id=self.tournament_id)
         except Tournament.DoesNotExist:
             print("No tournament")
-
-        print("tournament_id= ", tournament_id)
+            return
         participants = tournament.current_participants.all()
         if tournament.rounds.exists():
             self.send_error("Tournament Already Started")
@@ -100,9 +91,6 @@ class TournamentConsumer(WebsocketConsumer):
             try:
                 round_obj = tournament.rounds.first()
                 participants_ids = [participant.id for participant in round_obj.participants.all()]
-                print(participants_ids)
-                print("Merr")
-                print(participants)
                 for i in range(0, len(participants_ids), 2):
                     if i + 1 < len(participants_ids):
                         try:
@@ -120,21 +108,17 @@ class TournamentConsumer(WebsocketConsumer):
             except Exception as e:
                 print("Error", e)
 
-            print("Turnuva Başlatıldı")
-
-
-    def PlayMatch(self,profile_id1,tournament_id):
+    def PlayMatch(self, profile_id1, tournament_id):
         try:
-            profile_id = int(profile_id1)  # Metni tamsayıya dönüştür
+            profile_id = int(profile_id1)
         except ValueError:
             print("Tournament ID metin olarak beklenen türde değil.")
         try:
             tournament = Tournament.objects.get(pk=tournament_id)
             last_round = tournament.rounds.order_by('-round_number').first()
         except Tournament.DoesNotExist:
-            print("Turnuva Yok")
             return
-        if tournament.is_finished == True:
+        if tournament.is_finished:
             print("Turnuva Bitti")
             return
         print(last_round)
@@ -154,7 +138,6 @@ class TournamentConsumer(WebsocketConsumer):
                         game.save()
                         print("Maçı Player 2 kazandı")
                         return
-
 
             if last_round.matches.count() == 1 and not last_round.participants.exists() and last_round.matches.first().winner:
                 game = last_round.matches.first()
