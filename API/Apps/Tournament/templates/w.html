@@ -16,8 +16,9 @@
         const url = window.location.pathname;
         const param = url.split("/");
         const profile_id = param[param.length - 2];
-        const tournament_id = 1;
+        const tournament_id = 2;
         const socket = new WebSocket('ws://localhost:8000/ws/tournament/?profile_id=' + profile_id + '&tournament_id=' + tournament_id);
+
 
         socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
@@ -48,7 +49,10 @@
                 "tournament_id": tournament_id,
                 "message": messageToSend,
             };
-
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log('Backendden gelen cevap:', data);
+            };
             // JSON formatındaki mesajı gönder
             socket.send(JSON.stringify(messageData));
             console.log('Sunucuya mesaj gönderildi:', messageData);

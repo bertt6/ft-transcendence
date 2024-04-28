@@ -2,23 +2,53 @@
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 from channels.generic.websocket import WebsocketConsumer
+from django.core.cache import cache
+
 from ..Tournament.Serializers import TournamentPostSerializer
 import urllib.parse
 from ..Game.models import Game
 import json
 from ..Profile.models import Profile
 from .models import Tournament, Round
-
-
 class TournamentConsumer(WebsocketConsumer):
+    def group_message(self, event):
+        message = event["message"]
+        json_message = json.dumps({"message": message})
+        self.send(text_data=json_message)
+    def send_to_group(self, message):
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                "type": "group_message",
+                "message": message
+            }
+        )
     def connect(self):
         self.accept()
         query_string = self.scope['query_string'].decode()
         params = urllib.parse.parse_qs(query_string)
-        self.profile_id = params.get('profile_id', [None])[0]  # Kullanıcının profile_id'sini sakla
+
         self.tournament_id = params.get('tournament_id', [None])[0]
-        print("Connected to", self.profile_id)
-        print("Connected to Tournament", self.tournament_id)
+        self.profile_id = params.get('profile_id', [None])[0]
+
+        if self.tournament_id is not None:
+            self.room_group_name = self.tournament_id
+
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name,
+        )
+
+        cache_key = f"user_{self.tournament_id}"
+        cached_data = cache.get(cache_key)
+        if cached_data is None:
+            cached_data = []
+        if self.profile_id not in cached_data:
+            cached_data.append(self.profile_id)
+            cache.set(cache_key, cached_data)
+            self.send_to_group(cached_data)
+            print("Profile List:", cached_data)
+
 
         try:
             instance = Profile.objects.get(id=self.profile_id)
@@ -39,11 +69,9 @@ class TournamentConsumer(WebsocketConsumer):
     def receive(self, text_data):
         data = json.loads(text_data)
         message = data['tournament_id']
-        print(message)
-        print("selam")
-
-        self.PlayMatch(self.profile_id, self.tournament_id)
-        #self.StartTournament(self.profile_id, self.tournament_id)
+        # Gelen mesajı istemcilere gönderin
+        #self.PlayMatch(self.profile_id, self.tournament_id)
+        self.StartTournament(self.profile_id, self.tournament_id)
 
 
 
@@ -56,6 +84,16 @@ class TournamentConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"error": "Tournament Already Started"}))
 
     def disconnect(self,close_code):
+        cache_key = f"user_{self.tournament_id}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None and self.profile_id in cached_data:
+            cached_data.remove(self.profile_id)
+            cache.set(cache_key, cached_data)
+            print(f"Profile {self.profile_id} disconnected. Profile List after disconnect:", cached_data)
+            self.send_to_group(cached_data)
+
+
         try:
             tournament = Tournament.objects.get(id=self.tournament_id)
             participants = tournament.current_participants.filter(id=self.profile_id)
@@ -77,17 +115,18 @@ class TournamentConsumer(WebsocketConsumer):
                 tournament.save()
         print(f"Kullanıcı {self.profile_id} bağlantısı kesildi.")
 
+
     def StartTournament(self, profile_id,tournament_id1):
         try:
-            tournament_id = int(tournament_id1)  # Metni tamsayıya dönüştür
+            tournament_id = int(tournament_id1)
         except ValueError:
             print("Tournament ID metin olarak beklenen türde değil.")
         try:
-            tournament = Tournament.objects.get(id=tournament_id)
+            tournament = Tournament.objects.get(id=tournament_id1)
         except Tournament.DoesNotExist:
             print("No tournament")
 
-        print("tournament_id= ", tournament_id)
+        print("tournament_id= ", tournament_id1)
         participants = tournament.current_participants.all()
         if tournament.rounds.exists():
             self.send_error("Tournament Already Started")
@@ -100,9 +139,7 @@ class TournamentConsumer(WebsocketConsumer):
             try:
                 round_obj = tournament.rounds.first()
                 participants_ids = [participant.id for participant in round_obj.participants.all()]
-                print(participants_ids)
-                print("Merr")
-                print(participants)
+                all_games = []
                 for i in range(0, len(participants_ids), 2):
                     if i + 1 < len(participants_ids):
                         try:
@@ -114,14 +151,23 @@ class TournamentConsumer(WebsocketConsumer):
                         except Profile.DoesNotExist:
                             return
                         game = Game.objects.create(player1=profile1, player2=profile2)
+                        game = Game.objects.create(player1=profile1, player2=profile2)
+                        game_id = str(game.id)
+                        player1_id = str(profile1.id)
+                        player2_id = str(profile2.id)
+                        game_info = {
+                            "game_id": game_id,
+                            "players": [player1_id, player2_id]
+                        }
+                        all_games.append(game_info)
                         round_obj.matches.add(game)
                         round_obj.participants.remove(participants_ids[i])
                         round_obj.participants.remove(participants_ids[i + 1])
+                self.send_to_group(all_games)
             except Exception as e:
                 print("Error", e)
 
             print("Turnuva Başlatıldı")
-
 
     def PlayMatch(self,profile_id1,tournament_id):
         try:
@@ -134,10 +180,10 @@ class TournamentConsumer(WebsocketConsumer):
         except Tournament.DoesNotExist:
             print("Turnuva Yok")
             return
+        print(last_round)
         if tournament.is_finished == True:
             print("Turnuva Bitti")
             return
-        print(last_round)
         if last_round:
             all_matches_have_winner = all(Game.winner is not None for match in last_round.matches.all())
             if all_matches_have_winner:
