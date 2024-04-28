@@ -33,3 +33,11 @@ export function getActiveUserNickname()
         return null;
     return nickname;
 }
+export function parseErrorToNotify(data) {
+    let message = '';
+    for (const [key, value] of Object.entries(data))
+    {
+        message += `${key}: ${value.join(', ')} `;
+    }
+    return message;
+}

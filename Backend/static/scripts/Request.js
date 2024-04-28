@@ -33,7 +33,8 @@ export async function request(url, options = {}) {
     const data = await response.json()
     if(response.method === 'GET' && response.ok)
         responses.set(url, data)
-    return data;
+        data.ok = response.ok
+    return data
     }
     catch (e)
     {

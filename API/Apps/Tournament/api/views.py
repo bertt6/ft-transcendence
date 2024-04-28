@@ -19,15 +19,13 @@ def tournaments(request):
         serializer = TournamentGetSerializer(all_tournaments, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
-        print(request.data)
         request.data['created_by'] = profile_id
         request.data['current_participants'] = [profile_id]
         post_serializer = TournamentPostSerializer(data=request.data)
-        if post_serializer.is_valid():
-            post_serializer.save()
-            return Response(post_serializer.data, status=201)
-    else:
-        return Response({"error": "request method is not supported", "request_type":request.method },status=400)
+        if not post_serializer.is_valid():
+            return Response(post_serializer.errors, status=400)
+        post_serializer.save()
+        return Response(post_serializer.data, status=201)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])

@@ -68,3 +68,11 @@ input[type="range"]::-webkit-slider-thumb {
 .range-wrapper {
   flex: 1;
 }
+.create-button-loader{
+width: 32px;
+  height: 32px;
+}
+.create-button-loader div {
+  width: 32px;
+  height: 32px;
+}

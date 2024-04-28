@@ -569,13 +569,13 @@ const routes = new Map([
             <div class="tournament-wrapper" id="tournament-wrapper">
             </div>
           </div>
-          <button class="create-tournament-button">CREATE TOURNAMENT</button>
+          <pong-redirect href="/create-tournament/" class="create-tournament-button">CREATE TOURNAMENT</pong-redirect>
           <div class="tooltip" id="tooltip"></div>
         </div>
       </div>
 `
     }],
-        ['create-tournament', {
+    ['create-tournament', {
         auth_required: true,
         url: ['/create-tournament/'],
         html: `
@@ -607,7 +607,7 @@ const routes = new Map([
                   max="16"
                   value="2"
                 />
-                <span id="range-value">2</span>
+                <span id="range-value">4</span>
               </div>
             </div>
             <div class="button-wrapper">
