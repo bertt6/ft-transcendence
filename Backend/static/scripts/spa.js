@@ -617,6 +617,58 @@ const routes = new Map([
         </div>
       </div>
         `
+    }],
+    ['tournament',{
+        auth_required:true,
+        url:[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
+        html:`
+      <div
+        class="background container-fluid social-background"
+        style="padding: 0"
+      >
+        <div class="tournament-container">
+          <div class="tournament-header-wrapper">
+            <h1>AGALARLA TURNUVA</h1>
+          </div>
+          <div class="tournament-details-wrapper">
+            <div class="tournament-data-wrapper">
+              <div class="tournament-participants">
+                <div class="tournament-participant">
+                  <div class="participant-details">
+                    <div class="participant-image-wrapper">
+                      <img
+                        src="https://picsum.photos/seed/picsum/200/300"
+                        alt=""
+                      />
+                    </div>
+                    <span>BSAMLI</span>
+                  </div>
+                  <div class="participant-status">
+                    <span>ONLINE</span>
+                  </div>
+                </div>
+              </div>
+              <div class="joined-details">
+                <div class="joined-wrapper">
+                  <div class="joined-header">
+                    <h1>NAME</h1>
+                  </div>
+                  <div class="joined-ready">(NOT READY)</div>
+                </div>
+                <hr />
+                <div class="joined-remaining">
+                  <h1>25 Seconds Remaining</h1>
+                </div>
+              </div>
+            </div>
+            <div class="joined-ready-button">
+              <button id="joined-ready-button">READY</button>
+            </div>
+          </div>
+        </div>
+      </div>
+        `
+
     }]
 ]);
 const routeToFile = [
@@ -630,6 +682,7 @@ const routeToFile = [
     [['/matchmaking/'], 'matchmaking'],
     [['/tournaments/'], 'tournaments'],
     [['/create-tournament/'], 'create-tournament'],
+    [[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'tournament'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -733,7 +786,7 @@ export function loadPage(fileName) {
     }
     let content = document.getElementById('main');
     content.innerHTML = route.html;
-    renderPage();
+    renderPage().catch(console.error);
 }
 
 async function tryRefreshToken() {
@@ -750,7 +803,7 @@ async function tryRefreshToken() {
         });
         setCookie('access_token', data.access, 1);
         setCookie('refresh_token', data.refresh, 1);
-        return true;
+        return true;1
     } catch (error) {
         notify('Please login again', 3, 'error')
         return false

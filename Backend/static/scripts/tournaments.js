@@ -1,5 +1,5 @@
 import {request} from "./Request.js";
-import {API_URL, BASE_URL} from "./spa.js";
+import {API_URL, assignRouting, BASE_URL} from "./spa.js";
 import BaseComponent from "../components/Component.js";
 import {escapeHTML} from "./utils.js";
 class TournamentList extends BaseComponent{
@@ -11,7 +11,7 @@ class TournamentList extends BaseComponent{
     {
         return `
      ${this.state.tournaments.map(tournament => `
-          <div class="tournament-element">
+          <pong-redirect href="/tournaments/${tournament.id}" class="tournament-element">
                 <div class="element-data">
                   <div>
                     <h2>${escapeHTML(tournament.name)}</h2>
@@ -38,13 +38,14 @@ class TournamentList extends BaseComponent{
                 <div>
                   <img src="/static/public/more.svg" alt="" />
                 </div>
-              </div>
+              </pong-redirect>
      `).join('')} 
         `;
     }
     render() {
         this.html = this.handleHtml();
         super.render();
+        assignRouting();
     }
 }
 async function fetchTournaments()

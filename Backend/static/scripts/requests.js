@@ -93,7 +93,6 @@ async function App() {
     if (!socket)
         return;
     socket.onopen = function (e) {
-        console.log("connected to Request socket")
     }
     socket.onmessage = async function (e) {
         try {
