@@ -21,6 +21,8 @@ def create(request, profile_id):
     except Profile.DoesNotExist:
         return Response(status=400)
 
+@permission_classes([IsAuthenticated])
+def tournaments(request):
     if request.method == 'GET':
         Tournaments = Tournament.objects.all()
         serializer = TournamentGetSerializer(Tournaments, many=True)
@@ -64,6 +66,48 @@ def get_tournaments(request, profile_id, tournament_id):
     elif request.method == 'DELETE':
         if tournament.created_by.id == profile_id:
             tournament.delete()
-            return Response(status=200)
+            return Response(data= {"message":"tournament successfully deleted"},status=200)
         else:
             return Response(status=400)
+            return Response({{'error': 'Profile is not authorized to delete'}},status=400)
+
+
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def join(request, tournament_id):
+
+    try:
+        tournament = Tournament.objects.get(id=tournament_id)
+    except Tournament.DoesNotExist:
+        return Response(data={"error": "invalid tournament"}, status=400)
+
+    participants = tournament.current_participants.filter(id=request.user.profile.id)
+    if participants.exists():
+        return Response(data={"error": "You are already on channel"}, status=400)
+    elif tournament.current_participants.count() < tournament.max_participants:
+        tournament.current_participants.add(request.user.profile.id)
+        tournament.save()
+        return Response(status=200)
+    else:
+        return Response(data={"error": "You have reached the maximum number of participants"})
+
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def delete(request, tournament_id):
+    try:
+        tournament = Tournament.objects.get(id=tournament_id)
+    except Tournament.DoesNotExist:
+        return Response(data={"error": "invalid tournament"}, status=400)
+    participants = tournament.current_participants.filter(id=request.user.profile.id)
+    if participants.exists():
+        tournament.current_participants.remove(request.user.profile.id)
+        tournament.save()
+        if tournament.current_participants.count() == 0:
+            tournament.delete()
+        return Response(status=200)
+    else:
+        return Response(status=400)

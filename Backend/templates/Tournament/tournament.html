@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static  'styles/main.css'%}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <title>Home Page</title>
+  </head>
+
+  <body>
+      <div class="main-profile-data">
+        <pong-redirect class="inbox-profile-wrapper" id="profile-image-wrapper">
+          <img src="" id="profile-image" alt="" />
+        </pong-redirect>
+        <div class="inbox-wrapper">
+          <input type="checkbox" id="input-button" />
+          <label for="input-button" class="input-label">
+            <img src="{% static 'public/inbox.svg' %}" alt="cannot load" />
+          </label>
+          <ul class="inbox-list" id="inbox-list">
+          </ul>
+        </div>
+        <div class="logout-wrapper" id="logout-wrapper">
+            <label id="logout-button">
+                <img src="{% static 'public/logout.svg' %}" alt="cannot load">
+            </label>
+        </div>
+      </div>
+
+    <main class="main" id="main">
+      <div class="background social-background">
+        <div class="tournament-container">
+          <div class="tournament-header">
+            <h1>Tournaments</h1>
+          </div>
+          <div class="tournament-data-container">
+            <div class="tournament-wrapper">
+              <div class="tournament-element">
+                <div class="element-data">
+                  <div class="tournament-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                  <div>
+                    <h2>Agalarla Turnuva</h2>
+                  </div>
+                </div>
+                <div class="images-style">
+                  <div class="players-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                  <div class="players-img">
+                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                  </div>
+                  <div class="players-img">
+                    <img src="https://picsum.photos/200/300?grayscale" alt="" />
+                  </div>
+                  <div class="players-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <div class="tournament-point">
+                  <h2>IN GAME</h2>
+                </div>
+                <div class="tournament-order">
+                  <h2>3 MIN AGO</h2>
+                </div>
+                <div>
+                  <img src="{% static '/public/more.svg' %}" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="create-tournament-button">CREATE TOURNAMENT</button>
+          <div class="tooltip" id="tooltip"></div>
+        </div>
+      </div>
+    </main>
+        <script  src="{% static '/scripts/spa.js' %}" id="spa" type="module"></script>
+  </body>
+</html>

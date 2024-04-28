@@ -1,32 +1,37 @@
 import {request} from "./Request.js";
 import {notify} from "../components/Notification.js";
+import {getProfile} from "./utils.js";
 
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
-export function setCookie(name,value,days) {
+export const API_42_URL = 'https://api.intra.42.fr'
+
+export function setCookie(name, value, days) {
     let expires = "";
     if (days) {
         const date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
+
 export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
-    for(let i=0; i < ca.length; i++) {
+    for (let i = 0; i < ca.length; i++) {
         let c = ca[i];
-        while (c.charAt(0)===' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length,c.length);
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
 }
+
 const routes = new Map([
     ['login', {
-    auth_required:false,
-    url:["/auth/login/"],
-    html: `
+        auth_required: false,
+        url: ["/auth/login/"],
+        html: `
     <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
             <form class="login-wrapper p-5 gap-2" id="login-form">
@@ -49,18 +54,17 @@ const routes = new Map([
                 </div>
                 <div>
                     <input
-                            type="text"
+                            type="password"
                             class="login-input p-2"
                             id="password"
                             placeholder="PASSWORD"
                     />
                 </div>
-                <div
- class="buttons-wrapper"
-                >
+                <div class="buttons-wrapper">
+
                         <button class="login-button" id="login-button" type="submit">LOGIN</button>
-                        <pong-redirect href="register">
-                            <button class="register-button" type="button">REGISTER</button>
+                        <pong-redirect href="/auth/register/">
+                            <button class="login-button" type="button">REGISTER</button>
                         </pong-redirect>
 
                 </div>
@@ -72,7 +76,8 @@ const routes = new Map([
                 </button>
             </form>
         </div>
-    </div>`
+    </div>
+`
     }],
     ['register', {
         auth_required: false,
@@ -80,7 +85,10 @@ const routes = new Map([
         html: `
               <div class="background container-fluid">
             <div class="d-flex align-items-center justify-content-center h-100">
-              <form class="register-wrapper p-5 gap-2" id="register-form">{% csrf_token %}
+              <form class="register-wrapper p-5 gap-2" id="register-form">
+              <pong-redirect class="register-back" href="/auth/login/">
+                  <img src="/static/public/go-back.svg" alt="">
+              </pong-redirect>
                 <div
                   style="
                     display: flex;
@@ -154,6 +162,8 @@ const routes = new Map([
         auth_required: true,
         url: [/profile\/[A-Za-z]+/],
         html: `
+
+
               <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -180,6 +190,7 @@ const routes = new Map([
               <button class="header-wrapper" id="history-button"><span>MATCH HISTORY</span></button>
               <button class="header-wrapper" id="friends-button"><span> FRIENDS </span></button>
               <button class="header-wrapper" id="stats-button"><span>STATS</span></button>
+              <button class="header-wrapper" id="blocked-users-button"><span>BLOCKED</span></button>
             </div>
           <div id="data-wrapper">
                 <div class="friends-wrapper" style="display: none">
@@ -278,10 +289,10 @@ const routes = new Map([
       </div>
 `
     }],
-    ['social',{
-    auth_required: true,
-    url: ['/social/',  '/social/\\w+/g'],
-    html: `
+    ['social', {
+        auth_required: true,
+        url: ['/social/', '/social/\\w+/g'],
+        html: `
       <ul class="chat-options" id="chat-options">
         <li>Invite to Pong</li>
         <pong-redirect id="options-profile">Go To Profile</pong-redirect>
@@ -407,49 +418,37 @@ const routes = new Map([
         url: ['/home/'],
         html: `
       <div
-        class="background container-fluid position-relative"
+        class="container-fluid position-relative home-wrapper"
         style="padding: 0"
       >
-        <div class="main-buttons-wrapper">
-          <div class="play-wrapper">
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <h1>WELCOME TO PONG</h1>
-            </div>
-            <div class="button-wrapper">
-              <button class="play-button">LEADERBOARD</button>
-              <button class="play-button" id="multiplayer-button">
-                MULTIPLAYER
-              </button>
-              <button class="play-button">SINGLEPLAYER</button>
-              <pong-redirect href="/social/">
-                  <button class="play-button">SOCIAL</button>
-              </pong-redirect>
-            </div>
-          </div>
-        </div>
+        <pong-redirect  class="home-element menu-element" id="single-menu" href="/play/">
+          <h1>Singleplayer</h1>
+        </pong-redirect >
+        <pong-redirect class="home-element menu-element" id="multi-menu" href="/matchmaking/">
+          <h1>Multiplayer</h1>
+        </pong-redirect>
+        <pong-redirect  class="home-element" id="tournament-menu" href="/tournaments/">
+          <h1>Tournament</h1>
+        </pong-redirect >
+        <pong-redirect  class="home-element" id="social-menu" href="/social/">
+          <h1>Social</h1>
+        </pong-redirect >
       </div>
-
               `
     }],
-    ['verification',{
+    ['verification', {
         auth_required: false,
         url: ['/verification/'],
         html: `
-            <div class="background container-fluid">
+             <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
             <div class="verification-wrapper">
                 <h2>E-mail Verification</h2>
                 
                 <p>Please type verification code sent to your e-mail address</p>
                 
-                <p>The verification code will expire in 15 minutes</p>
-                
+                <p>The verification code will expire in</p>
+                <h1 id="timer">15:00</h1>
                 <div class="row">
                     <input type="number" id="singleDigitInput1">
                     <input type="number" id="singleDigitInput2">
@@ -459,42 +458,178 @@ const routes = new Map([
                     <input type="number" id="singleDigitInput6">
                 </div>
                 
-                <button type="button" id="verify">Verify</button>
+
+                <button class='verification-wrapper-button' type="button" id="verify">Verify</button>
                 
                 <p>
                     Didn't receive code? 
-                    <a id="request">Send again!</a>
+                    <a href="" id="request">Send again!</a>
                 </p>
             </div>
         </div>
     </div>
+
         `
     }],
     ['game', {
-            auth_required: true,
-            url: [/game\/(\d+)/],
-            html: `
-          <div class="container">
-                <div class="player">
-                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 1">
-                  <p>Player 1 &nbsp <br>Point: 2000&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</p>
-                  <p>Player 2 &nbsp <br>Point: 2000</p>
-                  <img src="/static/public/liked.svg" style="width: 20px" alt="Player 2">
-                </div>
-                <canvas class="canvas-class" id="pongCanvas" width="800" height="400"></canvas>
-              </div>
+        auth_required: true,
+        url: [/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
+        html: `
 
+     <div
+        class="background container-fluid social-background"
+        style="padding: 0"
+      >
+    <div class="game-container">
+
+        <div class="game-wrapper">
+            <div class="game-data-wrapper">
+                
+            <div class="game-player-data" id="player-one">
+                <div class="player-image">
+                     <img src="https://picsum.photos/seed/picsum/200/300" alt="Player 2">
+                </div>
+                <div class="player-description" id="player-one-details">
+                    <span class="player-name">Player 1</span>
+                    <span class="player-points">Points?</span>
+                </div>
+            </div>
+            <div class="game-points">
+                <h1 id="game-points" class="skeleton">
+
+                </h1>
+            </div>
+            <div class="game-player-data" id="player-two">
+                <div class="player-image">
+                     <img src="https://picsum.photos/seed/picsum/200/300" alt="Player 2">
+                </div>
+                <div class="player-description" id="player-two-details">
+                    <span class="player-name">Player 2</span>
+                    <span class="player-name">Points?</span>
+                </div>
+            </div>
+
+        </div>
+           <div class="" id="canvas-wrapper">
+        <div class="spectators-wrapper" id="spectators-wrapper">
+        </div>
+               <div class="canvas-wrapper">
+                <canvas class="canvas-class" id="pongCanvas" width="1368" height="600"></canvas>
+               </div>
+           </div>
+        </div>
+    </div>
+        </div>
             `
-        }]
+    }],
+    ['error', {
+        auth_required: false,
+        url: ['/error/'],
+        html: `
+      <div class="background container-fluid social-background">
+        <div class="error-container">
+          <div>
+            <h1 id="error-number">ERROR NUMBER 404</h1>
+            <p id="error-message">error message</p>
+            <pong-redirect href="/home/"><button>Back to main</button></pong-redirect>
+          </div>
+        </div>
+      </div>
+            `
+    }],
+    ['matchmaking',{
+        auth_required: true,
+        url: ['/matchmaking/'],
+        html: `
+              <div
+        class="container-fluid position-relative matchmaking-wrapper"
+        style="padding: 0"
+      >
+        <div class="matchmaking-container">
+          <div class="matchmaking-text-wrapper">
+            <h1 id="matchmaking text">FINDING A MATCH</h1>
+            <button id="close-matchmaking">X</button>
+          </div>
+          <div><h1 id="matchmaking-timer">00:00</h1></div>
+        </div>
+      </div>
+        `
+
+    }],
+    [
+        'tournaments', {
+        auth_required: true,
+        url: ['/tournaments/'],
+        html: `
+              <div class="background social-background">
+        <div class="tournament-container">
+          <div class="tournament-header">
+            <h1>Tournaments</h1>
+          </div>
+          <div class="tournament-data-container">
+            <div class="tournament-wrapper">
+              <div class="tournament-element">
+                <div class="element-data">
+                  <div class="tournament-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                  <div>
+                    <h2>Agalarla Turnuva</h2>
+                  </div>
+                </div>
+                <div class="images-style">
+                  <div class="players-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                  <div class="players-img">
+                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                  </div>
+                  <div class="players-img">
+                    <img src="https://picsum.photos/200/300?grayscale" alt="" />
+                  </div>
+                  <div class="players-img">
+                    <img
+                      src="https://picsum.photos/seed/picsum/200/300"
+                      alt=""
+                    />
+                  </div>
+                </div>
+                <div class="tournament-point">
+                  <h2>IN GAME</h2>
+                </div>
+                <div class="tournament-order">
+                  <h2>3 MIN AGO</h2>
+                </div>
+                <div>
+                  <img src="/static/public/more.svg" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="create-tournament-button">CREATE TOURNAMENT</button>
+          <div class="tooltip" id="tooltip"></div>
+        </div>
+      </div>
+`
+    }
+    ]
 ]);
 const routeToFile = [
     [["/auth/login/"], 'login'],
     [["/auth/register/"], 'register'],
     [[/profile\/[A-Za-z]+/], 'profile'],
-    [['/social/',  '/social/\\w+/g'], 'social'],
+    [['/social/', '/social/\\w+/g'], 'social'],
     [['/home/'], 'home'],
     [['/verification/'], 'verification'],
-    [[/game\/(\d+)/], 'game'],
+    [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
+    [['/matchmaking/'], 'matchmaking'],
+    [['/tournaments/'], 'tournaments'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -504,12 +639,23 @@ const requiredScripts = [
     '/static/components/spinner.js',
     '/static/scripts/utils.js',
     '/static/scripts/inbox.js',
+    '/static/scripts/Status.js',
 ]
 
-function handleStyles(value)
-{
+export function loadError(statusCode,title,message) {
+    let content = document.getElementById('main');
+    content.innerHTML = routes.get('error').html;
+    history.pushState({}, '', '/error/');
+    let errorNumber = document.getElementById('error-number');
+    let errorMessage = document.getElementById('error-message');
+    errorNumber.innerText = `${statusCode} ${title}`;
+    errorMessage.innerText = message;
+    App();
+}
+
+function handleStyles(value) {
     let style = document.getElementById('style');
-    if(style)
+    if (style)
         style.remove();
     let newStyle = document.createElement('link');
     newStyle.rel = 'stylesheet';
@@ -517,24 +663,22 @@ function handleStyles(value)
     newStyle.id = 'style';
     document.head.appendChild(newStyle);
 }
+
 function findRouteKey(pathName) {
     for (let [key, value] of routes) {
-        for(let url of value.url)
-        {
-            if(url instanceof RegExp)
-            {
-                if(url.test(pathName))
-                {
-                      return key;
+        for (let url of value.url) {
+            if (url instanceof RegExp) {
+                if (url.test(pathName)) {
+                    return key;
                 }
 
-            }
-            else if(pathName.includes(url))
+            } else if (pathName.includes(url))
                 return key;
         }
     }
     return null;
 }
+
 function loadRequiredScripts() {
     requiredScripts.forEach(script => {
         if (!document.getElementById(script)) {
@@ -546,6 +690,7 @@ function loadRequiredScripts() {
         }
     });
 }
+
 function findRouteFile(pathName) {
     const route = routeToFile.find(route => route[0].some(url => {
         if (url instanceof RegExp) {
@@ -554,83 +699,84 @@ function findRouteFile(pathName) {
             return pathName.includes(url);
         }
     }));
-
     return route ? route[1] : null;
 }
+
 export function loadPage(fileName) {
     let data = findRouteFile(fileName);
+    if(!data){
+        console.error("No route found for",fileName);
+        return;
+    }
     const route = routes.get(data);
     let isMatch = false;
+    if (Array.isArray(route.url)) {
+        isMatch = route.url.some(url => {
+            if (url instanceof RegExp) {
+                return url.test(window.location.pathname);
+            } else {
+                return window.location.pathname.includes(url);
+            }
+        });
+    } else if (route.url instanceof RegExp) {
+        isMatch = route.url.test(window.location.pathname);
+    } else {
+        isMatch = window.location.pathname.includes(route.url);
+    }
+        let split = fileName.split('/').filter(Boolean);
+    if (!isMatch) {
+        if(split.length > 1)
+            history.pushState({}, '', window.location.origin + `/${split[0]}/${split[1]}/`);
+        else
+            history.pushState({}, '', window.location.origin + route.url);
 
-if (Array.isArray(route.url)) {
-    isMatch = route.url.some(url => {
-        if (url instanceof RegExp) {
-            return url.test(window.location.pathname);
-        } else {
-            return window.location.pathname.includes(url);
-        }
-    });
-} else if (route.url instanceof RegExp) {
-    isMatch = route.url.test(window.location.pathname);
-} else {
-    isMatch = window.location.pathname.includes(route.url);
-}
-
-if (!isMatch) {
-    history.pushState({}, '', window.location.origin + route.url);
-}
+    }
     let content = document.getElementById('main');
     content.innerHTML = route.html;
     App();
 }
 
-async function tryRefreshToken()
-{
+async function tryRefreshToken() {
     let refresh_token = getCookie('refresh_token');
-    if(!refresh_token)
+    if (!refresh_token)
         return;
-    try{
+    try {
 
-    let data = await request(`${API_URL}/token/refresh`, {
-        method: 'POST',
-        body: JSON.stringify({
-            refresh: refresh_token
-        }),
-    });
+        let data = await request(`${API_URL}/token/refresh`, {
+            method: 'POST',
+            body: JSON.stringify({
+                refresh: refresh_token
+            }),
+        });
         setCookie('access_token', data.access, 1);
         setCookie('refresh_token', data.refresh, 1);
         return true;
-    }
-    catch (error)
-    {
+    } catch (error) {
         notify('Please login again', 3, 'error')
         return false
     }
 }
-async function checkForAuth()
-{
-    if(getCookie('access_token'))
+
+async function checkForAuth() {
+    if (getCookie('access_token'))
         return;
     await tryRefreshToken();
-    if(getCookie('access_token'))
-        return;
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    if(!value)
+    if (!value)
         return;
     const route = routes.get(value);
-    if(route.auth_required === true)
+    if (route.auth_required === true)
         loadPage('/auth/login/');
 
 }
-export function assignRouting()
-{
+
+export function assignRouting() {
     let elements = document.querySelectorAll("pong-redirect");
-    for(let element of elements)
-    {
-        if(element.getAttribute(('listener')) === 'true')
+    for (let element of elements) {
+        if (element.getAttribute(('listener')) === 'true')
             continue;
-        element.addEventListener('click', function(event) {
+        element.addEventListener('click', function (event) {
             event.preventDefault();
             let fileName = element.getAttribute('href');
             history.pushState({to: fileName}, '', window.location.origin + fileName);
@@ -639,14 +785,13 @@ export function assignRouting()
         element.setAttribute('listener', 'true');
     }
 }
-function loadSpecificScript()
-{
-let pathName = window.location.pathname;
+
+function loadSpecificScript() {
+    let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    console.log(value,pathName)
-    if(!value)
+    if (!value)
         return;
-    if(document.getElementById('script'))
+    if (document.getElementById('script'))
         document.getElementById('script').remove();
     let script = document.createElement('script');
     script.src = '/static/scripts/' + value + '.js?ts=' + new Date().getTime();
@@ -655,16 +800,39 @@ let pathName = window.location.pathname;
     document.body.appendChild(script);
     handleStyles(value)
 }
+
+async function assignLocalStorage() {
+    let profile =await  getProfile();
+    localStorage.setItem('activeUserNickname', profile.nickname);
+}
+
 const App = async () => {
     loadRequiredScripts();
     loadSpecificScript();
     await checkForAuth();
     assignRouting()
+    await assignLocalStorage();
 }
-window.addEventListener('popstate', (event ) => {
-    let pathName = window.location.pathname;
-    loadPage(pathName);
+window.addEventListener('popstate', (event) => {
+        let pathName = window.location.pathname;
+        loadPage(pathName);
     }
 );
 
 document.addEventListener('DOMContentLoaded', App);
+
+document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
+    const refresh_token = getCookie('refresh_token')
+    if(refresh_token === 'null')
+        return
+    await request(`${API_URL}/token/blacklist`, {
+        method: 'POST',
+        body: JSON.stringify({
+            refresh: refresh_token
+        }),
+    });
+    localStorage.clear()
+    setCookie('access_token', null, 1);
+    setCookie('refresh_token', null, 1);
+    loadPage('/auth/login/')
+})

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig",
@@ -61,7 +62,7 @@ INSTALLED_APPS = [
     "Apps.Chat.apps.ChatConfig",
     "Apps.UserStatus.apps.OnlineusersConfig",
     "Apps.Request.apps.RequestConfig",
-    "Apps.Game.apps.GameConfig"
+    "Apps.Game.apps.GameConfig",
 ]
 
 MIDDLEWARE = [
@@ -100,7 +101,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("192.168.228.2", 6379)],
+            "hosts": [("127.0.0.1", 6379)],
         },
     },
 }
@@ -108,7 +109,21 @@ CHANNEL_LAYERS = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_THROTTLE_CLASSES': [
+
+        'rest_framework.throttling.AnonRateThrottle',
+
+        'rest_framework.throttling.UserRateThrottle'
+
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+
+        'anon': '50/min',
+
+        'user': '100/min'
+
+    }
 }
 
 
@@ -170,7 +185,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=50),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,

@@ -14,11 +14,12 @@ class Inbox  extends BaseComponent{
         `
     }
     parseMessage(request){
+        console.log(request.type)
         switch (request.type){
             case 'friend':
                 return `You have a friend request from ${request.sender.nickname}`;
-            case 'pong':
-                return `${request.sender} invited you to a game of pong`;
+            case 'game':
+                return `${request.sender.nickname} invited you to a game of pong`;
             default:
                 return `You have a new notification from ${request.sender.nickname}`;
         }
@@ -95,10 +96,14 @@ async function handleProfileImage(){
     document.getElementById('profile-image-wrapper').setAttribute('href',`/profile/${profile.nickname}`)
 }
 async function App(){
+    if(localStorage.getItem('activeUserNickname') === null)
+        return;
     const inboxList = document.getElementById('inbox-list');
-    if(!inboxList){
-        throw new Error("No inbox list found")
+    if(!inboxList)
+    {
+        throw new Error("Inbox Error: Inbox list not found or user not logged in")
     }
+
     await handleProfileImage();
     let requests = await getRequests();
     const inbox = new Inbox({requests:requests},inboxList);

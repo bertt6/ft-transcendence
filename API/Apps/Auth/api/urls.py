@@ -1,5 +1,5 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView, TokenBlacklistView
 from Apps.Auth.api.views import *
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -11,4 +11,6 @@ urlpatterns = [
     path('change-password', change_password, name='change_password'),
     path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/temp-token', TokenObtainPairView.as_view(), name='temp_token'),
+    path('login-with-42', login_with_42, name='login_with_42'),
+    path('token/blacklist', TokenBlacklistView.as_view(), name='token_blacklist'),
 ]

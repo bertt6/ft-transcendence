@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('Profile', '0001_initial'),
+        ('Tournament', '0007_tournament_current_participants_and_more'),
     ]
 
     operations = [
