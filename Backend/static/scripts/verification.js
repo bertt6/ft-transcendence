@@ -61,7 +61,7 @@ async function postVerificationCode(value) {
         });
 
         setCookie('access_token', response.tokens.access, 1);
-        setCookie('refresh_token', response.tokens.refresh, 1);
+        setCookie('refresh_token', response.tokens.refresh, 30);
         loadPage('/home/')
         notify('Successfully verified', 3, 'success')
     }

@@ -42,7 +42,6 @@ class RequestConsumer(AsyncWebsocketConsumer):
                 }
             )
         else:
-            print("Request type not recognized!")
             await self.create_request(text_data_json)
 
     async def create_request_message(self, event):

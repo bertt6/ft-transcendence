@@ -10,15 +10,12 @@ from .models import Tournament, Round
 
 
 class TournamentConsumer(WebsocketConsumer):
-
     def connect(self):
         self.accept()
         query_string = self.scope['query_string'].decode()
         params = urllib.parse.parse_qs(query_string)
         self.nickname = params.get('nickname', [None])[0]
         self.tournament_id = params.get('tournament_id', [None])[0]
-
-
         try:
             instance = Profile.objects.get(nickname=self.nickname)
         except Profile.DoesNotExist:
@@ -161,5 +158,4 @@ class TournamentConsumer(WebsocketConsumer):
                     new_round.participants.remove(winners[i])
                     new_round.participants.remove(winners[i + 1])
                 new_round.save()
-            print("Yeni Turnuva Oluşturuldu")
             return
