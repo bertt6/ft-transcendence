@@ -114,7 +114,6 @@ def login_with_42(request):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save()
-    print(request.data)
     user = User.objects.get(username=request.data['username'])
     user.profile.save_image_from_url(request.data['image'])
     if user:

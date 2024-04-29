@@ -92,9 +92,6 @@ async function loginForm(event)
     }
     return false;
 }
-
-
-
 const App = async () => {
     if(getCookie("access_token"))
     {

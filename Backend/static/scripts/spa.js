@@ -811,7 +811,6 @@ async function tryRefreshToken() {
 }
 
 async function checkForAuth() {
-    debugger
     if (getCookie('access_token'))
         return;
     if (await tryRefreshToken() === true)
