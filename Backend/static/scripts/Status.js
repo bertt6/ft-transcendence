@@ -1,6 +1,11 @@
+import {getActiveUserNickname} from "./utils.js";
+import {checkIfAuthRequired} from "./spa.js";
+
 let socket;
 
-export function getStatusSocket(url) {
+export function getStatusSocket() {
+    const nickname = getActiveUserNickname();
+    const url  = `ws://localhost:8000/ws/status/${nickname}`;
     return new Promise((resolve, reject) => {
         if (socket) {
             if (socket.readyState === WebSocket.OPEN) {
@@ -25,7 +30,8 @@ export function getStatusSocket(url) {
 
 async function App()
 {
-    let nickname = localStorage.getItem('activeUserNickname');
-    let socket = await getStatusSocket(`ws://localhost:8000/ws/status/${nickname}`);
+    if (checkIfAuthRequired(window.location.pathname))
+        return;
+    let socket = await getStatusSocket();
 }
 App().catch(e => console.error(e))

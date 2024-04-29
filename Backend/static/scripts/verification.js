@@ -49,7 +49,7 @@ document.getElementById("verify").addEventListener("click", async function() {
 
 async function postVerificationCode(value) {
     try {
-        let response = await request(`${API_URL}/email-verification`, {
+        let response = await request(`${API_URL}/email-verification/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ async function postVerificationCode(value) {
         });
 
         setCookie('access_token', response.tokens.access, 1);
-        setCookie('refresh_token', response.tokens.refresh, 1);
+        setCookie('refresh_token', response.tokens.refresh, 30);
         loadPage('/home/')
         notify('Successfully verified', 3, 'success')
     }

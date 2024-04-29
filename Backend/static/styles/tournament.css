@@ -1,0 +1,133 @@
+.tournament-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 90%;
+  margin: auto;
+  overflow: hidden;
+}
+.tournament-details-wrapper {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  gap: 2rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.tournament-participants {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  flex-basis: 800px;
+  max-height: 1000px;
+  min-height: 90%;
+  overflow: auto;
+}
+.tournament-participant {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgb(51, 32, 10);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+}
+.participant-image-wrapper {
+  border-radius: 50%;
+  aspect-ratio: 1;
+  width: 3rem;
+  height: 3rem;
+}
+.participant-details {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  gap: 1rem;
+}
+.participant-image-wrapper img {
+  border-radius: 50%;
+  aspect-ratio: 1;
+  width: 100%;
+  height: 100%;
+}
+.participant-status {
+  font-size: 1.5rem;
+}
+.participants-wrapper {
+  overflow: auto;
+}
+#tournament-context {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  color: white;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  list-style: none;
+  margin: 0;
+  padding: 1rem;
+  z-index: 10;
+  border: 1px solid white;
+  user-select: none;
+}
+#tournament-context li:hover {
+  cursor: pointer;
+  background-color: white;
+}
+.joined-details {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+  padding: 1rem 5rem;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 80%;
+}
+.joined-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+.joined-header h1 {
+  font-size: 3rem;
+}
+.joined-ready {
+  color: red;
+  font-size: 1.5rem;
+}
+.joined-remaining {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+.joined-remaining h1 {
+  font-size: 2rem;
+}
+.joined-ready-button {
+  align-self: flex-end;
+}
+.joined-ready.button {
+  background-color: rgb(51, 32, 10);
+  color: white;
+}
+#joined-ready-button {
+  background-color: rgb(51, 32, 10);
+  color: white;
+  padding: 0.5rem 3rem;
+  border-radius: 2rem;
+  font-size: 2rem;
+  margin-bottom: 20%;
+}
+.tournament-data-wrapper {
+  display: flex;
+  height: 100%;
+  gap: 2rem;
+  align-items: center;
+}

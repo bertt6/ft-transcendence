@@ -1,5 +1,5 @@
 import {BASE_URL, loadError, loadPage} from "./spa.js";
-import {getProfile} from "./utils.js";
+import {getActiveUserNickname, getProfile} from "./utils.js";
 import BaseComponent from "../components/Component.js";
 import {getStatusSocket} from "./Status.js";
 
@@ -209,7 +209,7 @@ async function connectToServer()
             statusSocket.send(JSON.stringify({
                 request_type: "set_status",
                 status: "in_game",
-                nickname: localStorage.getItem("activeUserNickname"),
+                nickname: getActiveUserNickname()
             }));
           }catch(e)
           {

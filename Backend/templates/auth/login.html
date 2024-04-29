@@ -45,21 +45,19 @@
                 </div>
                 <div>
                     <input
-                            type="password"
-                            class="login-input p-2"
-                            id="password"
-                            placeholder="PASSWORD"
+                        type="password"
+                        class="login-input p-2"
+                        id="password"
+                        placeholder="PASSWORD"
                     />
                 </div>
                 <div class="buttons-wrapper">
-
-                        <button class="login-button" id="login-button" type="submit">LOGIN</button>
-                        <pong-redirect href="/auth/register/">
-                            <button class="login-button" type="button">REGISTER</button>
-                        </pong-redirect>
-
+                    <button class="login-button" id="login-button" type="submit">LOGIN</button>
+                    <pong-redirect href="/auth/register/">
+                        <button class="login-button" type="button">REGISTER</button>
+                    </pong-redirect>
                 </div>
-                <button class="ecole-login-button" id="ecole-login-button">
+                <button class="ecole-login-button" id="ecole-login-button" type="button">
                     Login with 42
                     <div>
                         <img src="{% static 'public/42.svg' %}" alt=""/>

@@ -1,9 +1,9 @@
 import {loadPage} from "./spa.js";
+import {getActiveUserNickname} from "./utils";
 
 function handleText() {
   const BASE_TEXT = "FINDING A MATCH";
   const text = document.getElementById("matchmaking text");
-  console.log(text);
   let textIndex = 0;
   return setInterval(() => {
       text.innerText = BASE_TEXT + ".".repeat(textIndex % 4);
@@ -34,7 +34,7 @@ async function matchFounded() {
 }
 async function connectToSocket() {
   let interval;
-  const nickname = localStorage.getItem("activeUserNickname")
+  const nickname = getActiveUserNickname()
     const socket = new WebSocket(`ws://localhost:8000/ws/matchmaking/${nickname}`);
     socket.onopen = () => {
       interval = handleText();

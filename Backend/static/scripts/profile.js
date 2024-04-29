@@ -2,7 +2,7 @@ import BaseComponent from "../components/Component.js";
 import { API_URL, BASE_URL, loadPage } from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
-import { escapeHTML } from "./utils.js";
+import {escapeHTML, getActiveUserNickname} from "./utils.js";
 
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -42,7 +42,6 @@ class History extends BaseComponent {
         this.parentElement.innerHTML = this.handleHTML();
     }
 }
-
 class BlockedUsers extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -71,8 +70,6 @@ class BlockedUsers extends BaseComponent {
         this.parentElement.innerHTML = this.html;
     }
 }
-
-
 class Stats extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -120,8 +117,6 @@ class Stats extends BaseComponent {
         this.parentElement.innerHTML = this.html;
     }
 }
-
-
 class Friends extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -288,7 +283,7 @@ async function fetchProfile() {
     const pathParts = pathName.split('/');
     const nickname = pathParts[pathParts.length - 1];
     try {
-        let data = await request(`${API_URL}/profile-with-nickname/${nickname}`, {
+        let data = await request(`${API_URL}/profile-with-nickname/${nickname}/`, {
             method: 'GET',
         });
         console.log(data);
@@ -341,7 +336,7 @@ async function fetchBlockedUsers() {
 }
 async function fetchStats() {
     try {
-        let response = await request(`${API_URL}/profile/stats`, {
+        let response = await request(`${API_URL}/profile/stats/`, {
             method: 'GET',
 
         });
@@ -354,7 +349,7 @@ async function fetchStats() {
 
 async function fetchFriends() {
     try {
-        let data = await request(`${API_URL}/profile/friends`, {
+        let data = await request(`${API_URL}/profile/friends/`, {
             method: 'GET',
 
         });
@@ -368,7 +363,7 @@ async function fetchFriends() {
 async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
-    const activeUserNickname = localStorage.getItem('activeUserNickname');
+    const activeUserNickname = getActiveUserNickname()
     if (hash === '#history') {
         const history = new History({ histories: [1] }, parentElement);
         history.render();
