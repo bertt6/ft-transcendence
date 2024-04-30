@@ -1,6 +1,6 @@
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
-import {API_URL, BASE_URL, checkIfAuthRequired} from "./spa.js";
+import {API_URL, assignRouting, BASE_URL, checkIfAuthRequired} from "./spa.js";
 import {getActiveUserNickname} from "./utils.js";
 class ProfileData extends BaseComponent{
     constructor(state,parentElement=null){
@@ -8,7 +8,7 @@ class ProfileData extends BaseComponent{
     }
     handleHtml(){
         return `
-    <div class="main-profile-data" id="data-wrapper">
+    <div class="main-profile-data" id="inbox-data-wrapper">
         <pong-redirect class="inbox-profile-wrapper" id="profile-image-wrapper">
           <img src="" id="profile-image" alt="" />
         </pong-redirect>
@@ -34,6 +34,7 @@ class ProfileData extends BaseComponent{
     tmpWrapper.innerHTML = this.html;
     let parsedHtml = tmpWrapper.firstChild;
     document.body.insertAdjacentHTML('afterbegin', this.html);
+    assignRouting();
     }
 }
 class Inbox  extends BaseComponent{
@@ -106,7 +107,6 @@ class Inbox  extends BaseComponent{
 }
 function getRequests() {
     try{
-
     return request(`${API_URL}/request/`, {
         method: 'GET',
     });
@@ -151,7 +151,7 @@ async function App(){
 window.addEventListener('popstate',() => {
     if(checkInboxRequired())
     {
-        if(document.getElementById("data-wrapper"))
+        if(document.getElementById("inbox-data-wrapper"))
             return
         let profile = new ProfileData({},document.getElementById('profile-data'));
         profile.render();

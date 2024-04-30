@@ -15,7 +15,6 @@ export function setCookie(name, value, days) {
     }
     document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
-
 export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -26,7 +25,6 @@ export function getCookie(name) {
     }
     return null;
 }
-
 const routes = new Map([
     ['login', {
         auth_required: false,
@@ -843,8 +841,10 @@ export function assignRouting() {
 function loadSpecificScript() {
     let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    if (!value)
+    if (!value){
+    loadError(404, 'Page not found', 'The page you are looking for does not exist')
         return;
+    }
     if (document.getElementById('script'))
         document.getElementById('script').remove();
     let script = document.createElement('script');

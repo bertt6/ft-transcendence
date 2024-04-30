@@ -14,6 +14,7 @@ class GameSerializer(serializers.ModelSerializer):
     player1 = GameProfileSerializer(read_only=True)
     player2 = GameProfileSerializer(read_only=True)
     winner = GameProfileSerializer(read_only=True)
+
     class Meta:
         model = Game
         fields = '__all__'
