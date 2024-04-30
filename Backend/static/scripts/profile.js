@@ -4,6 +4,7 @@ import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
 import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
 
+
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -68,6 +69,82 @@ class BlockedUsers extends BaseComponent {
         this.parentElement.innerHTML = this.html;
     }
 }
+
+class PaddleColor extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+        this.html = this.handleHTML();
+    }
+
+    handleHTML() {
+        
+        return `
+        <form>
+    <div class="paddle-color-wrapper">
+        <div class="colors-text">COLORS</div>
+        <div class="paddle-color-row">
+            <div class="paddle-color-item">
+                <input type="radio" id="red1" name="color_row1" value="red1">
+                <label for="red1">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+            <div class="paddle-color-item">
+                <input type="radio" id="red2" name="color_row1" value="red2">
+                <label for="red2">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="paddle-color-row">
+            <div class="paddle-color-item">
+                <input type="radio" id="red3" name="color_row1" value="red3">
+                <label for="red3">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+            <div class="paddle-color-item">
+                <input type="radio" id="red4" name="color_row1" value="red4">
+                <label for="red4">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+</form>
+    `;
+    }
+
+    render() {
+        this.parentElement.innerHTML = this.html;
+    }
+}
+
+function calculateWinRate(wins, losses) {
+    let winRate = wins + losses === 0 ? 0 : (wins / (wins + losses)) * 100;
+    return parseFloat(winRate.toFixed(2));
+}
+
 class Stats extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -100,7 +177,8 @@ class Stats extends BaseComponent {
     <div class="stats-row">
         <div class="stats-item">
             <h3>Win Rate</h3>
-            <p class="stats-value">%${((parseInt(this.state.statsInfo.total_wins) / (parseInt(this.state.statsInfo.total_wins) + parseInt(this.state.statsInfo.total_losses))) * 100).toFixed(2)}</p>
+            <p class="stats-value">%${calculateWinRate(parseInt((this.state.statsInfo.total_wins)), parseInt(this.state.statsInfo.total_losses))}</p>
+            
         </div>
         <div class="stats-item">
             <h3 href="leaderboard" class="stats-value">Rank</>
@@ -220,7 +298,7 @@ class ProfileInfo extends BaseComponent {
               </div>`
     }
 
-updateProfile = async (formData) => {
+    updateProfile = async (formData) => {
 
         try {
             let response = await request(`${API_URL}/profile/`, {
@@ -301,6 +379,8 @@ async function assignDataRouting() {
     const friendsButton = document.getElementById('friends-button');
     const statsButton = document.getElementById('stats-button');
     const blockedUsersButton = document.getElementById('blocked-users-button');
+    const paddleColorButton = document.getElementById('paddle-color-button');
+
     historyButton.addEventListener('click', () => {
         history.replaceState(null, null, '#history')
         handleRouting()
@@ -317,6 +397,10 @@ async function assignDataRouting() {
         history.replaceState(null, null, '#blockedusers')
         handleRouting()
     });
+    paddleColorButton.addEventListener('click', () => {
+        history.replaceState(null, null, '#paddlecolor')
+        handleRouting()
+    });
 }
 
 async function fetchBlockedUsers() {
@@ -328,6 +412,17 @@ async function fetchBlockedUsers() {
         { nickname: "user5", profile_picture: "https://example.com/user5.jpg" }
     ];
     return users;
+}
+
+async function fetchPaddleColor() {
+    const colors = [
+        { color: "red", hex: "#FF0000" },
+        { color: "green", hex: "#00FF00" },
+        { color: "blue", hex: "#0000FF" },
+        { color: "yellow", hex: "#FFFF00" },
+        { color: "purple", hex: "#800080" }
+    ];
+    return colors;
 }
 async function fetchStats() {
     try {
@@ -401,9 +496,13 @@ async function handleRouting() {
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
+    if (hash == '#paddlecolor') {
+        const paddleColor = await fetchPaddleColor();
+        const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
+        paddleColorComponent.render();
+    }
 }
-function getUsernameFromURL()
-{
+function getUsernameFromURL() {
     const pathName = window.location.pathname;
     const pathParts = pathName.split('/');
     return pathParts[pathParts.length - 1];
