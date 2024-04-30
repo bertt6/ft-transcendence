@@ -4,7 +4,7 @@ import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
 import {getSocket} from "./requests.js";
-import {escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
 import {getStatusSocket} from "./Status.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
@@ -359,32 +359,7 @@ let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
-function   calculateDate(date)
-    {
-    let tweetDate = new Date(date);
-    let currentDate = new Date();
-    let differenceInSeconds = Math.floor((currentDate - tweetDate) / 1000);
 
-    let minute = 60;
-    let hour = minute * 60;
-    let day = hour * 24;
-    let week = day * 7;
-    if (differenceInSeconds < minute) {
-        return `${differenceInSeconds} seconds ago`;
-    }
-    else if (differenceInSeconds < hour) {
-        return `${Math.floor(differenceInSeconds / minute)} minutes ago`;
-    }
-    else if (differenceInSeconds < day) {
-        return `${Math.floor(differenceInSeconds / hour)} hours ago`;
-        }
-    else if (differenceInSeconds < week) {
-        return `${Math.floor(differenceInSeconds / day)} days ago`;
-    }
-    else {
-        return `${Math.floor(differenceInSeconds / week)} weeks ago`;
-        }
-    }
 
 const fetchChatFriends = async () => {
 

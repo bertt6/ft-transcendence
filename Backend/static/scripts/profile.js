@@ -2,7 +2,7 @@ import BaseComponent from "../components/Component.js";
 import { API_URL, BASE_URL, loadPage } from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
-import {escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
 
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -19,17 +19,15 @@ class History extends BaseComponent {
                   <div class="history-type"><h5>1v1</h5></div>
                 </div>
                 <div class="history-data">
-                  <h5>BSAMLI</h5>
+                  <h5>${history.player1.nickname}</h5>
                   <h5>VS</h5>
-                  <h5>OFIRAT</h5>
+                  <h5>${history.player2.nickname}</h5>
                 </div>
                 <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
+                 ${history.winner.nickname}
                 </div>
                 <div>
-                  <h5>1 DAY AGO</h5>
+                  <h5>${calculateDate(history.date)}</h5>
                 </div>
               </div>
             `)}
@@ -153,8 +151,6 @@ class Friends extends BaseComponent {
         this.render();
     }
 }
-
-
 class ProfileInfo extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -286,7 +282,6 @@ async function fetchProfile() {
         let data = await request(`${API_URL}/profile-with-nickname/${nickname}/`, {
             method: 'GET',
         });
-        console.log(data);
         const profileParentElement = document.getElementById('profile-info');
         const profile = new ProfileInfo({ profile: data, isEditing: false }, profileParentElement);
         profile.render();
@@ -359,13 +354,36 @@ async function fetchFriends() {
         notify('Error fetching friends', 3, 'error')
     }
 }
+async function fetchHistory()
+{
+    try
+    {
+        let data = await request(`${API_URL}/profile/history/`,{
+            method:'GET',
+        });
+        console.log(data)
 
+        if(!data.ok)
+        {
+            notify('Error fetching history',3,'error');
+            return [];
+        }
+        return data;
+    }
+    catch(error)
+    {
+        notify('Error fetching history',3,'error')
+        console.error('Error:',error);
+    return []
+        }
+}
 async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
     const activeUserNickname = getActiveUserNickname()
     if (hash === '#history') {
-        const history = new History({ histories: [1] }, parentElement);
+        let data = await fetchHistory();
+        const history = new History({ histories: data }, parentElement);
         history.render();
     }
     if (hash === '#friends') {
