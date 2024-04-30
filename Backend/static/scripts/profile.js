@@ -42,7 +42,6 @@ class History extends BaseComponent {
         this.parentElement.innerHTML = this.handleHTML();
     }
 }
-
 class BlockedUsers extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -147,7 +146,6 @@ function calculateWinRate(wins, losses) {
     return parseFloat(winRate.toFixed(2));
 }
 
-
 class Stats extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -196,8 +194,6 @@ class Stats extends BaseComponent {
         this.parentElement.innerHTML = this.html;
     }
 }
-
-
 class Friends extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);

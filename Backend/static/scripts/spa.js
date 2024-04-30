@@ -795,7 +795,7 @@ async function tryRefreshToken() {
         return;
     try {
 
-        let data = await request(`${API_URL}/token/refresh`, {
+        let data = await request(`${API_URL}/token/refresh/`, {
             method: 'POST',
             body: JSON.stringify({
                 refresh: refresh_token
@@ -803,7 +803,7 @@ async function tryRefreshToken() {
         });
         setCookie('access_token', data.access, 1);
         setCookie('refresh_token', data.refresh, 1);
-        return true;1
+        return true;
     } catch (error) {
         notify('Please login again', 3, 'error')
         return false
@@ -813,7 +813,8 @@ async function tryRefreshToken() {
 async function checkForAuth() {
     if (getCookie('access_token'))
         return;
-    await tryRefreshToken();
+    if (await tryRefreshToken() === true)
+        return;
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
     if (!value)
@@ -872,8 +873,8 @@ async function renderPage() {
 }
 const App = async () => {
     loadRequiredScripts();
-    loadSpecificScript();
     await checkForAuth();
+    loadSpecificScript();
     assignRouting()
     await assignLocalStorage();
 }

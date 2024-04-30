@@ -111,11 +111,11 @@ def change_password(request):
 def login_with_42(request):
     if not User.objects.filter(username=request.data['username']).exists():
         serializer = RegisterWith42Serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
         serializer.save()
     user = User.objects.get(username=request.data['username'])
     user.profile.save_image_from_url(request.data['image'])
-
     if user:
         send_email(user)
         return Response(data={'user': UserSerializer(user).data}, status=200)
