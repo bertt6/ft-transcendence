@@ -2,7 +2,8 @@ import BaseComponent from "../components/Component.js";
 import { API_URL, BASE_URL, loadPage } from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
-import {escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
+
 
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -19,17 +20,15 @@ class History extends BaseComponent {
                   <div class="history-type"><h5>1v1</h5></div>
                 </div>
                 <div class="history-data">
-                  <h5>BSAMLI</h5>
+                  <h5>${history.player1.nickname}</h5>
                   <h5>VS</h5>
-                  <h5>OFIRAT</h5>
+                  <h5>${history.player2.nickname}</h5>
                 </div>
                 <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
+                 ${history.winner.nickname}
                 </div>
                 <div>
-                  <h5>1 DAY AGO</h5>
+                  <h5>${calculateDate(history.date)}</h5>
                 </div>
               </div>
             `)}
@@ -42,7 +41,6 @@ class History extends BaseComponent {
         this.parentElement.innerHTML = this.handleHTML();
     }
 }
-
 class BlockedUsers extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -72,6 +70,80 @@ class BlockedUsers extends BaseComponent {
     }
 }
 
+class PaddleColor extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+        this.html = this.handleHTML();
+    }
+
+    handleHTML() {
+        
+        return `
+        <form>
+    <div class="paddle-color-wrapper">
+        <div class="colors-text">COLORS</div>
+        <div class="paddle-color-row">
+            <div class="paddle-color-item">
+                <input type="radio" id="red1" name="color_row1" value="red1">
+                <label for="red1">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+            <div class="paddle-color-item">
+                <input type="radio" id="red2" name="color_row1" value="red2">
+                <label for="red2">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="paddle-color-row">
+            <div class="paddle-color-item">
+                <input type="radio" id="red3" name="color_row1" value="red3">
+                <label for="red3">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+            <div class="paddle-color-item">
+                <input type="radio" id="red4" name="color_row1" value="red4">
+                <label for="red4">
+                    <div>
+                        <p>Red</p>
+                    </div>
+                    <div class="red">
+                        <img src="/static/public/SingleCloud.png" alt="">
+                    </div>
+                </label>
+            </div>
+        </div>
+    </div>
+</form>
+    `;
+    }
+
+    render() {
+        this.parentElement.innerHTML = this.html;
+    }
+}
+
+function calculateWinRate(wins, losses) {
+    let winRate = wins + losses === 0 ? 0 : (wins / (wins + losses)) * 100;
+    return parseFloat(winRate.toFixed(2));
+}
 
 class Stats extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -105,7 +177,8 @@ class Stats extends BaseComponent {
     <div class="stats-row">
         <div class="stats-item">
             <h3>Win Rate</h3>
-            <p class="stats-value">%${((parseInt(this.state.statsInfo.total_wins) / (parseInt(this.state.statsInfo.total_wins) + parseInt(this.state.statsInfo.total_losses))) * 100).toFixed(2)}</p>
+            <p class="stats-value">%${calculateWinRate(parseInt((this.state.statsInfo.total_wins)), parseInt(this.state.statsInfo.total_losses))}</p>
+            
         </div>
         <div class="stats-item">
             <h3 href="leaderboard" class="stats-value">Rank</>
@@ -120,8 +193,6 @@ class Stats extends BaseComponent {
         this.parentElement.innerHTML = this.html;
     }
 }
-
-
 class Friends extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -158,8 +229,6 @@ class Friends extends BaseComponent {
         this.render();
     }
 }
-
-
 class ProfileInfo extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -229,7 +298,7 @@ class ProfileInfo extends BaseComponent {
               </div>`
     }
 
-updateProfile = async (formData) => {
+    updateProfile = async (formData) => {
 
         try {
             let response = await request(`${API_URL}/profile/`, {
@@ -291,7 +360,6 @@ async function fetchProfile() {
         let data = await request(`${API_URL}/profile-with-nickname/${nickname}/`, {
             method: 'GET',
         });
-        console.log(data);
         const profileParentElement = document.getElementById('profile-info');
         const profile = new ProfileInfo({ profile: data, isEditing: false }, profileParentElement);
         profile.render();
@@ -311,6 +379,8 @@ async function assignDataRouting() {
     const friendsButton = document.getElementById('friends-button');
     const statsButton = document.getElementById('stats-button');
     const blockedUsersButton = document.getElementById('blocked-users-button');
+    const paddleColorButton = document.getElementById('paddle-color-button');
+
     historyButton.addEventListener('click', () => {
         history.replaceState(null, null, '#history')
         handleRouting()
@@ -327,6 +397,10 @@ async function assignDataRouting() {
         history.replaceState(null, null, '#blockedusers')
         handleRouting()
     });
+    paddleColorButton.addEventListener('click', () => {
+        history.replaceState(null, null, '#paddlecolor')
+        handleRouting()
+    });
 }
 
 async function fetchBlockedUsers() {
@@ -338,6 +412,17 @@ async function fetchBlockedUsers() {
         { nickname: "user5", profile_picture: "https://example.com/user5.jpg" }
     ];
     return users;
+}
+
+async function fetchPaddleColor() {
+    const colors = [
+        { color: "red", hex: "#FF0000" },
+        { color: "green", hex: "#00FF00" },
+        { color: "blue", hex: "#0000FF" },
+        { color: "yellow", hex: "#FFFF00" },
+        { color: "purple", hex: "#800080" }
+    ];
+    return colors;
 }
 async function fetchStats() {
     try {
@@ -364,13 +449,36 @@ async function fetchFriends() {
         notify('Error fetching friends', 3, 'error')
     }
 }
+async function fetchHistory()
+{
+    try
+    {
+        let data = await request(`${API_URL}/profile/history/`,{
+            method:'GET',
+        });
+        console.log(data)
 
+        if(!data.ok)
+        {
+            notify('Error fetching history',3,'error');
+            return [];
+        }
+        return data;
+    }
+    catch(error)
+    {
+        notify('Error fetching history',3,'error')
+        console.error('Error:',error);
+    return []
+        }
+}
 async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
     const activeUserNickname = getActiveUserNickname()
     if (hash === '#history') {
-        const history = new History({ histories: [1] }, parentElement);
+        let data = await fetchHistory();
+        const history = new History({ histories: data }, parentElement);
         history.render();
     }
     if (hash === '#friends') {
@@ -388,9 +496,13 @@ async function handleRouting() {
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
+    if (hash == '#paddlecolor') {
+        const paddleColor = await fetchPaddleColor();
+        const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
+        paddleColorComponent.render();
+    }
 }
-function getUsernameFromURL()
-{
+function getUsernameFromURL() {
     const pathName = window.location.pathname;
     const pathParts = pathName.split('/');
     return pathParts[pathParts.length - 1];

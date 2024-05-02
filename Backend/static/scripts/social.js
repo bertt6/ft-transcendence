@@ -4,7 +4,7 @@ import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
 import {getSocket} from "./requests.js";
-import {escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
 import {getStatusSocket} from "./Status.js";
 class ChatFriendsComponent extends  BaseComponent{
     constructor(state,parentElement = null) {
@@ -82,9 +82,9 @@ class SocialPostsComponent extends BaseComponent {
                         <span>${calculateDate(tweet.date)}</span>
                       </div>
                     </pong-redirect>
-                    <div>
-                      <img  src="/static/public/more.svg" alt="" style="width: 50px" />
-                    </div>
+                    <button class="post-delete-button" data-tweet-id="${tweet.id}">
+                      <img  src="/static/public/trash.svg" alt="" style="width: 32px" />
+                    </button>
                   </div>
                   <div>
                     <div class="post-text">
@@ -359,33 +359,6 @@ let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
-function   calculateDate(date)
-    {
-    let tweetDate = new Date(date);
-    let currentDate = new Date();
-    let differenceInSeconds = Math.floor((currentDate - tweetDate) / 1000);
-
-    let minute = 60;
-    let hour = minute * 60;
-    let day = hour * 24;
-    let week = day * 7;
-    if (differenceInSeconds < minute) {
-        return `${differenceInSeconds} seconds ago`;
-    }
-    else if (differenceInSeconds < hour) {
-        return `${Math.floor(differenceInSeconds / minute)} minutes ago`;
-    }
-    else if (differenceInSeconds < day) {
-        return `${Math.floor(differenceInSeconds / hour)} hours ago`;
-        }
-    else if (differenceInSeconds < week) {
-        return `${Math.floor(differenceInSeconds / day)} days ago`;
-    }
-    else {
-        return `${Math.floor(differenceInSeconds / week)} weeks ago`;
-        }
-    }
-
 const fetchChatFriends = async () => {
 
     const endpoint = `${API_URL}/profile/friends`;
@@ -488,6 +461,29 @@ for(let button of commentButtons)
     });
 }
 }
+async function assignDeleteButtons()
+{
+    let buttons = document.getElementsByClassName('post-delete-button');
+    for(let button of buttons)
+    {
+        let tweetId = button.getAttribute('data-tweet-id');
+        button.addEventListener('click', async () => {
+            try{
+                let data = await request(`${API_URL}/delete-tweet/${tweetId}`, {
+                    method: 'DELETE',
+                });
+                notify('Tweet deleted successfully', 3, 'success');
+                let parentElement = button.parentElement.parentElement;
+                parentElement.remove();
+            }
+            catch(error)
+            {
+                console.error('Error:', error);
+                notify('Error deleting tweet', 3, 'error');
+            }
+        });
+    }
+}
 async function assignEventListeners() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
@@ -500,6 +496,7 @@ async function assignEventListeners() {
 
     await assignLikeButtons();
     await assignCommentButtons();
+    await assignDeleteButtons();
 }
 async function getProfile()
 {

@@ -15,7 +15,6 @@ export function setCookie(name, value, days) {
     }
     document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
-
 export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -26,7 +25,6 @@ export function getCookie(name) {
     }
     return null;
 }
-
 const routes = new Map([
     ['login', {
         auth_required: false,
@@ -694,7 +692,6 @@ const requiredScripts = [
     '/static/scripts/inbox.js',
     '/static/scripts/Status.js',
 ]
-
 export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
     content.innerHTML = routes.get('error').html;
@@ -795,7 +792,7 @@ async function tryRefreshToken() {
         return;
     try {
 
-        let data = await request(`${API_URL}/token/refresh`, {
+        let data = await request(`${API_URL}/token/refresh/`, {
             method: 'POST',
             body: JSON.stringify({
                 refresh: refresh_token
@@ -803,7 +800,7 @@ async function tryRefreshToken() {
         });
         setCookie('access_token', data.access, 1);
         setCookie('refresh_token', data.refresh, 1);
-        return true;1
+        return true;
     } catch (error) {
         notify('Please login again', 3, 'error')
         return false
@@ -813,7 +810,8 @@ async function tryRefreshToken() {
 async function checkForAuth() {
     if (getCookie('access_token'))
         return;
-    await tryRefreshToken();
+    if (await tryRefreshToken() === true)
+        return;
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
     if (!value)
@@ -842,8 +840,10 @@ export function assignRouting() {
 function loadSpecificScript() {
     let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    if (!value)
+    if (!value){
+    loadError(404, 'Page not found', 'The page you are looking for does not exist')
         return;
+    }
     if (document.getElementById('script'))
         document.getElementById('script').remove();
     let script = document.createElement('script');
@@ -872,8 +872,8 @@ async function renderPage() {
 }
 const App = async () => {
     loadRequiredScripts();
-    loadSpecificScript();
     await checkForAuth();
+    loadSpecificScript();
     assignRouting()
     await assignLocalStorage();
 }

@@ -41,3 +41,30 @@ export function parseErrorToNotify(data) {
     }
     return message;
 }
+
+export function   calculateDate(date)
+{
+    let tweetDate = new Date(date);
+    let currentDate = new Date();
+    let differenceInSeconds = Math.floor((currentDate - tweetDate) / 1000);
+
+    let minute = 60;
+    let hour = minute * 60;
+    let day = hour * 24;
+    let week = day * 7;
+    if (differenceInSeconds < minute) {
+        return `${differenceInSeconds} seconds ago`;
+    }
+    else if (differenceInSeconds < hour) {
+        return `${Math.floor(differenceInSeconds / minute)} minutes ago`;
+    }
+    else if (differenceInSeconds < day) {
+        return `${Math.floor(differenceInSeconds / hour)} hours ago`;
+        }
+    else if (differenceInSeconds < week) {
+        return `${Math.floor(differenceInSeconds / day)} days ago`;
+    }
+    else {
+        return `${Math.floor(differenceInSeconds / week)} weeks ago`;
+        }
+}
