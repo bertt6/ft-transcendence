@@ -692,7 +692,6 @@ const requiredScripts = [
     '/static/scripts/inbox.js',
     '/static/scripts/Status.js',
 ]
-
 export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
     content.innerHTML = routes.get('error').html;
