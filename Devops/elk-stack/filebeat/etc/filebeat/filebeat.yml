@@ -2,7 +2,7 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /app/API/logs/*
+    - /logs/*
 
 output.logstash:
   hosts: ["logstash:5044"]

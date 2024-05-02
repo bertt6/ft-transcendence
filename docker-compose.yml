@@ -17,12 +17,14 @@ services:
     build:
       context: Backend
       dockerfile: frontend.Dockerfile
+    ports:
+      - 3030:3030
     depends_on:
       - postgres
       - redis
     volumes:
       - static_volume:/app/Backend/static
-    command: /bin/bash ./docker-entrypoint-wsgi.sh
+    command: python manage.py runserver 0.0.0.0:3030
 
   backend:
     build:
@@ -32,6 +34,8 @@ services:
       - postgres
       - redis
       - logstash  # Logstash'e bağımlı
+    ports:
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgres://postgres:123@db:5432/transcendenceDB
     volumes:
