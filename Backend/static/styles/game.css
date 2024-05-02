@@ -114,7 +114,7 @@
 .spectators-wrapper{
     position: absolute;
     right: 50%;
-    top: 4rem;
+    top: 3rem;
     display: flex;
     justify-content: center;
 }
@@ -135,4 +135,32 @@ margin-right: -1rem; /* Half of the width */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+.popup-container {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
+    list-style: none;
+    z-index: 10;
+    border: 1px solid white;
+    user-select: none;
+    padding: 10px;
+    position: absolute;
+    top: 3rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.popup-container h6 {
+    text-align: center;
+}
+
+.popup-content {
+    padding: 2px;
+    gap: 25px;
+    width: 100px;
+    display: flex;
+    font-size: small;
+    align-items: center;
+    justify-content: space-between;
 }

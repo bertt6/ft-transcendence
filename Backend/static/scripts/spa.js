@@ -4,6 +4,7 @@ import {getProfile} from "./utils.js";
 
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
+export const API_42_URL = 'https://api.intra.42.fr'
 
 export function setCookie(name, value, days) {
     let expires = "";
@@ -14,7 +15,6 @@ export function setCookie(name, value, days) {
     }
     document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
-
 export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -25,7 +25,6 @@ export function getCookie(name) {
     }
     return null;
 }
-
 const routes = new Map([
     ['login', {
         auth_required: false,
@@ -439,15 +438,15 @@ const routes = new Map([
         auth_required: false,
         url: ['/verification/'],
         html: `
-            <div class="background container-fluid">
+             <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
             <div class="verification-wrapper">
                 <h2>E-mail Verification</h2>
                 
                 <p>Please type verification code sent to your e-mail address</p>
                 
-                <p>The verification code will expire in 15 minutes</p>
-                
+                <p>The verification code will expire in</p>
+                <h1 id="timer">15:00</h1>
                 <div class="row">
                     <input type="number" id="singleDigitInput1">
                     <input type="number" id="singleDigitInput2">
@@ -457,15 +456,17 @@ const routes = new Map([
                     <input type="number" id="singleDigitInput6">
                 </div>
                 
-                <button type="button" id="verify">Verify</button>
+
+                <button class='verification-wrapper-button' type="button" id="verify">Verify</button>
                 
                 <p>
                     Didn't receive code? 
-                    <a id="request">Send again!</a>
+                    <a href="" id="request">Send again!</a>
                 </p>
             </div>
         </div>
     </div>
+
         `
     }],
     ['game', {
@@ -534,7 +535,7 @@ const routes = new Map([
       </div>
             `
     }],
-    ['matchmaking',{
+    ['matchmaking', {
         auth_required: true,
         url: ['/matchmaking/'],
         html: `
@@ -552,6 +553,120 @@ const routes = new Map([
       </div>
         `
 
+    }],
+    ['tournaments', {
+        auth_required: true,
+        url: ['/tournaments/'],
+        html: `
+      <div class="background social-background">
+        <div class="tournament-container">
+          <div class="tournament-header">
+            <h1>Tournaments</h1>
+          </div>
+          <div class="tournament-data-container">
+            <div class="tournament-wrapper" id="tournament-wrapper">
+            </div>
+          </div>
+          <pong-redirect href="/create-tournament/" class="create-tournament-button">CREATE TOURNAMENT</pong-redirect>
+          <div class="tooltip" id="tooltip"></div>
+        </div>
+      </div>
+`
+    }],
+    ['create-tournament', {
+        auth_required: true,
+        url: ['/create-tournament/'],
+        html: `
+              <div
+        class="background container-fluid social-background"
+        style="padding: 0"
+      >
+        <div class="create-container">
+          <div class="create-header">
+            <h1>Create Tournament</h1>
+          </div>
+          <form id="create-form">
+            <div class="create-group">
+              <label for="tournament-name-input">Tournament Name :</label>
+              <input
+                type="text"
+                id="tournament-name-input"
+                name="name"
+                required
+              />
+            </div>
+            <div class="create-group">
+              <label for="range-input" id="range-label">Player Count :</label>
+              <div class="range-wrapper">
+                <input
+                  type="range"
+                  id="max_participants"
+                  min="4"
+                  max="16"
+                  value="2"
+                />
+                <span id="range-value">4</span>
+              </div>
+            </div>
+            <div class="button-wrapper">
+              <button id="create-button">CREATE</button>
+            </div>
+          </form>
+        </div>
+      </div>
+        `
+    }],
+    ['tournament',{
+        auth_required:true,
+        url:[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
+        html:`
+      <div
+        class="background container-fluid social-background"
+        style="padding: 0"
+      >
+        <div class="tournament-container">
+          <div class="tournament-header-wrapper">
+            <h1>AGALARLA TURNUVA</h1>
+          </div>
+          <div class="tournament-details-wrapper">
+            <div class="tournament-data-wrapper">
+              <div class="tournament-participants">
+                <div class="tournament-participant">
+                  <div class="participant-details">
+                    <div class="participant-image-wrapper">
+                      <img
+                        src="https://picsum.photos/seed/picsum/200/300"
+                        alt=""
+                      />
+                    </div>
+                    <span>BSAMLI</span>
+                  </div>
+                  <div class="participant-status">
+                    <span>ONLINE</span>
+                  </div>
+                </div>
+              </div>
+              <div class="joined-details">
+                <div class="joined-wrapper">
+                  <div class="joined-header">
+                    <h1>NAME</h1>
+                  </div>
+                  <div class="joined-ready">(NOT READY)</div>
+                </div>
+                <hr />
+                <div class="joined-remaining">
+                  <h1>25 Seconds Remaining</h1>
+                </div>
+              </div>
+            </div>
+            <div class="joined-ready-button">
+              <button id="joined-ready-button">READY</button>
+            </div>
+          </div>
+        </div>
+      </div>
+        `
+
     }]
 ]);
 const routeToFile = [
@@ -563,6 +678,9 @@ const routeToFile = [
     [['/verification/'], 'verification'],
     [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
     [['/matchmaking/'], 'matchmaking'],
+    [['/tournaments/'], 'tournaments'],
+    [['/create-tournament/'], 'create-tournament'],
+    [[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'tournament'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
@@ -572,9 +690,9 @@ const requiredScripts = [
     '/static/components/spinner.js',
     '/static/scripts/utils.js',
     '/static/scripts/inbox.js',
+    '/static/scripts/Status.js',
 ]
-
-export function loadError(statusCode,title,message) {
+export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
     content.innerHTML = routes.get('error').html;
     history.pushState({}, '', '/error/');
@@ -631,18 +749,16 @@ function findRouteFile(pathName) {
             return pathName.includes(url);
         }
     }));
-
     return route ? route[1] : null;
 }
 
 export function loadPage(fileName) {
     let data = findRouteFile(fileName);
-    if(!data){
-        console.error("No route found for",fileName);
+    if (!data) {
+        console.error("No route found for", fileName);
         return;
     }
     const route = routes.get(data);
-
     let isMatch = false;
     if (Array.isArray(route.url)) {
         isMatch = route.url.some(url => {
@@ -657,20 +773,17 @@ export function loadPage(fileName) {
     } else {
         isMatch = window.location.pathname.includes(route.url);
     }
-        let split = fileName.split('/').filter(Boolean);
+    let split = fileName.split('/').filter(Boolean);
     if (!isMatch) {
-        if(split.length > 1)
-        {
-            console.log("split",split)
+        if (split.length > 1)
             history.pushState({}, '', window.location.origin + `/${split[0]}/${split[1]}/`);
-        }
         else
             history.pushState({}, '', window.location.origin + route.url);
 
     }
     let content = document.getElementById('main');
     content.innerHTML = route.html;
-    App();
+    renderPage().catch(console.error);
 }
 
 async function tryRefreshToken() {
@@ -679,7 +792,7 @@ async function tryRefreshToken() {
         return;
     try {
 
-        let data = await request(`${API_URL}/token/refresh`, {
+        let data = await request(`${API_URL}/token/refresh/`, {
             method: 'POST',
             body: JSON.stringify({
                 refresh: refresh_token
@@ -697,8 +810,7 @@ async function tryRefreshToken() {
 async function checkForAuth() {
     if (getCookie('access_token'))
         return;
-    await tryRefreshToken();
-    if (getCookie('access_token'))
+    if (await tryRefreshToken() === true)
         return;
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
@@ -728,8 +840,10 @@ export function assignRouting() {
 function loadSpecificScript() {
     let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    if (!value)
+    if (!value){
+    loadError(404, 'Page not found', 'The page you are looking for does not exist')
         return;
+    }
     if (document.getElementById('script'))
         document.getElementById('script').remove();
     let script = document.createElement('script');
@@ -741,14 +855,25 @@ function loadSpecificScript() {
 }
 
 async function assignLocalStorage() {
-    let profile =await  getProfile();
+    let profile = await getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
 }
-
-const App = async () => {
-    loadRequiredScripts();
+export function checkIfAuthRequired(pathName) {
+    let value = findRouteKey(pathName);
+    if (!value)
+        return false;
+    const route = routes.get(value);
+    return route.auth_required;
+}
+async function renderPage() {
     loadSpecificScript();
     await checkForAuth();
+    assignRouting()
+}
+const App = async () => {
+    loadRequiredScripts();
+    await checkForAuth();
+    loadSpecificScript();
     assignRouting()
     await assignLocalStorage();
 }
@@ -759,3 +884,19 @@ window.addEventListener('popstate', (event) => {
 );
 
 document.addEventListener('DOMContentLoaded', App);
+
+document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
+    const refresh_token = getCookie('refresh_token')
+    if (refresh_token === 'null')
+        return
+    await request(`${API_URL}/token/blacklist`, {
+        method: 'POST',
+        body: JSON.stringify({
+            refresh: refresh_token
+        }),
+    });
+    localStorage.clear()
+    setCookie('access_token', null, 1);
+    setCookie('refresh_token', null, 1);
+    loadPage('/auth/login/')
+})

@@ -1,7 +1,42 @@
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
-import {API_URL, BASE_URL} from "./spa.js";
-
+import {API_URL, assignRouting, BASE_URL, checkIfAuthRequired} from "./spa.js";
+import {getActiveUserNickname} from "./utils.js";
+class ProfileData extends BaseComponent{
+    constructor(state,parentElement=null){
+        super(state,parentElement);
+    }
+    handleHtml(){
+        return `
+    <div class="main-profile-data" id="inbox-data-wrapper">
+        <pong-redirect class="inbox-profile-wrapper" id="profile-image-wrapper">
+          <img src="" id="profile-image" alt="" />
+        </pong-redirect>
+        <div class="inbox-wrapper">
+          <input type="checkbox" id="input-button" />
+          <label for="input-button" class="input-label">
+            <img src="/static/public/inbox.svg" alt="cannot load" />
+          </label>
+          <ul class="inbox-list" id="inbox-list">
+          </ul>
+        </div>
+        <div class="logout-wrapper" id="logout-wrapper">
+            <label id="logout-button">
+                <img src="/static/public/logout.svg" alt="cannot load">
+            </label>
+        </div>
+      </div>
+        `
+    }
+    render(){
+    this.html = this.handleHtml();
+    let tmpWrapper = document.createElement('div');
+    tmpWrapper.innerHTML = this.html;
+    let parsedHtml = tmpWrapper.firstChild;
+    document.body.insertAdjacentHTML('afterbegin', this.html);
+    assignRouting();
+    }
+}
 class Inbox  extends BaseComponent{
     constructor(state,parentElement=null){
         super(state,parentElement);
@@ -57,24 +92,21 @@ class Inbox  extends BaseComponent{
         let acceptButton = buttonWrapper.querySelector('[data-type="accept"]');
         let rejectButton = buttonWrapper.querySelector('[data-type="reject"]');
         acceptButton.addEventListener('click',async ()=>{
-            let response = await request(`${API_URL}/request/${request.sender.nickname}`,{
+            let response = await request(`${API_URL}/request/${request.sender.nickname}/`,{
                 'method':'PUT',
                 body:JSON.stringify({status:'accepted'}),
             })
-            console.log(response)
         })
         rejectButton.addEventListener('click',async ()=>{
-            let response = await request(`${API_URL}/request/${request.sender.nickname}`,{
+            let response = await request(`${API_URL}/request/${request.sender.nickname}/`,{
                 'method':'PUT',
                 body:JSON.stringify({status:'rejected'}),
             })
-            console.log(response)
         })
     }
 }
 function getRequests() {
     try{
-
     return request(`${API_URL}/request/`, {
         method: 'GET',
     });
@@ -95,19 +127,38 @@ async function handleProfileImage(){
     }
     document.getElementById('profile-image-wrapper').setAttribute('href',`/profile/${profile.nickname}`)
 }
+function checkInboxRequired()
+{
+    let nonRequiredPaths = ['/login/', '/register/', '/auth/verification/'];
+    return !nonRequiredPaths.includes(window.location.pathname);
+
+}
 async function App(){
-    if(localStorage.getItem('activeUserNickname') === null)
+    if(getActiveUserNickname() === null || !checkIfAuthRequired(window.location.pathname) && checkInboxRequired(window.location.pathname))
         return;
+    let profile = new ProfileData({},document.getElementById('profile-data'));
+    profile.render();
     const inboxList = document.getElementById('inbox-list');
     if(!inboxList)
     {
         throw new Error("Inbox Error: Inbox list not found or user not logged in")
     }
-
     await handleProfileImage();
     let requests = await getRequests();
     const inbox = new Inbox({requests:requests},inboxList);
     inbox.render();
 }
-
+window.addEventListener('popstate',() => {
+    if(checkInboxRequired())
+    {
+        if(document.getElementById("inbox-data-wrapper"))
+            return
+        let profile = new ProfileData({},document.getElementById('profile-data'));
+        profile.render();
+    }
+    else
+    {
+        document.getElementById('data-wrapper').remove();
+    }
+})
 App().catch(console.error)

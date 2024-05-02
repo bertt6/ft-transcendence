@@ -66,7 +66,6 @@ def delete_tweet(request, tweet_id):
         tweet = Tweet.objects.get(id=tweet_id)
     except Tweet.DoesNotExist:
         return Response({"error": "Tweet not found"}, status=404)
-
     if tweet.from_user != profile:
         return Response({"error": "Unauthorized"}, status=403)
     tweet.delete()

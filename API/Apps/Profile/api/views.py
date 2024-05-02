@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -5,7 +6,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from ..models import Profile
 from rest_framework.response import Response
 
-from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer
+from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer, \
+    ProfileGameSerializer
+from ...Game.models import Game
 from ...Request.models import Request
 
 import logging
@@ -20,8 +23,7 @@ logger = logging.getLogger(__name__)
 @permission_classes([IsAuthenticated])
 class ProfileView(APIView):
     def get(self, request, profile_nickname):
-
-        if(not profile_nickname):
+        if (not profile_nickname):
             return Response({"error": "Profile not found"}, status=404)
         profile = Profile.objects.get(nickname=profile_nickname)
         if not profile:
@@ -38,6 +40,8 @@ class ProfileSearchView(APIView):
             return Response({"error": "Profile not found"}, status=404)
         profile_serializer = ProfileGetSerializer(profiles, many=True)
         return Response(profile_serializer.data, status=200)
+
+
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 class ProfileDetailView(APIView):
@@ -49,7 +53,6 @@ class ProfileDetailView(APIView):
         return Response(profile_serializer.data, status=200)
 
     def put(self, request):
-        print(request.data.get('profile-picture'))
         profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
@@ -79,7 +82,7 @@ class ProfileStatsView(APIView):
         logger.info('Profile stats retrieved', extra={'profile': profile.nickname})
         return Response(serializer.data, status=200)
 
-    def post(self, request,profile_id):
+    def post(self, request, profile_id):
         profile = Profile.objects.get(id=profile_id)
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
@@ -87,13 +90,14 @@ class ProfileStatsView(APIView):
         profile.save()
         return Response(profile.stats, status=201)
 
-    def put(self, request,profile_id):
+    def put(self, request, profile_id):
         profile = Profile.objects.get(id=profile_id)
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
         profile.stats = request.data
         profile.save()
         return Response(profile.stats, status=200)
+
 
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -102,10 +106,11 @@ class ProfileGameHistoryView(APIView):
         profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
-        history = profile.game_history
-        return Response(history, status=200)
+        games = Game.objects.filter(Q(player1=profile) | Q(player2=profile)).exclude(winner=None)
+        serializer = ProfileGameSerializer(games, many=True)
+        return Response(serializer.data, status=200)
 
-    def post(self, request,profile_id):
+    def post(self, request, profile_id):
         profile = Profile.objects.get(id=profile_id)
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
@@ -113,7 +118,7 @@ class ProfileGameHistoryView(APIView):
         profile.save()
         return Response(profile.game_history, status=201)
 
-    def put(self, request,profile_id):
+    def put(self, request, profile_id):
         profile = Profile.objects.get(id=profile_id)
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
@@ -155,12 +160,13 @@ class ProfileFriendsView(APIView):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 class ProfileBlockedUsersView(APIView):
-    def get(self,request):
+    def get(self, request):
         profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
         serializer = ProfileFriendsSerializer(profile.blocked_users, many=True)
         return Response(serializer.data, status=200)
+
     def post(self, request):
         profile_id = request.data.get('user_id')
         profile = request.user.profile

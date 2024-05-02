@@ -9,13 +9,20 @@ def get_online_users():
     return json.loads(all_keys_json)
 
 
-def set_online_user(user_id):
+def set_online_user(user):
+    all_users = get_online_users()
+    if not any(u['nickname'] == user['nickname'] for u in all_users):
+        all_users.append(user)
+        cache.set('online_users', json.dumps(all_users))
+
+def update_online_user(nickname, status):
     all_keys = get_online_users()
-    all_keys.append(user_id)
+    for user in all_keys:
+        if user['nickname'] == nickname:
+            user['status'] = status
     cache.set('online_users', json.dumps(all_keys))
 
-
-def remove_online_user(user_id):
+def remove_online_user(nickname):
     all_keys = get_online_users()
-    all_keys.remove(user_id)
+    all_keys = [user for user in all_keys if user['nickname'] != nickname]
     cache.set('online_users', json.dumps(all_keys))

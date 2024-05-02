@@ -35,6 +35,11 @@ class MatchMakingConsumer(WebsocketConsumer):
             self.channel_name,
         )
 
+    def receive(self, text_data=None, bytes_data=None):
+        text_data_json = json.loads(text_data)
+        if text_data_json['request_type'] == 'disconnect':
+            self.close()
+
     def match_making_message(self, event):
         self.send(text_data=json.dumps({
             'message': event['message'],
@@ -308,6 +313,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'game': GameConsumer.game_states[self.game_id]
                     }
                 )
+                GameConsumer.game_states[self.game_id]['ball']['dx'] = 5
+                GameConsumer.game_states[self.game_id]['ball']['dy'] = 5
                 await asyncio.sleep(3.2)
         elif ball['x'] + 10 >= GameConsumer.game_states[self.game_id]['canvas_width'] / 2:
             GameConsumer.game_states[self.game_id]['player_one']['score'] += 1
@@ -336,6 +343,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                         'game': GameConsumer.game_states[self.game_id]
                     }
                 )
+                GameConsumer.game_states[self.game_id]['ball']['dx'] = 5
+                GameConsumer.game_states[self.game_id]['ball']['dy'] = 5
                 await asyncio.sleep(3.2)
 
     def initialize_game_state(self, data):

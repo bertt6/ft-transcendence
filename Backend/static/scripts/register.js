@@ -1,15 +1,8 @@
 import {API_URL, loadPage} from "./spa.js";
 import Spinner from "../components/spinner.js";
 import {notify} from "../components/Notification.js";
+import {parseErrorToNotify} from "./utils.js";
 
-const parseErrorToNotify = (data) => {
-    let message = '';
-    for (const [key, value] of Object.entries(data))
-    {
-        message += `${key}: ${value.join(', ')} `;
-    }
-    return message;
-}
 const registerSubmit = async (event) => {
     event.preventDefault();
     const formData = {

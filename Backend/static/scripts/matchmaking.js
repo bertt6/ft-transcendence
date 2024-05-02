@@ -1,12 +1,12 @@
 import {loadPage} from "./spa.js";
+import {getActiveUserNickname} from "./utils";
 
 function handleText() {
   const BASE_TEXT = "FINDING A MATCH";
   const text = document.getElementById("matchmaking text");
-  console.log(text);
   let textIndex = 0;
-  setInterval(() => {
-    text.innerText = BASE_TEXT + ".".repeat(textIndex % 3);
+  return setInterval(() => {
+      text.innerText = BASE_TEXT + ".".repeat(textIndex % 4);
     textIndex += 1;
   }, 1000);
 }
@@ -22,21 +22,39 @@ function handleTimer() {
     timer.innerText = `${minutes}:${seconds}`;
   }, 1000);
 }
+
+async function matchFounded() {
+  const text = document.getElementById("matchmaking text");
+  const exitButton = document.getElementById('close-matchmaking')
+  const timer = document.getElementById("matchmaking-timer");
+  text.innerText = 'MATCH FOUND!'
+  exitButton.hidden = true
+  timer.hidden = true
+  await new Promise(r => setTimeout(r, 5000));
+}
 async function connectToSocket() {
-  const nickname = localStorage.getItem("activeUserNickname")
+  let interval;
+  const nickname = getActiveUserNickname()
     const socket = new WebSocket(`ws://localhost:8000/ws/matchmaking/${nickname}`);
     socket.onopen = () => {
-        console.log("Successfully connected to the server");
+      interval = handleText();
+      handleTimer();
     }
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-      console.log(data)
-        loadPage(`/game/${data.game_id}`);
+  socket.onmessage = async (event) => {
+    const data = JSON.parse(event.data);
+    clearInterval(interval)
+    await matchFounded()
+    loadPage(`/game/${data.game_id}`);
     }
+  document.getElementById("close-matchmaking").addEventListener('click', () => {
+    socket.send(JSON.stringify({
+      request_type: "disconnect",
+    }))
+    loadPage('/home/')
+  })
 }
 async function App() {
-  handleText();
-  handleTimer();
   await connectToSocket();
 }
+
 App();

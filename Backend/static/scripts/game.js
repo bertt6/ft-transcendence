@@ -1,6 +1,7 @@
 import {BASE_URL, loadError, loadPage} from "./spa.js";
-import {getProfile} from "./utils.js";
+import {getActiveUserNickname, getProfile} from "./utils.js";
 import BaseComponent from "../components/Component.js";
+import {getStatusSocket} from "./Status.js";
 
 const canvas = document.getElementById("pongCanvas");
 const ctx = canvas.getContext("2d");
@@ -11,28 +12,64 @@ const paddleHeight = 200;
 const ballSize = 20;
 
 
-class Participants extends BaseComponent
-{
-    constructor(state,parentElement)
-    {
-        super(state,parentElement);
+class Participants extends BaseComponent {
+    constructor(state, parentElement) {
+        super(state, parentElement);
+        this.popupContainer = null;
     }
-    handleHTML()
-    {
+
+    handleHTML() {
         return `
-         ${this.state.spectators.map((spectator) => `
-         <div class="spectator-image">
-            <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
-        </div>
-         `).join("")}
-        `
+            <div class="spectators-container">
+                ${this.state.spectators.map((spectator, index) => `
+                    <div class="spectator-image" data-index="${index}">
+                        <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                    </div>
+                `).join("")}
+            </div>
+        `;
     }
+
+    showSpectatorDetails(index) {
+        this.popupContainer = document.createElement('div');
+        this.popupContainer.classList.add('popup-container');
+        this.parentElement.appendChild(this.popupContainer);
+
+        this.popupContainer.innerHTML = `
+        <div>
+            <h6>Spectators - ${this.state.spectators.length}</h6>
+                ${this.state.spectators.map((spectator, index) => `
+                    <div class="popup-content">
+                        <img class='spectator-image' src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                        <a>${spectator.nickname}</a>
+                    </div>
+                `).join('')}
+        </div>
+       `;
+        this.popupContainer.style.display = 'block';
+    }
+
+    hideSpectatorDetails() {
+        this.popupContainer.style.display = 'none';
+    }
+
+    attachEventListeners() {
+        const spectatorImages = this.parentElement.querySelectorAll('.spectators-container');
+        spectatorImages.forEach((image, index) => {
+            image.addEventListener('mouseover', () => this.showSpectatorDetails(index));
+            image.addEventListener('mouseleave', () => this.hideSpectatorDetails())
+
+        });
+    }
+
     render() {
         this.parentElement.innerHTML = this.handleHTML();
+        this.attachEventListeners();
     }
-    setState(newState)
-    {
-        this.state = {...this.state,...newState};
+
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.render();
     }
 }
 let element = document.getElementById('spectators-wrapper')
@@ -147,7 +184,6 @@ async function connectToServer()
     const path = window.location.pathname;
     const id = path.split("/")[2];
     let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
-
     socket.onopen = async function (event) {
         let connectedProfile = await getProfile()
         socket.send(JSON.stringify({
@@ -164,10 +200,21 @@ async function connectToServer()
         }, 3000);
     }
 
-    socket.onmessage = (event) => {
+    socket.onmessage = async  (event) => {
       const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
+          try {
+            const statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({
+                request_type: "set_status",
+                status: "in_game",
+                nickname: getActiveUserNickname()
+            }));
+          }catch(e)
+          {
+              console.error(e);
+          }
         handleInitialState(data);
         handleMovement(socket,data);
       } else if (data.state_type === "score_state") {
