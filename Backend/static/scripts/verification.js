@@ -75,7 +75,9 @@ function startTimer()
     let minutes = 14;
     let seconds = 59;
     let timer = setInterval(function() {
-        document.getElementById('timer').innerText = `${minutes}:${seconds}`;
+        let timerElement = document.getElementById('timer');
+        if(timerElement)
+            timerElement.innerText = `${minutes}:${seconds}`;
         if(minutes === 0 && seconds === 0)
         {
             clearInterval(timer);
