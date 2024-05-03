@@ -1,0 +1,203 @@
+Index: API/Apps/Tournament/consumers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\nfrom asgiref.sync import async_to_sync\nfrom django.http import JsonResponse\nfrom channels.generic.websocket import WebsocketConsumer\nfrom ..Tournament.Serializers import TournamentPostSerializer\nimport urllib.parse\nfrom ..Game.models import Game\nimport json\nfrom ..Profile.models import Profile\nfrom .models import Tournament, Round\n\n\nclass TournamentConsumer(WebsocketConsumer):\n    def connect(self):\n        self.accept()\n        query_string = self.scope['query_string'].decode()\n        params = urllib.parse.parse_qs(query_string)\n        self.profile_id = params.get('profile_id', [None])[0]  # Kullanıcının profile_id'sini sakla\n        self.tournament_id = params.get('tournament_id', [None])[0]\n        print(\"Connected to\", self.profile_id)\n        print(\"Connected to Tournament\", self.tournament_id)\n\n        try:\n            instance = Profile.objects.get(id=self.profile_id)\n        except Profile.DoesNotExist:\n            self.send_error(\"invalid_profile\")\n            self.close(code=1000)  # WebSocket bağlantısını kapat\n            return\n\n        try:\n            tournament = Tournament.objects.get(id=self.tournament_id)\n        except Tournament.DoesNotExist:\n            self.send_error(\"invalid_tournament\")\n            self.close(code=1000)  # WebSocket bağlantısını kapat\n            return\n        tournament.current_participants.add(instance)\n        tournament.save()\n\n    def receive(self, text_data):\n        data = json.loads(text_data)\n        message = data['tournament_id']\n        print(message)\n        print(\"selam\")\n\n        #self.PlayMatch(self.profile_id, self.tournament_id)\n        self.StartTournament(self.profile_id, self.tournament_id)\n\n\n\n    def send_error(self, error_type):\n        if error_type == \"invalid_profile\":\n            self.send(text_data=json.dumps({\"error\": \"Invalid Profile\"}))\n        elif error_type == \"invalid_tournament\":\n            self.send(text_data=json.dumps({\"error\": \"Invalid tournament\"}))\n        elif error_type == \"Tournament Already Started\":\n            self.send(text_data=json.dumps({\"error\": \"Tournament Already Started\"}))\n\n    def disconnect(self,close_code):\n        try:\n            tournament = Tournament.objects.get(id=self.tournament_id)\n            participants = tournament.current_participants.filter(id=self.profile_id)\n\n        except Tournament.DoesNotExist:\n            self.send_error(\"invalid_tournament\")\n            self.close(code=1000)  # WebSocket bağlantısını kapat\n            return\n\n        if tournament.current_participants.count() == 0:\n            tournament.delete()\n        if participants.exists():\n            if tournament.created_by_id == self.profile_id and tournament.current_participants.count() > 1:\n                first_participant = tournament.current_participants.exclude(id=self.profile_id).first()\n                tournament.created_by = first_participant\n                tournament.save()\n            else:\n                tournament.current_participants.remove(self.profile_id)\n                tournament.save()\n        print(f\"Kullanıcı {self.profile_id} bağlantısı kesildi.\")\n\n    def StartTournament(self, profile_id,tournament_id1):\n        try:\n            tournament_id = int(tournament_id1)  # Metni tamsayıya dönüştür\n        except ValueError:\n            print(\"Tournament ID metin olarak beklenen türde değil.\")\n        try:\n            tournament = Tournament.objects.get(id=tournament_id)\n        except Tournament.DoesNotExist:\n            print(\"No tournament\")\n\n        print(\"tournament_id= \", tournament_id)\n        participants = tournament.current_participants.all()\n        if tournament.rounds.exists():\n            self.send_error(\"Tournament Already Started\")\n            return\n        if tournament.current_participants.count() > 2:\n            round_number = 1\n            round_obj = Round.objects.create(round_number=round_number)\n            round_obj.participants.set(participants)\n            tournament.rounds.add(round_obj)\n            try:\n                round_obj = tournament.rounds.first()\n                participants_ids = [participant.id for participant in round_obj.participants.all()]\n                print(participants_ids)\n                print(\"Merr\")\n                print(participants)\n                for i in range(0, len(participants_ids), 2):\n                    if i + 1 < len(participants_ids):\n                        try:\n                            profile1 = Profile.objects.get(id=participants_ids[i])\n                        except Profile.DoesNotExist:\n                            return\n                        try:\n                            profile2 = Profile.objects.get(id=participants_ids[i + 1])\n                        except Profile.DoesNotExist:\n                            return\n                        print(\"Hello\")\n                        game = Game.objects.create(player1=profile1, player2=profile2)\n                        print(game.player1.id)\n                        print(\"Hello123\")\n                        round_obj.matches.add(game)\n                        round_obj.participants.remove(participants_ids[i])\n                        round_obj.participants.remove(participants_ids[i + 1])\n            except Exception as e:\n                print(\"Error\", e)\n\n            print(\"Turnuva Başlatıldı\")\n\n\n    def PlayMatch(self,profile_id1,tournament_id):\n        try:\n            profile_id = int(profile_id1)  # Metni tamsayıya dönüştür\n        except ValueError:\n            print(\"Tournament ID metin olarak beklenen türde değil.\")\n        print(\"pd\", profile_id)\n        try:\n            tournament = Tournament.objects.get(pk=tournament_id)\n            last_round = tournament.rounds.order_by('-round_number').first()\n        except Tournament.DoesNotExist:\n            print(\"Turnuva Yok\")\n            return\n        if tournament.is_finished == True:\n            print(\"Turnuva Bitti\")\n            return\n        print(last_round)\n        if last_round:\n            all_matches_have_winner = all(game.winner is not None for match in last_round.matches.all())\n            if all_matches_have_winner:\n                new_round_number = last_round.round_number + 1\n                new_round = Round.objects.create(round_number=new_round_number)\n\n            player_participated = False\n            for game in last_round.matches.all():\n                if game.player1.id == profile_id or game.player2.id == profile_id:\n                    print(game.player1.id, game.player2.id)\n                    player_participated = True\n                    if game.winner is None:\n                        game.winner = game.player2\n                        game.save()\n                        print(\"Maçı Player 2 kazandı\")\n                        return\n\n\n            if last_round.matches.count() == 1 and not last_round.participants.exists() and last_round.matches.first().winner:\n                game = last_round.matches.first()\n                tournament.winner = game.winner\n                tournament.is_finished = True\n                tournament.save()\n            if not player_participated:\n                print(\"Player Maclarda Yok\")\n                return\n\n            winners = [game.winner for game in last_round.matches.all()]\n            if len(last_round.participants.all()) == 1:\n                winners.append(last_round.participants.first())\n            new_round.participants.set(winners)\n            tournament.rounds.add(new_round)\n\n            for i in range(0, len(winners), 2):\n                if i + 1 < len(winners):\n                    game = Game.objects.create(player1=winners[i], player2=winners[i + 1])\n                    new_round.matches.add(game)\n                    new_round.participants.remove(winners[i])\n                    new_round.participants.remove(winners[i + 1])\n                new_round.save()\n            print(\"Yeni Turnuva Oluşturuldu\")\n            return
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/API/Apps/Tournament/consumers.py b/API/Apps/Tournament/consumers.py
+--- a/API/Apps/Tournament/consumers.py	
++++ b/API/Apps/Tournament/consumers.py	
+@@ -11,12 +11,47 @@
+ 
+ 
+ class TournamentConsumer(WebsocketConsumer):
++
++    def __init__(self, *args, **kwargs):
++        super().__init__(*args, **kwargs)
++        self.connections = {}  # Bağlantıları saklamak için bir sözlü
++
++    def send_message_to_connection(self, connection_name, message):
++        connection = self.connections.get(connection_name)
++        if connection:
++            json_message = json.dumps({"message": message})
++            connection.send(text_data=json_message)
++        else:
++            # Bağlantı bulunamadı
++            pass
++
++    def sen_socket_message(self):
++        for profile_id, connection in self.connections.items():
++            print(f"Profile ID: {profile_id}")
++
++    def send_connection_notification(self, connected_profile_id):
++        # Bağlantı durumu bilgisini diğer profillere iletmek için kullanılacak kodu buraya ekleyin
++        # Örneğin:
++        connected_profile = self.connections.get(connected_profile_id)
++        if connected_profile:
++            connected_profile.send_message_to_connection123(self.profile_id)
++
++    def send_message_to_user(self, user_id, message):
++        # Belirli bir kullanıcıya mesaj gönderme işlevi
++        user_connection = self.connections.get(user_id)
++        if user_connection:
++            user_connection.send(text_data=json.dumps({'message': message}))
+     def connect(self):
+-        self.accept()
++        self.room_name = "Selam"
++        self.room_group_name = "Merhaba"
++        async_to_sync(self.channel_layer.group_add)(
++            self.room_group_name, self.channel_name
++        )
+         query_string = self.scope['query_string'].decode()
+         params = urllib.parse.parse_qs(query_string)
+         self.profile_id = params.get('profile_id', [None])[0]  # Kullanıcının profile_id'sini sakla
+         self.tournament_id = params.get('tournament_id', [None])[0]
++        self.accept()
+         print("Connected to", self.profile_id)
+         print("Connected to Tournament", self.tournament_id)
+ 
+@@ -36,14 +71,41 @@
+         tournament.current_participants.add(instance)
+         tournament.save()
+ 
++        for profile_id, connection in self.connections.items():
++            print(f"Profile ID: {profile_id}")
++
++    def send_message(self):
++        message_data = {
++            'text': self.profile_id,
++            'sender': 'server'  # Mesajın hangi tarafından gönderildiğini belirtebilirsiniz
++        }
++        json_message = json.dumps(message_data)
++        message = json_message
++        self.send(text_data=message)
++
++    def chat_message(self, event):
++        message = event['message']
++
++        self.send(text_data=json.dumps({
++            'message': message
++        }))
++    def send_message_to_connection123(self, profile_id1):
++        profile_id_str = str(profile_id1)
++        for profile_id, connection in self.connections.items():
++            if profile_id_str == profile_id1:
++                connection.send_message()
++
+     def receive(self, text_data):
+-        data = json.loads(text_data)
+-        message = data['tournament_id']
+-        print(message)
+-        print("selam")
++        data_json = json.loads(text_data)
++        message = data_json['message']
+ 
+-        #self.PlayMatch(self.profile_id, self.tournament_id)
+-        self.StartTournament(self.profile_id, self.tournament_id)
++        async_to_sync(self.channel_layer.group_send)(
++            self.room_group_name,
++            {
++                'type': 'chat_message',
++                'message': message
++            }
++        )
+ 
+ 
+ 
+@@ -56,6 +118,8 @@
+             self.send(text_data=json.dumps({"error": "Tournament Already Started"}))
+ 
+     def disconnect(self,close_code):
++        if self.profile_id in self.connections:
++            del self.connections[self.profile_id]
+         try:
+             tournament = Tournament.objects.get(id=self.tournament_id)
+             participants = tournament.current_participants.filter(id=self.profile_id)
+@@ -100,23 +164,11 @@
+             try:
+                 round_obj = tournament.rounds.first()
+                 participants_ids = [participant.id for participant in round_obj.participants.all()]
+-                print(participants_ids)
+-                print("Merr")
+-                print(participants)
+                 for i in range(0, len(participants_ids), 2):
+                     if i + 1 < len(participants_ids):
+-                        try:
+-                            profile1 = Profile.objects.get(id=participants_ids[i])
+-                        except Profile.DoesNotExist:
+-                            return
+-                        try:
+-                            profile2 = Profile.objects.get(id=participants_ids[i + 1])
+-                        except Profile.DoesNotExist:
+-                            return
+-                        print("Hello")
+-                        game = Game.objects.create(player1=profile1, player2=profile2)
+-                        print(game.player1.id)
+-                        print("Hello123")
++                        profile1 = Profile.objects.get(id=participants_ids[i])
++                        profile2 = Profile.objects.get(id=participants_ids[i + 1])
++                        game = Game.objects.create(player1=profile1, player2=profile2, tournament=tournament)
+                         round_obj.matches.add(game)
+                         round_obj.participants.remove(participants_ids[i])
+                         round_obj.participants.remove(participants_ids[i + 1])
+@@ -143,7 +195,7 @@
+             return
+         print(last_round)
+         if last_round:
+-            all_matches_have_winner = all(game.winner is not None for match in last_round.matches.all())
++            all_matches_have_winner = all(Game.winner is not None for match in last_round.matches.all())
+             if all_matches_have_winner:
+                 new_round_number = last_round.round_number + 1
+                 new_round = Round.objects.create(round_number=new_round_number)
+Index: API/Apps/Tournament/templates/w.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>WebSocket Test</title>\n</head>\n<body>\n    <input type=\"text\" id=\"messageInput\" placeholder=\"Mesajınızı girin\">\n    <button id=\"sendButton\">Gönder</button>\n    <button id=\"endButton\" onclick=\"endButtonClicked()\">Maçı oyna</button>\n\n\n    <script>\n\n        const url = window.location.pathname;\n        const param = url.split(\"/\");\n        const profile_id = param[param.length - 2];\n        const tournament_id = 3;\n        const socket = new WebSocket('ws://localhost:8000/ws/tournament/?profile_id=' + profile_id + '&tournament_id=' + tournament_id);\n\n        socket.onmessage = function(event) {\n    const data = JSON.parse(event.data);\n    console.log('Backendden gelen cevap:', data);\n    // Burada cevaba göre gerekli işlemleri yapabilirsiniz\n};\n\n        document.getElementById(\"sendButton\").addEventListener(\"click\", function() {\n            var messageToSend = document.getElementById(\"messageInput\").value;\n\n            // Mesajı JSON formatına dönüştür\n            var messageData = {\n                \"profile_id\": profile_id,\n                \"tournament_id\": tournament_id,\n                \"message\": messageToSend,\n            };\n\n            // JSON formatındaki mesajı gönder\n            socket.send(JSON.stringify(messageData));\n            console.log('Sunucuya mesaj gönderildi:', messageData);\n        });\n          function endButtonClicked() {\n            var messageToSend = \"Turnuvayı Sonlandır\";\n\n            // Mesajı JSON formatına dönüştür\n            var messageData = {\n                \"profile_id\": profile_id,\n                \"tournament_id\": tournament_id,\n                \"message\": messageToSend,\n            };\n\n            // JSON formatındaki mesajı gönder\n            socket.send(JSON.stringify(messageData));\n            console.log('Sunucuya mesaj gönderildi:', messageData);\n        }\n    </script>\n</body>\n</html>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/API/Apps/Tournament/templates/w.html b/API/Apps/Tournament/templates/w.html
+--- a/API/Apps/Tournament/templates/w.html	
++++ b/API/Apps/Tournament/templates/w.html	
+@@ -16,7 +16,7 @@
+         const url = window.location.pathname;
+         const param = url.split("/");
+         const profile_id = param[param.length - 2];
+-        const tournament_id = 3;
++        const tournament_id = 1;
+         const socket = new WebSocket('ws://localhost:8000/ws/tournament/?profile_id=' + profile_id + '&tournament_id=' + tournament_id);
+ 
+         socket.onmessage = function(event) {
+Index: API/Apps/Game/models.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import uuid\n\nfrom django.db import models\nfrom django.apps import apps\nfrom Apps.Profile.models import Profile\n# Create your models here.\n\n\nclass Game(models.Model):\n    id = models.UUIDField(primary_key=True,default=uuid.uuid4)\n    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player1')\n    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player2')\n    winner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='winner', null=True, blank=True,default=None)\n    is_finished = models.BooleanField(default=False)\n    date = models.DateTimeField(auto_now_add=True)\n\n    @property\n    def tournament(self):\n        Tournament = apps.get_model('Tournament', 'Tournament')\n        return models.ForeignKey(Tournament, on_delete=models.SET_NULL, blank=True, null=True)\n\n    def str(self):\n        return f'{self.player1} vs {self.player2} on {self.date} with Id {self.id}'\n\n    def save(self, args, **kwargs):\n        if self.winner:\n            self.is_finished = True\n        super().save(args, **kwargs)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/API/Apps/Game/models.py b/API/Apps/Game/models.py
+--- a/API/Apps/Game/models.py	
++++ b/API/Apps/Game/models.py	
+@@ -13,16 +13,12 @@
+     winner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='winner', null=True, blank=True,default=None)
+     is_finished = models.BooleanField(default=False)
+     date = models.DateTimeField(auto_now_add=True)
+-
+-    @property
+-    def tournament(self):
+-        Tournament = apps.get_model('Tournament', 'Tournament')
+-        return models.ForeignKey(Tournament, on_delete=models.SET_NULL, blank=True, null=True)
++    tournament = models.ForeignKey('Tournament.Tournament', on_delete=models.CASCADE, null=True, blank=True)
+ 
+     def str(self):
+         return f'{self.player1} vs {self.player2} on {self.date} with Id {self.id}'
+ 
+-    def save(self, args, **kwargs):
++    def save(self, *args, **kwargs):
+         if self.winner:
+             self.is_finished = True
+-        super().save(args, **kwargs)
+\ No newline at end of file
++        super().save(*args, **kwargs)
+\ No newline at end of file
