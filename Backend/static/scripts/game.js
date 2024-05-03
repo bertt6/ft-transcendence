@@ -256,7 +256,6 @@ function handleMovement(socket,data)
   document.addEventListener("keydown", (event) => {
     if (event.key === "w" || event.key === "s")
         {
-            console.log("pressed")
           currentPaddle.dy = event.key === "w" ? -10: 10;
             socket.send(JSON.stringify(currentPaddle));
         }
