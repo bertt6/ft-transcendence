@@ -16,7 +16,7 @@
         const url = window.location.pathname;
         const param = url.split("/");
         const profile_id = param[param.length - 2];
-        const tournament_id = 2;
+        const tournament_id = "82a00956-e466-43da-ac40-b8604f993a68";
         const socket = new WebSocket('ws://localhost:8000/ws/tournament/?profile_id=' + profile_id + '&tournament_id=' + tournament_id);
 
 

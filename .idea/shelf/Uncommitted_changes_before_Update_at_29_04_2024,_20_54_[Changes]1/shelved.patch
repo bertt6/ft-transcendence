@@ -1,0 +1,16 @@
+Index: API/Apps/Tournament/api/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from django.urls import path\n\nfrom .views import tournaments, get_tournaments, join, delete\n\nurlpatterns = [\n    path('', tournaments),\n    path('<int:tournament_id>', get_tournaments),\n    path('join/<int:tournament_id>', join),\n    path('delete/<int:tournament_id>', delete)\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/API/Apps/Tournament/api/urls.py b/API/Apps/Tournament/api/urls.py
+--- a/API/Apps/Tournament/api/urls.py	
++++ b/API/Apps/Tournament/api/urls.py	
+@@ -8,3 +8,4 @@
+     path('join/<int:tournament_id>', join),
+     path('delete/<int:tournament_id>', delete)
+ 
++]
+\ No newline at end of file

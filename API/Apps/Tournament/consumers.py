@@ -54,7 +54,7 @@ class TournamentConsumer(WebsocketConsumer):
             instance = Profile.objects.get(id=self.profile_id)
         except Profile.DoesNotExist:
             self.send_error("invalid_profile")
-            self.close(code=1000)  # WebSocket bağlantısını kapat
+            self.close(code=1000)
             return
 
         try:
@@ -68,12 +68,15 @@ class TournamentConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
+        button_id = data.get('button_id', None)
         message = data['tournament_id']
         # Gelen mesajı istemcilere gönderin
-        #self.PlayMatch(self.profile_id, self.tournament_id)
-        self.StartTournament(self.profile_id, self.tournament_id)
+        self.PlayMatch(self.profile_id, self.tournament_id)
+        #self.StartTournament(self.profile_id, self.tournament_id)
 
 
+
+#receive type
 
     def send_error(self, error_type):
         if error_type == "invalid_profile":
@@ -150,8 +153,7 @@ class TournamentConsumer(WebsocketConsumer):
                             profile2 = Profile.objects.get(id=participants_ids[i + 1])
                         except Profile.DoesNotExist:
                             return
-                        game = Game.objects.create(player1=profile1, player2=profile2)
-                        game = Game.objects.create(player1=profile1, player2=profile2)
+                        game = Game.objects.create(player1=profile1, player2=profile2,tournament_id = tournament_id)
                         game_id = str(game.id)
                         player1_id = str(profile1.id)
                         player2_id = str(profile2.id)
@@ -171,7 +173,7 @@ class TournamentConsumer(WebsocketConsumer):
 
     def PlayMatch(self,profile_id1,tournament_id):
         try:
-            profile_id = int(profile_id1)  # Metni tamsayıya dönüştür
+            profile_id = int(profile_id1)
         except ValueError:
             print("Tournament ID metin olarak beklenen türde değil.")
         try:
@@ -200,7 +202,6 @@ class TournamentConsumer(WebsocketConsumer):
                         game.save()
                         print("Maçı Player 2 kazandı")
                         return
-
 
             if last_round.matches.count() == 1 and not last_round.participants.exists() and last_round.matches.first().winner:
                 game = last_round.matches.first()
