@@ -189,6 +189,7 @@ const routes = new Map([
               <button class="header-wrapper" id="friends-button"><span> FRIENDS </span></button>
               <button class="header-wrapper" id="stats-button"><span>STATS</span></button>
               <button class="header-wrapper" id="blocked-users-button"><span>BLOCKED</span></button>
+              <button class="header-wrapper" id="paddle-color-button"><span>PADDLE COLOR</span></button>
             </div>
           <div id="data-wrapper">
                 <div class="friends-wrapper" style="display: none">
