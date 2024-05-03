@@ -210,7 +210,7 @@ class Friends extends BaseComponent {
                   </div>
                   <div class="friend-data">
                     <h6>${friend.user.first_name.length > 0 ? escapeHTML(friend.user.first_name) : "No name is set for this user"}</h6>
-                    <span>${friend.nickname.length > 0 ? friend.nickname : friend.user.username}</span>
+                    <span>${friend.nickname}</span>
                   </div>
                 </div>
                 <div class="friend-more">
