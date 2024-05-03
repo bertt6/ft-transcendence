@@ -90,7 +90,9 @@ function draw(data) {
   ctx.beginPath();
   ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
   ctx.fill();
+  ctx.fillStyle = "red";
 ctx.fillRect(data.player_one.paddle_x, data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
+ctx.fillStyle = "blue";
 ctx.fillRect(data.player_two.paddle_x, data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
   ctx.restore();  // Restore the context state to what it was before translating the origin
 }
@@ -127,7 +129,7 @@ function handleInitialState(state)
 {
   setCurrentPoints(state)
   setPlayerData(state);
-  draw(state.game);
+  draw(state.game,"red","blue");
 }
 function printWinner(winner,socket){
   let winnerHTML = `
@@ -218,17 +220,18 @@ async function connectToServer()
         handleInitialState(data);
         handleMovement(socket,data);
       } else if (data.state_type === "score_state") {
-        draw(data.game);
+        draw(data.game,"red","blue");
         setCurrentPoints(data);
         printCountdown();
       } else if (data.state_type === 'finish_state') {
-        draw(data.game);
+        draw(data.game,"red","blue");
+
         setCurrentPoints(data);
         printWinner(data.winner);
       }
       else if(data.state_type === "game_state")
       {
-        draw(data.game);
+        draw(data.game,"red","blue");
         setCurrentPoints(data);
         handleParticipants(data);
       }
@@ -253,6 +256,7 @@ function handleMovement(socket,data)
   document.addEventListener("keydown", (event) => {
     if (event.key === "w" || event.key === "s")
         {
+            console.log("pressed")
           currentPaddle.dy = event.key === "w" ? -10: 10;
             socket.send(JSON.stringify(currentPaddle));
         }
