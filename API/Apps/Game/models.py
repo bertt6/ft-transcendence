@@ -1,5 +1,4 @@
 import uuid
-
 from django.db import models
 from django.apps import apps
 from Apps.Profile.models import Profile

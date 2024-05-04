@@ -10,6 +10,7 @@ from Apps.Chat.consumers import ChatConsumer
 from Apps.Game.consumers import MatchMakingConsumer, GameConsumer
 from Apps.Request.consumers import RequestConsumer
 from Apps.UserStatus.consumers import OnlineUsersConsumer
+from Apps.Tournament.consumers import TournamentConsumer
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "API.settings")
 
@@ -21,6 +22,8 @@ websocket_urlpatterns = [
     re_path(r'^ws/requests/(?P<nickname>[^/]+)$', RequestConsumer.as_asgi()),
     re_path(r'^ws/matchmaking/(?P<nickname>[^/]+)$', MatchMakingConsumer.as_asgi()),
     re_path(r'^ws/game/(?P<game_id>[^/]+)$', GameConsumer.as_asgi()),
+    re_path(r'^ws/tournament/$', TournamentConsumer.as_asgi()),
+
 ]
 
 application = ProtocolTypeRouter(

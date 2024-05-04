@@ -28,11 +28,16 @@ export async function request(url, options = {}) {
     if(options.method === 'GET' && responses.has(url)) {
         return responses.get(url)
     }
+    try{
     const response = await fetch(url, mergedOptions)
-    if(!response.ok) {
-        throw response
-    }
     const data = await response.json()
-    responses.set(url, data)
-    return data;
+    if(response.method === 'GET' && response.ok)
+        responses.set(url, data)
+        data.ok = response.ok
+    return data
+    }
+    catch (e)
+    {
+        console.error(e);
+    }
 }

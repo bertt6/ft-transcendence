@@ -33,20 +33,23 @@ document.getElementById("verify").addEventListener("click", async function() {
     }
     else {
         await postVerificationCode(value)
-        var player = document.getElementById('player');
+       /*
+    var player = document.getElementById('player');
         player.volume = 0.1;
         player.play();
         player.onended = function () {
             player.currentTime = 0;
             player.play();
         };
+       */
+
     }
 })
 
 
 async function postVerificationCode(value) {
     try {
-        let response = await request(`${API_URL}/email-verification`, {
+        let response = await request(`${API_URL}/email-verification/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -58,7 +61,7 @@ async function postVerificationCode(value) {
         });
 
         setCookie('access_token', response.tokens.access, 1);
-        setCookie('refresh_token', response.tokens.refresh, 1);
+        setCookie('refresh_token', response.tokens.refresh, 30);
         loadPage('/home/')
         notify('Successfully verified', 3, 'success')
     }
@@ -72,7 +75,9 @@ function startTimer()
     let minutes = 14;
     let seconds = 59;
     let timer = setInterval(function() {
-        document.getElementById('timer').innerText = `${minutes}:${seconds}`;
+        let timerElement = document.getElementById('timer');
+        if(timerElement)
+            timerElement.innerText = `${minutes}:${seconds}`;
         if(minutes === 0 && seconds === 0)
         {
             clearInterval(timer);

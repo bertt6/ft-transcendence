@@ -1,4 +1,4 @@
-import {loadPage, API_URL, getCookie, setCookie, API_42_URL} from "./spa.js";
+import {loadPage, API_URL, getCookie, API_42_URL} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import Spinner from "../components/spinner.js";
 import {request} from "./Request";
@@ -32,14 +32,13 @@ async function handle42APICallback(code) {
                 }
             })
             response.json().then(async (user) => {
-                console.log(user)
-                const response = await fetch(`${API_URL}/login-with-42`, {
+                const response = await fetch(`${API_URL}/login-with-42/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        username: user.login + 'Test',
+                        username: user.login,
                         email: user.email,
                         image: user.image.versions.medium
                     }),
@@ -49,7 +48,6 @@ async function handle42APICallback(code) {
                     loadPage('/auth/verification/');
                 })
             })
-
         }
     })
 }
@@ -64,7 +62,7 @@ async function loginForm(event)
         username: username,
         password: password
     };
-    const endpoint = `${API_URL}/send-email-for-verification`;
+    const endpoint = `${API_URL}/send-email-for-verification/`;
     const loginButton = document.getElementById('login-button');
     loginButton.disabled = true;
     const spinner = new Spinner({isVisible:true,className:"login-button-loader"}, loginButton);
@@ -82,12 +80,10 @@ async function loginForm(event)
             spinner.setState({isVisible:false});
             loadPage('/auth/verification/');
         } else {
-            console.error('Error:', response);
             spinner.setState({isVisible:false});
             loginButton.disabled = false;
             loginButton.innerText = "Login";
             notify('Invalid username or password', 3, 'error');
-            let data = await response.json();
         }
     } catch (error) {
         notify("An error occurred. Please try again later", 3, "error");
@@ -95,9 +91,6 @@ async function loginForm(event)
     }
     return false;
 }
-
-
-
 const App = async () => {
     if(getCookie("access_token"))
     {
@@ -109,7 +102,6 @@ const App = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     if (code) {
-        console.log(code)
         await handle42APICallback(code)
     }
 }
