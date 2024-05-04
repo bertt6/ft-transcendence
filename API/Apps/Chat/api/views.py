@@ -16,7 +16,8 @@ def start_chat(request):
     nickname = request.data.get("nickname")
     first_user = request.user.profile
     second_user = Profile.objects.get(nickname=nickname)
-    if not second_user:
+    if (not second_user or second_user.blocked_users.filter(id=first_user.id).exists()
+            or first_user.blocked_users.filter(id=second_user.id).exists()):
         return Response({"error": "User not found"}, status=404)
     try:
         room = Room.objects.get(

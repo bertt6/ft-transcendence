@@ -16,23 +16,32 @@ from ...Request.models import Request
 @permission_classes([IsAuthenticated])
 class ProfileView(APIView):
     def get(self, request, profile_nickname):
-        if (not profile_nickname):
+        try:
+            if (not profile_nickname):
+                return Response({"error": "Profile not found"}, status=404)
+            profile = request.user.profile
+            blocked_users_ids = profile.blocked_users.values_list('id', flat=True)
+            filter = ~Q(id__in=blocked_users_ids) & ~Q(blocked_users=profile)
+            profile = Profile.objects.filter(filter).get(nickname=profile_nickname)
+            profile_serializer = ProfileGetSerializer(profile)
+            return Response(profile_serializer.data, status=200)
+        except Profile.DoesNotExist:
             return Response({"error": "Profile not found"}, status=404)
-        profile = Profile.objects.get(nickname=profile_nickname)
-        if not profile:
-            return Response({"error": "Profile not found"}, status=404)
-        profile_serializer = ProfileGetSerializer(profile)
-        return Response(profile_serializer.data, status=200)
+
 
 
 class ProfileSearchView(APIView):
     def get(self, request):
-        search = request.data.get('search')
-        profiles = Profile.objects.filter(nickname__icontains=search)
-        if not profiles:
+        try:
+            profile = request.user.profile
+            search = request.data.get('search')
+            blocked_users_ids = profile.blocked_users.values_list('id', flat=True)
+            filter = Q(nickname__icontains=search) & ~Q(id__in=blocked_users_ids) & ~Q(blocked_users=profile)
+            profiles = Profile.objects.filter(filter)
+            profile_serializer = ProfileGetSerializer(profiles, many=True)
+            return Response(profile_serializer.data, status=200)
+        except Profile.DoesNotExist:
             return Response({"error": "Profile not found"}, status=404)
-        profile_serializer = ProfileGetSerializer(profiles, many=True)
-        return Response(profile_serializer.data, status=200)
 
 
 @authentication_classes([JWTAuthentication])
@@ -142,7 +151,9 @@ class ProfileFriendsView(APIView):
             return Response({"error": "Profile not found"}, status=404)
         nickname = request.data.get('nickname')
         friend = Profile.objects.get(nickname=nickname)
-        if not friend:
+
+        if (not friend or friend.blocked_users.filter(id=request.user.id).exists()
+                or profile.blocked_users.filter(id=friend.id).exists()):
             return Response({"error": "Friend not found"}, status=404)
         profile.friends.add(friend)
         profile.save()
@@ -160,17 +171,23 @@ class ProfileBlockedUsersView(APIView):
         return Response(serializer.data, status=200)
 
     def post(self, request):
-        profile_id = request.data.get('user_id')
-        profile = request.user.profile
+        from_profile = request.user.profile
+        to_profile_id = request.data.get('profile_id')
+        to_profile = Profile.objects.get(id=request.data.get('profile_id'))
 
-        if Profile.objects.filter(id=profile_id).exists():
+        if not Profile.objects.filter(id=to_profile_id).exists():
             return Response({"error": "Profile not found"}, status=404)
 
-        if profile.blocked_users.filter(id=profile_id).exists():
-            profile.blocked_users.add(profile_id)
-            if profile.friends.filter(id=profile_id):
-                profile.friends.remove(profile_id)
+        if not from_profile.blocked_users.filter(id=to_profile_id).exists():
+            from_profile.blocked_users.add(to_profile)
+            if from_profile.friends.filter(id=to_profile.id).exists():
+                from_profile.friends.remove(to_profile)
+                to_profile.friends.remove(from_profile)
+            from_profile.save()
+            return Response({"error": "Profile blocked"}, status=201)
+
         else:
-            profile.blocked_users.remove(profile_id)
-        profile.save()
-        return Response(status=200)
+            from_profile.blocked_users.remove(to_profile)
+            from_profile.save()
+            return Response({"error": "Profile block removed"}, status=201)
+
