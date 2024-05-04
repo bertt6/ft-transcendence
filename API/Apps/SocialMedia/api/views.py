@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from rest_framework.response import Response
@@ -16,7 +17,10 @@ paginator.page_size = 20
 @permission_classes([IsAuthenticated])
 def get_tweets(request):
     try:
-        tweets = Tweet.objects.all().order_by('-date')  # Sort tweets by date in descending order
+        profile = request.user.profile
+        blocked_users_ids = profile.blocked_users.values_list('id', flat=True)
+        blocked_users_filter = ~Q(from_user__id__in=blocked_users_ids) & ~Q(from_user__blocked_users=profile)
+        tweets = Tweet.objects.all().filter(blocked_users_filter).order_by('-date')
         paginator = PageNumberPagination()
         paginator.page_size = 10
         paginated_data = paginator.paginate_queryset(tweets, request)
@@ -30,9 +34,12 @@ def get_tweets(request):
 @permission_classes([IsAuthenticated])
 def get_tweet_and_comments(request, tweet_id):
     try:
+        profile = request.user.profile
         tweet = Tweet.objects.get(id=tweet_id)
         tweet = TweetGetSerializer(tweet)
-        comments = Comment.objects.filter(tweet=tweet_id).order_by('-date')
+        blocked_users_ids = profile.blocked_users.values_list('id', flat=True)
+        blocked_users_filter = ~Q(from_user__id__in=blocked_users_ids)
+        comments = Comment.objects.filter(tweet=tweet_id).filter(blocked_users_filter).order_by('-date')
         paginator = PageNumberPagination()
         paginator.page_size = 10
         paginated_data = paginator.paginate_queryset(comments, request)
