@@ -856,10 +856,13 @@ function loadSpecificScript() {
 }
 
 async function assignLocalStorage() {
+    if(!checkIfAuthRequired())
+        return;
     let profile = await getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
 }
-export function checkIfAuthRequired(pathName) {
+export function checkIfAuthRequired() {
+    const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
     if (!value)
         return false;
