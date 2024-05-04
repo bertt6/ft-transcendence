@@ -29,7 +29,8 @@ class TournamentConsumer(WebsocketConsumer):
         params = urllib.parse.parse_qs(query_string)
 
         self.tournament_id = params.get('tournament_id', [None])[0]
-        self.profile_id = params.get('profile_id', [None])[0]
+        self.nickname = params.get('nickname', None)[0]
+        print("nick::",self.nickname)
 
         if self.tournament_id is not None:
             self.room_group_name = self.tournament_id
@@ -43,15 +44,16 @@ class TournamentConsumer(WebsocketConsumer):
         cached_data = cache.get(cache_key)
         if cached_data is None:
             cached_data = []
-        if self.profile_id not in cached_data:
-            cached_data.append(self.profile_id)
+        if self.nickname not in cached_data:
+            cached_data.append(self.nickname)
             cache.set(cache_key, cached_data)
             self.send_to_group(cached_data)
             print("Profile List:", cached_data)
 
 
         try:
-            instance = Profile.objects.get(id=self.profile_id)
+            instance = Profile.objects.get(nickname=self.nickname).id
+            print("instance", instance)
         except Profile.DoesNotExist:
             self.send_error("invalid_profile")
             self.close(code=1000)
@@ -61,7 +63,7 @@ class TournamentConsumer(WebsocketConsumer):
             tournament = Tournament.objects.get(id=self.tournament_id)
         except Tournament.DoesNotExist:
             self.send_error("invalid_tournament")
-            self.close(code=1000)  # WebSocket bağlantısını kapat
+            self.close(code=1000)
             return
         tournament.current_participants.add(instance)
         tournament.save()
@@ -70,9 +72,10 @@ class TournamentConsumer(WebsocketConsumer):
         data = json.loads(text_data)
         button_id = data.get('button_id', None)
         message = data['tournament_id']
-        # Gelen mesajı istemcilere gönderin
-        self.PlayMatch(self.profile_id, self.tournament_id)
-        #self.StartTournament(self.profile_id, self.tournament_id)
+        if data['request_type'] == 'checkMatch':
+            self.checkMatch(self.nickname, self.tournament_id)
+        elif data['request_type'] == 'StartTournament':
+            self.StartTournament(self.nickname, self.tournament_id)
 
 
 
@@ -87,19 +90,24 @@ class TournamentConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"error": "Tournament Already Started"}))
 
     def disconnect(self,close_code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name,
+            self.channel_name,
+        )
         cache_key = f"user_{self.tournament_id}"
         cached_data = cache.get(cache_key)
 
-        if cached_data is not None and self.profile_id in cached_data:
-            cached_data.remove(self.profile_id)
+        if cached_data is not None and self.nickname in cached_data:
+            cached_data.remove(self.nickname)
             cache.set(cache_key, cached_data)
-            print(f"Profile {self.profile_id} disconnected. Profile List after disconnect:", cached_data)
+            print(f"Profile {self.nickname} disconnected. Profile List after disconnect:", cached_data)
             self.send_to_group(cached_data)
 
 
         try:
             tournament = Tournament.objects.get(id=self.tournament_id)
-            participants = tournament.current_participants.filter(id=self.profile_id)
+            profile_id = Profile.objects.get(nickname=self.nickname).id
+            participants = tournament.current_participants.filter(id=profile_id)
 
         except Tournament.DoesNotExist:
             self.send_error("invalid_tournament")
@@ -108,22 +116,19 @@ class TournamentConsumer(WebsocketConsumer):
 
         if tournament.current_participants.count() == 0:
             tournament.delete()
+        profile_id1 = Profile.objects.get(nickname=self.nickname).id
         if participants.exists():
-            if tournament.created_by_id == self.profile_id and tournament.current_participants.count() > 1:
-                first_participant = tournament.current_participants.exclude(id=self.profile_id).first()
+            if tournament.created_by_id == profile_id1 and tournament.current_participants.count() > 1:
+                first_participant = tournament.current_participants.exclude(id=profile_id1).first()
                 tournament.created_by = first_participant
                 tournament.save()
             else:
-                tournament.current_participants.remove(self.profile_id)
+                tournament.current_participants.remove(profile_id1)
                 tournament.save()
-        print(f"Kullanıcı {self.profile_id} bağlantısı kesildi.")
+        print(f"Kullanıcı {profile_id1} bağlantısı kesildi.")
 
 
     def StartTournament(self, profile_id,tournament_id1):
-        try:
-            tournament_id = int(tournament_id1)
-        except ValueError:
-            print("Tournament ID metin olarak beklenen türde değil.")
         try:
             tournament = Tournament.objects.get(id=tournament_id1)
         except Tournament.DoesNotExist:
@@ -153,13 +158,13 @@ class TournamentConsumer(WebsocketConsumer):
                             profile2 = Profile.objects.get(id=participants_ids[i + 1])
                         except Profile.DoesNotExist:
                             return
-                        game = Game.objects.create(player1=profile1, player2=profile2,tournament_id = tournament_id)
+                        game = Game.objects.create(player1=profile1, player2=profile2,tournament_id = tournament_id1)
                         game_id = str(game.id)
-                        player1_id = str(profile1.id)
-                        player2_id = str(profile2.id)
+                        player1_nick = str(profile1.nickname)
+                        player2_nick = str(profile2.nickname)
                         game_info = {
                             "game_id": game_id,
-                            "players": [player1_id, player2_id]
+                            "players": [player1_nick, player2_nick]
                         }
                         all_games.append(game_info)
                         round_obj.matches.add(game)
@@ -171,7 +176,7 @@ class TournamentConsumer(WebsocketConsumer):
 
             print("Turnuva Başlatıldı")
 
-    def PlayMatch(self,profile_id1,tournament_id):
+    def checkMatch(self,profile_id1,tournament_id):
         try:
             profile_id = int(profile_id1)
         except ValueError:

@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from ..Serializers import TournamentGetSerializer, TournamentPostSerializer, RoundSerializer
 from rest_framework.decorators import api_view, permission_classes
 
-def websocket_test(request, profile_id):
-    return render(request, 'w.html', {'profile_id': profile_id})
+def websocket_test(request, nickname):
+    return render(request, 'w.html', {'nickname': nickname})
 
 @api_view(['GET', 'POST'])
 def create(request, profile_id):
