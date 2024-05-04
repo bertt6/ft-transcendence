@@ -9,6 +9,29 @@ from rest_framework.response import Response
 from ..Serializers import TournamentGetSerializer, TournamentPostSerializer, RoundSerializer
 from rest_framework.decorators import api_view, permission_classes
 
+def websocket_test(request, nickname):
+    return render(request, 'w.html', {'nickname': nickname})
+
+@api_view(['GET', 'POST'])
+def create(request, profile_id):
+
+    try:
+        profiles = Profile.objects.get(id=profile_id)
+    except Profile.DoesNotExist:
+        return Response(status=400)
+
+    if request.method == 'GET':
+        Tournaments = Tournament.objects.all()
+        serializer = TournamentGetSerializer(Tournaments, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        request.data['created_by'] = profile_id
+        request.data['current_participants'] = [profile_id]
+        serializert = TournamentPostSerializer(data=request.data)
+        if serializert.is_valid():
+            serializert.save()
+            return Response(serializert.data, status=201)
+    return Response(serializert.errors, status=400)
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])

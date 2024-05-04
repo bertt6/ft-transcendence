@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c8c6aa2b-ee89-4825-b6be-d1f5cd808db5" name="Changes" comment="Delete .idea directory">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/Apps/Tournament/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/API/Apps/Tournament/api/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/Apps/Tournament/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/API/Apps/Tournament/api/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/Apps/Tournament/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/API/Apps/Tournament/consumers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/Apps/Tournament/templates/w.html" beforeDir="false" afterPath="$PROJECT_DIR$/API/Apps/Tournament/templates/w.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Allah1" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2f9MS0PFmFQP4inTEw970jnuxLa" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;tournament&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/API/Apps/Tournament/templates" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-d68999036c7f-b11f5e8da5ad-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-233.14475.56" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task id="LOCAL-00001" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713206709684</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1713206709684</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713206973023</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1713206973023</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713206979962</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1713206979962</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713207133785</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1713207133785</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713207165390</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1713207165390</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713207315006</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1713207315006</updated>
+    </task>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c8c6aa2b-ee89-4825-b6be-d1f5cd808db5" name="Changes" comment="Delete .idea directory" />
+      <created>1713208836306</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1713208836306</updated>
+      <workItem from="1713208837784" duration="127000" />
+      <workItem from="1713210815440" duration="730000" />
+      <workItem from="1713218085627" duration="681000" />
+      <workItem from="1713259972163" duration="1835000" />
+      <workItem from="1713263210583" duration="5000" />
+      <workItem from="1713263381460" duration="3117000" />
+      <workItem from="1713267455580" duration="2629000" />
+      <workItem from="1713274719351" duration="12803000" />
+      <workItem from="1713384053370" duration="6104000" />
+      <workItem from="1713432414994" duration="6246000" />
+      <workItem from="1713451786331" duration="3284000" />
+      <workItem from="1713464052639" duration="5607000" />
+      <workItem from="1713470329064" duration="14000" />
+      <workItem from="1713470352678" duration="1000" />
+      <workItem from="1713514561959" duration="27000" />
+      <workItem from="1713517049042" duration="4689000" />
+      <workItem from="1713522835158" duration="82000" />
+      <workItem from="1713522928362" duration="68000" />
+      <workItem from="1713525243674" duration="515000" />
+      <workItem from="1713526346659" duration="28000" />
+      <workItem from="1713526448906" duration="1865000" />
+      <workItem from="1713528480871" duration="1742000" />
+      <workItem from="1713530251431" duration="987000" />
+      <workItem from="1713532407828" duration="2000" />
+      <workItem from="1713532544735" duration="20792000" />
+      <workItem from="1713559923015" duration="2064000" />
+      <workItem from="1713562292529" duration="2405000" />
+      <workItem from="1713602359379" duration="337000" />
+      <workItem from="1713602849019" duration="555000" />
+      <workItem from="1713606713412" duration="6418000" />
+      <workItem from="1713620457603" duration="12676000" />
+      <workItem from="1713639956753" duration="3761000" />
+      <workItem from="1713646413986" duration="4306000" />
+      <workItem from="1713652445968" duration="4922000" />
+      <workItem from="1713687820901" duration="9969000" />
+      <workItem from="1713699320140" duration="22864000" />
+      <workItem from="1713729366872" duration="35000" />
+      <workItem from="1713729792914" duration="31000" />
+      <workItem from="1714255363137" duration="27000" />
+      <workItem from="1714313285158" duration="19765000" />
+      <workItem from="1714340300442" duration="92000" />
+      <workItem from="1714340435748" duration="117000" />
+      <workItem from="1714412613323" duration="797000" />
+      <workItem from="1714413425256" duration="79000" />
+      <workItem from="1714415385866" duration="5378000" />
+      <workItem from="1714583741640" duration="2107000" />
+      <workItem from="1714588723186" duration="695000" />
+      <workItem from="1714754312198" duration="4553000" />
+      <workItem from="1714766126007" duration="1223000" />
+      <workItem from="1714821988319" duration="4524000" />
+    </task>
+    <task id="LOCAL-00007" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713384439667</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1713384439667</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713640261744</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1713640261744</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713643345584</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1713643345584</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713689237724</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1713689237724</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Delete .idea directory">
+      <option name="closed" value="true" />
+      <created>1713728087914</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1713728087914</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Delete .idea directory" />
+    <option name="LAST_COMMIT_MESSAGE" value="Delete .idea directory" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/Apps/SocialMedia/migrations/0001_initial.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/.venv/lib/python3.12/site-packages/twisted/test/test_text.py</url>
+          <line>173</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Backend/manage.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/.venv/lib/python3.12/site-packages/autobahn/websocket/test/test_websocket_frame.py</url>
+          <line>26</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/API/asgi.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/API/Apps/Game/consumers.py</url>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/Backend/static/components/Component.js</url>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
