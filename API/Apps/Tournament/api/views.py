@@ -26,7 +26,6 @@ def create(request, profile_id):
         return Response(serializer.data)
     elif request.method == 'POST':
         request.data['created_by'] = profile_id
-        request.data['current_participants'] = [profile_id]
         serializert = TournamentPostSerializer(data=request.data)
         if serializert.is_valid():
             serializert.save()

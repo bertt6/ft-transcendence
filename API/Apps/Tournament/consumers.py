@@ -1,28 +1,41 @@
-
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
 
-from ..Tournament.Serializers import TournamentPostSerializer
+from .cache import add_player_to_cache
+from ..Tournament.Serializers import TournamentPostSerializer, TournamentProfileSerializer
 import urllib.parse
 from ..Game.models import Game
 import json
 from ..Profile.models import Profile
 from .models import Tournament, Round
+
+
 class TournamentConsumer(WebsocketConsumer):
     def group_message(self, event):
-        message = event["message"]
-        json_message = json.dumps({"message": message})
+        players = event["players"]
+        json_message = json.dumps(players)
         self.send(text_data=json_message)
-    def send_to_group(self, message):
+
+    def send_to_group(self,players):
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 "type": "group_message",
-                "message": message
+                "players": players
             }
         )
+
+    def check_params(self):
+        if self.tournament_id is None or self.nickname is None:
+            return False
+        if Profile.objects.filter(nickname=self.nickname).exists():
+            return False
+        if Tournament.objects.filter(id=self.tournament_id).exists():
+            return False
+        return True
+
     def connect(self):
         self.accept()
         query_string = self.scope['query_string'].decode()
@@ -30,43 +43,29 @@ class TournamentConsumer(WebsocketConsumer):
 
         self.tournament_id = params.get('tournament_id', [None])[0]
         self.nickname = params.get('nickname', None)[0]
-        print("nick::",self.nickname)
-
-        if self.tournament_id is not None:
-            self.room_group_name = self.tournament_id
-
+        self.room_group_name = self.tournament_id
+        self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        if self.check_params():
+            self.close(code=1000)
+        if self.nickname is None or self.tournament_id is None:
+            self.send_error("invalid_profile")
+            self.close(code=1000)
+            return
+        instance = Profile.objects.get(nickname=self.nickname)
+        serializer = TournamentProfileSerializer(instance)
+        cache_key = f"user_{self.tournament_id}"
+        data = add_player_to_cache(serializer.data, cache_key)
+        tournament = Tournament.objects.get(id=self.tournament_id)
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name,
         )
-
-        cache_key = f"user_{self.tournament_id}"
-        cached_data = cache.get(cache_key)
-        if cached_data is None:
-            cached_data = []
-        if self.nickname not in cached_data:
-            cached_data.append(self.nickname)
-            cache.set(cache_key, cached_data)
-            self.send_to_group(cached_data)
-            print("Profile List:", cached_data)
-
-
-        try:
-            instance = Profile.objects.get(nickname=self.nickname).id
-            print("instance", instance)
-        except Profile.DoesNotExist:
-            self.send_error("invalid_profile")
-            self.close(code=1000)
-            return
-
-        try:
-            tournament = Tournament.objects.get(id=self.tournament_id)
-        except Tournament.DoesNotExist:
-            self.send_error("invalid_tournament")
-            self.close(code=1000)
-            return
         tournament.current_participants.add(instance)
         tournament.save()
+        self.send_to_group(data)
 
     def receive(self, text_data):
         data = json.loads(text_data)
@@ -77,9 +76,7 @@ class TournamentConsumer(WebsocketConsumer):
         elif data['request_type'] == 'StartTournament':
             self.StartTournament(self.nickname, self.tournament_id)
 
-
-
-#receive type
+    # receive type
 
     def send_error(self, error_type):
         if error_type == "invalid_profile":
@@ -89,7 +86,7 @@ class TournamentConsumer(WebsocketConsumer):
         elif error_type == "Tournament Already Started":
             self.send(text_data=json.dumps({"error": "Tournament Already Started"}))
 
-    def disconnect(self,close_code):
+    def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name,
@@ -102,7 +99,6 @@ class TournamentConsumer(WebsocketConsumer):
             cache.set(cache_key, cached_data)
             print(f"Profile {self.nickname} disconnected. Profile List after disconnect:", cached_data)
             self.send_to_group(cached_data)
-
 
         try:
             tournament = Tournament.objects.get(id=self.tournament_id)
@@ -127,8 +123,7 @@ class TournamentConsumer(WebsocketConsumer):
                 tournament.save()
         print(f"Kullanıcı {profile_id1} bağlantısı kesildi.")
 
-
-    def StartTournament(self, profile_id,tournament_id1):
+    def StartTournament(self, profile_id, tournament_id1):
         try:
             tournament = Tournament.objects.get(id=tournament_id1)
         except Tournament.DoesNotExist:
@@ -158,7 +153,7 @@ class TournamentConsumer(WebsocketConsumer):
                             profile2 = Profile.objects.get(id=participants_ids[i + 1])
                         except Profile.DoesNotExist:
                             return
-                        game = Game.objects.create(player1=profile1, player2=profile2,tournament_id = tournament_id1)
+                        game = Game.objects.create(player1=profile1, player2=profile2, tournament_id=tournament_id1)
                         game_id = str(game.id)
                         player1_nick = str(profile1.nickname)
                         player2_nick = str(profile2.nickname)
@@ -176,7 +171,7 @@ class TournamentConsumer(WebsocketConsumer):
 
             print("Turnuva Başlatıldı")
 
-    def checkMatch(self,profile_id1,tournament_id):
+    def checkMatch(self, profile_id1, tournament_id):
         try:
             profile_id = int(profile_id1)
         except ValueError:

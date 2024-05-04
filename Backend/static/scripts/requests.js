@@ -15,11 +15,10 @@ async function handleAcceptCallback(profile,request_id)
             'method':'POST',
             body:JSON.stringify(body),
         })
-        console.log(response)
     }
      catch (error)
      {
-         console.log(error)
+         console.error(error)
     }
 }
 async function handleRejectedCallback(request_id)
