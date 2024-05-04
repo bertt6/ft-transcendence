@@ -1,6 +1,6 @@
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
-import {API_URL, assignRouting, BASE_URL, checkIfAuthRequired} from "./spa.js";
+import {API_URL, assignRouting, BASE_URL, checkIfAuthRequired, loadPage, setCookie,getCookie} from "./spa.js";
 import {getActiveUserNickname} from "./utils.js";
 class ProfileData extends BaseComponent{
     constructor(state,parentElement=null){
@@ -30,10 +30,26 @@ class ProfileData extends BaseComponent{
     }
     render(){
     this.html = this.handleHtml();
+
     let tmpWrapper = document.createElement('div');
     tmpWrapper.innerHTML = this.html;
     let parsedHtml = tmpWrapper.firstChild;
     document.body.insertAdjacentHTML('afterbegin', this.html);
+    document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
+    const refresh_token = getCookie('refresh_token')
+    if (refresh_token === 'null')
+        return
+    await request(`${API_URL}/token/blacklist`, {
+        method: 'POST',
+        body: JSON.stringify({
+            refresh: refresh_token
+        }),
+    });
+    localStorage.clear()
+    setCookie('access_token', null, 1);
+    setCookie('refresh_token', null, 1);
+    loadPage('/auth/login/')
+})
     assignRouting();
     }
 }
