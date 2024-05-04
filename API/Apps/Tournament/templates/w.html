@@ -15,9 +15,9 @@
 
         const url = window.location.pathname;
         const param = url.split("/");
-        const profile_id = param[param.length - 2];
-        const tournament_id = "82a00956-e466-43da-ac40-b8604f993a68";
-        const socket = new WebSocket('ws://localhost:8000/ws/tournament/?profile_id=' + profile_id + '&tournament_id=' + tournament_id);
+        const nickname = param[param.length - 2];
+        const tournament_id = "eba06344-e081-4e52-852f-38bbff0fdbd6";
+        const socket = new WebSocket('ws://localhost:8000/ws/tournament/?nickname=' + nickname + '&tournament_id=' + tournament_id);
 
 
         socket.onmessage = function(event) {
@@ -31,9 +31,9 @@
 
             // Mesajı JSON formatına dönüştür
             var messageData = {
-                "profile_id": profile_id,
                 "tournament_id": tournament_id,
                 "message": messageToSend,
+                "request_type": "checkMatch"
             };
 
             // JSON formatındaki mesajı gönder
@@ -45,9 +45,9 @@
 
             // Mesajı JSON formatına dönüştür
             var messageData = {
-                "profile_id": profile_id,
                 "tournament_id": tournament_id,
                 "message": messageToSend,
+                "request_type": "StartTournament"
             };
             socket.onmessage = function(event) {
                 const data = JSON.parse(event.data);
