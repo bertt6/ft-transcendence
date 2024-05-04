@@ -5,6 +5,7 @@ import {getProfile} from "./utils.js";
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
 export const API_42_URL = 'https://api.intra.42.fr'
+export const WEBSOCKET_URL = 'ws://localhost:8000/ws/'
 
 export function setCookie(name, value, days) {
     let expires = "";
