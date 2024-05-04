@@ -1,3 +1,6 @@
+import os
+
+from django.http import HttpResponseRedirect
 from pytz import timezone
 
 from Apps.Auth.serializers import RegisterSerializer, ChangePasswordSerializer, RegisterWith42Serializer
@@ -105,6 +108,13 @@ def change_password(request):
         user.set_password(new_password)
         user.save()
         return Response({'success': 'password changed successfully'}, status=200)
+
+
+@api_view(['POST'])
+def direct_42_login_page(request):
+    oauth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={os.getenv("42_UID")}&redirect_uri={os.getenv("42_REDIRECT_URL")}&response_type=code"
+
+    return Response({"oauth_url": oauth_url}, status=200)
 
 
 @api_view(['POST'])

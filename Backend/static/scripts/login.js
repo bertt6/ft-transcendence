@@ -1,6 +1,7 @@
 import {loadPage, API_URL, getCookie, setCookie, API_42_URL} from "./spa.js";
 import {notify} from "../components/Notification.js";
 import Spinner from "../components/spinner.js";
+import {request} from "./Request";
 
 const clientId = 'u-s4t2ud-059b83142b8ffdfdf43962207310ae26dc27e02afbf40a1c7272c0dc6ff99282';
 const redirectUrl = 'http://localhost:3000/auth/login/';
@@ -8,8 +9,7 @@ const secret = 's-s4t2ud-81f661a545b4da85a34bfa67238776cb2509aace80b9419cf4eba5c
 
 
 document.getElementById('ecole-login-button').addEventListener('click', async () => {
-    const oauthUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=code`;
-    window.location.href = oauthUrl;
+
 })
 
 async function handle42APICallback(code) {
@@ -78,7 +78,6 @@ async function loginForm(event)
             body: JSON.stringify(formData),
         });
         if (response.ok) {
-            let data = await response.json();
             localStorage.setItem('username', username);
             spinner.setState({isVisible:false});
             loadPage('/auth/verification/');

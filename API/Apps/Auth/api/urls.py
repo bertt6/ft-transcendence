@@ -12,5 +12,6 @@ urlpatterns = [
     path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/temp-token', TokenObtainPairView.as_view(), name='temp_token'),
     path('login-with-42', login_with_42, name='login_with_42'),
+    path('direct-42-login-page', direct_42_login_page, name='direct_42_login_page'),
     path('token/blacklist', TokenBlacklistView.as_view(), name='token_blacklist'),
 ]
