@@ -87,7 +87,7 @@ function addSocketTestButton(){
     });
 }
 async function App() {
-    if(!checkIfAuthRequired(window.location.pathname))
+    if(!checkIfAuthRequired())
         return;
     let socket = getSocket();
     if (!socket)

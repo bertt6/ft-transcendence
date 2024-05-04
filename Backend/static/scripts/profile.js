@@ -500,7 +500,7 @@ async function handleRouting() {
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
-    if (hash == '#paddlecolor') {
+    if (hash === '#paddlecolor') {
         const paddleColor = await fetchPaddleColor();
         const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
         paddleColorComponent.render();
