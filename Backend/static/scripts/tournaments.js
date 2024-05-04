@@ -11,7 +11,7 @@ class TournamentList extends BaseComponent{
     {
         return `
      ${this.state.tournaments.map(tournament => `
-          <pong-redirect href="/tournaments/${tournament.id}" class="tournament-element">
+          <pong-redirect href="/tournament/${tournament.id}/" class="tournament-element">
                 <div class="element-data">
                   <div>
                     <h2>${escapeHTML(tournament.name)}</h2>

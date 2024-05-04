@@ -30,7 +30,7 @@ export function getStatusSocket() {
 
 async function App()
 {
-    if (checkIfAuthRequired())
+    if (!checkIfAuthRequired())
         return;
     let socket = await getStatusSocket();
 }
