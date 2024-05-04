@@ -11,6 +11,7 @@ from ..utils import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from .permissions import IsEmailVerified
 from ...Profile.api.Serializers import UserSerializer
+from ...Profile.api.api_42 import api_42
 
 
 @api_view(['POST'])
@@ -116,18 +117,7 @@ def direct_42_login_page(request):
 
     return Response({"oauth_url": oauth_url}, status=200)
 
-
 @api_view(['POST'])
-def login_with_42(request):
-    if not User.objects.filter(username=request.data['username']).exists():
-        serializer = RegisterWith42Serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
-        serializer.save()
-    user = User.objects.get(username=request.data['username'])
-    user.profile.save_image_from_url(request.data['image'])
-    if user:
-        send_email(user)
-        return Response(data={'user': UserSerializer(user).data}, status=200)
-    else:
-        return Response(data={'error': 'User not found'}, status=404)
+def login_with_42(request, code):
+    response = api_42(code)
+    return response
