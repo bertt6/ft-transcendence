@@ -5,7 +5,7 @@ import {getProfile} from "./utils.js";
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
 export const API_42_URL = 'https://api.intra.42.fr'
-export const WEBSOCKET_URL = 'ws://localhost:8000/ws/'
+export const WEBSOCKET_URL = 'ws://localhost:8000/ws'
 
 export function setCookie(name, value, days) {
     let expires = "";
@@ -632,21 +632,7 @@ const routes = new Map([
           </div>
           <div class="tournament-details-wrapper">
             <div class="tournament-data-wrapper">
-              <div class="tournament-participants">
-                <div class="tournament-participant">
-                  <div class="participant-details">
-                    <div class="participant-image-wrapper">
-                      <img
-                        src="https://picsum.photos/seed/picsum/200/300"
-                        alt=""
-                      />
-                    </div>
-                    <span>BSAMLI</span>
-                  </div>
-                  <div class="participant-status">
-                    <span>ONLINE</span>
-                  </div>
-                </div>
+              <div class="tournament-participants" id="tournament-participants">
               </div>
               <div class="joined-details">
                 <div class="joined-wrapper">

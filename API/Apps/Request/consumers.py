@@ -23,7 +23,6 @@ class RequestConsumer(AsyncWebsocketConsumer):
             self.group_name,
             self.channel_name
         )
-
     async def redirect_to_game(self, event):
         await self.send(text_data=json.dumps({
             'game_id': event['game_id'],
