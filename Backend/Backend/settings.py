@@ -28,8 +28,8 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = ""
+STATIC_ROOT = Path(BASE_DIR).resolve();
+STATICFILES_DIRS = [ BASE_DIR / "static" ]
 # Application definition
 
 INSTALLED_APPS = [
@@ -78,6 +78,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Backend.wsgi.application'
+ASGI_APPLICATION = 'Backend.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases

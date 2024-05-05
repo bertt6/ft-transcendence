@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: true
+  
+  - name: Database
+    type: postgres
+    access: proxy
+    url: postgres://postgres:123@db:5432/transcendenceDB
+    basicAuth: false
+    isDefault: false    

@@ -13,6 +13,13 @@ from .permissions import IsEmailVerified
 from ...Profile.api.Serializers import UserSerializer
 from ...Profile.api.api_42 import api_42
 
+import logging
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+logger = logging.getLogger(__name__)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -37,6 +44,7 @@ def login(request):
         'username': user.username
     }
     response.status_code = 200
+    logger.info(f"User {user.username} logged in.")
     return response
 
 
