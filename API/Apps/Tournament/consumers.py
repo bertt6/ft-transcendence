@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
 
-from .cache import add_player_to_cache
+from .cache import add_player_to_cache, remove_player_from_cache, get_players_from_cache
 from ..Tournament.Serializers import TournamentPostSerializer, TournamentProfileSerializer
 import urllib.parse
 from ..Game.models import Game
@@ -14,16 +14,20 @@ from .models import Tournament, Round
 
 class TournamentConsumer(WebsocketConsumer):
     def group_message(self, event):
-        players = event["players"]
-        json_message = json.dumps(players)
-        self.send(text_data=json_message)
+        data = event["data"]
+        send_type = event["send_type"]
+        self.send(text_data=json.dumps({
+            "data": data,
+            "send_type": send_type
+        }))
 
-    def send_to_group(self,players):
+    def send_to_group(self, data, send_type):
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 "type": "group_message",
-                "players": players
+                "send_type": send_type,
+                "data": data
             }
         )
 
@@ -50,33 +54,28 @@ class TournamentConsumer(WebsocketConsumer):
         )
         if self.check_params():
             self.close(code=1000)
-        if self.nickname is None or self.tournament_id is None:
-            self.send_error("invalid_profile")
-            self.close(code=1000)
-            return
         instance = Profile.objects.get(nickname=self.nickname)
         serializer = TournamentProfileSerializer(instance)
         cache_key = f"user_{self.tournament_id}"
-        data = add_player_to_cache(serializer.data, cache_key)
+        created_by = False
         tournament = Tournament.objects.get(id=self.tournament_id)
+        if tournament.created_by == instance:
+            created_by = True
+        data = add_player_to_cache(serializer.data, cache_key, created_by)
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name,
         )
         tournament.current_participants.add(instance)
         tournament.save()
-        self.send_to_group(data)
+        self.send_to_group(data,"player_list")
 
     def receive(self, text_data):
         data = json.loads(text_data)
-        button_id = data.get('button_id', None)
-        message = data['tournament_id']
         if data['request_type'] == 'checkMatch':
             self.checkMatch(self.nickname, self.tournament_id)
         elif data['request_type'] == 'StartTournament':
             self.StartTournament(self.nickname, self.tournament_id)
-
-    # receive type
 
     def send_error(self, error_type):
         if error_type == "invalid_profile":
@@ -92,44 +91,25 @@ class TournamentConsumer(WebsocketConsumer):
             self.channel_name,
         )
         cache_key = f"user_{self.tournament_id}"
-        cached_data = cache.get(cache_key)
-
-        if cached_data is not None and self.nickname in cached_data:
-            cached_data.remove(self.nickname)
-            cache.set(cache_key, cached_data)
-            print(f"Profile {self.nickname} disconnected. Profile List after disconnect:", cached_data)
-            self.send_to_group(cached_data)
-
-        try:
-            tournament = Tournament.objects.get(id=self.tournament_id)
-            profile_id = Profile.objects.get(nickname=self.nickname).id
-            participants = tournament.current_participants.filter(id=profile_id)
-
-        except Tournament.DoesNotExist:
-            self.send_error("invalid_tournament")
-            self.close(code=1000)  # WebSocket bağlantısını kapat
+        if not remove_player_from_cache(cache_key, self.nickname):
             return
-
+        self.send_to_group(get_players_from_cache(cache_key), "player_list")
+        tournament = Tournament.objects.get(id=self.tournament_id)
+        profile_id = Profile.objects.get(nickname=self.nickname).id
+        participants = tournament.current_participants.filter(id=profile_id)
         if tournament.current_participants.count() == 0:
             tournament.delete()
-        profile_id1 = Profile.objects.get(nickname=self.nickname).id
         if participants.exists():
-            if tournament.created_by_id == profile_id1 and tournament.current_participants.count() > 1:
-                first_participant = tournament.current_participants.exclude(id=profile_id1).first()
+            if tournament.created_by_id == profile_id and tournament.current_participants.count() > 1:
+                first_participant = tournament.current_participants.exclude(id=profile_id).first()
                 tournament.created_by = first_participant
                 tournament.save()
             else:
-                tournament.current_participants.remove(profile_id1)
+                tournament.current_participants.remove(profile_id)
                 tournament.save()
-        print(f"Kullanıcı {profile_id1} bağlantısı kesildi.")
 
     def StartTournament(self, profile_id, tournament_id1):
-        try:
-            tournament = Tournament.objects.get(id=tournament_id1)
-        except Tournament.DoesNotExist:
-            print("No tournament")
-
-        print("tournament_id= ", tournament_id1)
+        tournament = Tournament.objects.get(id=tournament_id1)
         participants = tournament.current_participants.all()
         if tournament.rounds.exists():
             self.send_error("Tournament Already Started")
@@ -165,12 +145,9 @@ class TournamentConsumer(WebsocketConsumer):
                         round_obj.matches.add(game)
                         round_obj.participants.remove(participants_ids[i])
                         round_obj.participants.remove(participants_ids[i + 1])
-                self.send_to_group(all_games)
+                self.send_to_group(all_games, "game_info")
             except Exception as e:
-                print("Error", e)
-
-            print("Turnuva Başlatıldı")
-
+                print(e)
     def checkMatch(self, profile_id1, tournament_id):
         try:
             profile_id = int(profile_id1)
