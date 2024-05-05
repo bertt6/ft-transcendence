@@ -1,5 +1,5 @@
 import {loadPage} from "./spa.js";
-import {getActiveUserNickname} from "./utils";
+import {getActiveUserNickname} from "./utils.js";
 
 function handleText() {
   const BASE_TEXT = "FINDING A MATCH";

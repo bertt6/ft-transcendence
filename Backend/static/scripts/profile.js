@@ -1,5 +1,5 @@
 import BaseComponent from "../components/Component.js";
-import { API_URL, BASE_URL, loadPage } from "./spa.js";
+import {API_URL, assignRouting, BASE_URL, loadPage} from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
 import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
@@ -208,10 +208,9 @@ class Friends extends BaseComponent {
                   <div class="friend-image">
                     <img src="https://picsum.photos/id/237/200/300" alt="" />
                   </div>
-                  <div class="friend-data">
-                    <h6>${friend.user.first_name.length > 0 ? escapeHTML(friend.user.first_name) : "No name is set for this user"}</h6>
-                    <span>${friend.nickname.length > 0 ? friend.nickname : friend.user.username}</span>
-                  </div>
+                  <pong-redirect href="/profile/${friend.nickname}/" class="friend-data">
+                    <span>${friend.nickname}</span>
+                  </pong-redirect>
                 </div>
                 <div class="friend-more">
                   <div><img src="/static/public/image.svg" alt="" /></div>
@@ -227,6 +226,10 @@ class Friends extends BaseComponent {
     setState(newState) {
         this.state = { ...this.state, ...newState };
         this.render();
+    }
+    render() {
+        super.render();
+        assignRouting();
     }
 }
 class ProfileInfo extends BaseComponent {
@@ -355,9 +358,10 @@ class ProfileInfo extends BaseComponent {
 async function fetchProfile() {
     const pathName = window.location.pathname;
     const pathParts = pathName.split('/');
-    const nickname = pathParts[pathParts.length - 1];
+    const urlArray = pathParts.filter(Boolean);
+    const nickname = urlArray[urlArray.length - 1];
     try {
-        let data = await request(`${API_URL}/profile-with-nickname/${nickname}/`, {
+        let data = await request(`${API_URL}/profile-with-nickname/${nickname}`, {
             method: 'GET',
         });
         const profileParentElement = document.getElementById('profile-info');
@@ -496,7 +500,7 @@ async function handleRouting() {
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
-    if (hash == '#paddlecolor') {
+    if (hash === '#paddlecolor') {
         const paddleColor = await fetchPaddleColor();
         const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
         paddleColorComponent.render();
