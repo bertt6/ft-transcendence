@@ -31,7 +31,8 @@ class TournamentPlayers extends BaseComponent {
 }
 function connectToSocket()
 {
-    try{
+    try
+    {
         const nickname = getActiveUserNickname();
         const  tournamentId =window.location.pathname.split("/").filter(Boolean)[1];
         const url = `${WEBSOCKET_URL}/tournament/?nickname=${nickname}&tournament_id=${tournamentId}`;
@@ -42,9 +43,30 @@ function connectToSocket()
         }
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            const tournamentPlayers = new TournamentPlayers({players: data}, parentElement);
-            tournamentPlayers.render();
+            console.log(data)
+            if(data.send_type === "player_list")
+            {
+                const tournamentPlayers = new TournamentPlayers({players: data.data}, parentElement);
+                tournamentPlayers.render();
+            }
+            else if(data.send_type === "game_info")
+            {
+                handleGameRedirection(data);
+            }
         }
+        socket.onclose = () => {
+            console.log("disconnected from the server");
+        }
+        let testButton = document.getElementById("test-start-button");
+        testButton.addEventListener("click", () => {
+            socket.send(JSON.stringify({
+                request_type: "StartTournament"
+            }));
+        });
+        let exitButton = document.getElementById("exit-button");
+        exitButton.addEventListener("click", () => {
+            socket.close();
+        });
     }
     catch (e)
     {
@@ -53,6 +75,6 @@ function connectToSocket()
 }
 async function App()
 {
-connectToSocket()
+    connectToSocket()
 }
 App().catch(e => console.error(e))

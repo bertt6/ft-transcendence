@@ -53,8 +53,7 @@ def login(request):
 def send_email_for_verification(request):
     username = request.data['username']
     password = request.data['password']
-    user = User.objects.filter(username=username).first()
-
+    user = User.objects.get(username=username)
     if user is None or not user.check_password(password):
         raise AuthenticationFailed("Wrong Password or Username!")
     send_email(user)
@@ -124,6 +123,7 @@ def direct_42_login_page(request):
     oauth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={os.getenv("42_UID")}&redirect_uri={os.getenv("42_REDIRECT_URL")}&response_type=code"
 
     return Response({"oauth_url": oauth_url}, status=200)
+
 
 @api_view(['POST'])
 def login_with_42(request, code):
