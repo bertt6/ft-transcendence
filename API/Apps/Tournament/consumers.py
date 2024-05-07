@@ -68,7 +68,7 @@ class TournamentConsumer(WebsocketConsumer):
         )
         tournament.current_participants.add(instance)
         tournament.save()
-        self.send_to_group(data,"player_list")
+        self.send_to_group(data, "player_list")
 
     def receive(self, text_data):
         data = json.loads(text_data)
@@ -95,18 +95,14 @@ class TournamentConsumer(WebsocketConsumer):
             return
         self.send_to_group(get_players_from_cache(cache_key), "player_list")
         tournament = Tournament.objects.get(id=self.tournament_id)
-        profile_id = Profile.objects.get(nickname=self.nickname).id
-        participants = tournament.current_participants.filter(id=profile_id)
-        if tournament.current_participants.count() == 0:
-            tournament.delete()
-        if participants.exists():
-            if tournament.created_by_id == profile_id and tournament.current_participants.count() > 1:
-                first_participant = tournament.current_participants.exclude(id=profile_id).first()
-                tournament.created_by = first_participant
-                tournament.save()
+        profile = Profile.objects.get(nickname=self.nickname)
+        tournament.current_participants.remove(profile)
+        participants = tournament.current_participants.all()
+        if tournament.created_by == profile:
+            if participants.exists():
+                tournament.created_by = participants.first()
             else:
-                tournament.current_participants.remove(profile_id)
-                tournament.save()
+                tournament.delete()
 
     def StartTournament(self, profile_id, tournament_id1):
         tournament = Tournament.objects.get(id=tournament_id1)
@@ -148,6 +144,7 @@ class TournamentConsumer(WebsocketConsumer):
                 self.send_to_group(all_games, "game_info")
             except Exception as e:
                 print(e)
+
     def checkMatch(self, profile_id1, tournament_id):
         try:
             profile_id = int(profile_id1)
