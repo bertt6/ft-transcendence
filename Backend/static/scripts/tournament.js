@@ -1,4 +1,4 @@
-import {BASE_URL, WEBSOCKET_URL} from "./spa.js";
+import {BASE_URL, loadPage, WEBSOCKET_URL} from "./spa.js";
 import {getActiveUserNickname} from "./utils.js";
 import BaseComponent from "../components/Component.js";
 class TournamentPlayers extends BaseComponent {
@@ -29,6 +29,19 @@ class TournamentPlayers extends BaseComponent {
 
     }
 }
+function handleButtons(players)
+{
+    console.log("players",players)
+    const nickname = getActiveUserNickname();
+    const buttonWrapper = document.getElementById("button-wrapper");
+    let player = players.data.find(player => player.nickname === nickname)
+    if(!player)
+        return
+    if(player.owner)
+        buttonWrapper.innerHTML = `<button id="start-button">Start</button>`
+    else
+        buttonWrapper.innerHTML = `<button id="ready-button">Ready</button>`
+}
 function connectToSocket()
 {
     try
@@ -37,16 +50,17 @@ function connectToSocket()
         const  tournamentId =window.location.pathname.split("/").filter(Boolean)[1];
         const url = `${WEBSOCKET_URL}/tournament/?nickname=${nickname}&tournament_id=${tournamentId}`;
         const socket = new WebSocket(url);
-        let parentElement = document.getElementById("tournament-participants");
         socket.onopen = () => {
             console.log("connected to the server");
         }
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            console.log(data)
+            console.log("socket sent data", data)
             if(data.send_type === "player_list")
             {
+                let parentElement = document.getElementById("tournament-participants");
                 const tournamentPlayers = new TournamentPlayers({players: data.data}, parentElement);
+                handleButtons(data)
                 tournamentPlayers.render();
             }
             else if(data.send_type === "game_info")
@@ -57,16 +71,7 @@ function connectToSocket()
         socket.onclose = () => {
             console.log("disconnected from the server");
         }
-        let testButton = document.getElementById("test-start-button");
-        testButton.addEventListener("click", () => {
-            socket.send(JSON.stringify({
-                request_type: "StartTournament"
-            }));
-        });
-        let exitButton = document.getElementById("exit-button");
-        exitButton.addEventListener("click", () => {
-            socket.close();
-        });
+
     }
     catch (e)
     {

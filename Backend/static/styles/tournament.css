@@ -110,14 +110,22 @@
 .joined-remaining h1 {
   font-size: 2rem;
 }
-.joined-ready-button {
+.tournament-buttons{
   align-self: flex-end;
 }
 .joined-ready.button {
   background-color: rgb(51, 32, 10);
   color: white;
 }
-#exit-button {
+#ready-button {
+  background-color: rgb(51, 32, 10);
+  color: white;
+  padding: 0.5rem 3rem;
+  border-radius: 2rem;
+  font-size: 2rem;
+  margin-bottom: 20%;
+}
+#start-button{
   background-color: rgb(51, 32, 10);
   color: white;
   padding: 0.5rem 3rem;

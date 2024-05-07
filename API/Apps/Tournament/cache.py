@@ -2,13 +2,13 @@ from django.core.cache import cache
 
 
 def add_player_to_cache(data, key, created_by=False):
-    cached_data = cache.get(key)
-    if cached_data is None:
-        cached_data = []
-    if created_by:
-        cached_data.insert(0, data)
-    else:
-        cached_data.append(data)
+    cached_data = cache.get(key) or []
+    for player in cached_data:
+        if player['nickname'] == data['nickname']:
+            return cached_data
+    data['owner'] = created_by
+    data['is_ready'] = False
+    cached_data.append(data)
     cache.set(key, cached_data)
     return cached_data
 
