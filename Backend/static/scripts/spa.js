@@ -5,6 +5,7 @@ import {getProfile} from "./utils.js";
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
 export const API_42_URL = 'https://api.intra.42.fr'
+export const WEBSOCKET_URL = 'ws://localhost:8000/ws'
 
 export function setCookie(name, value, days) {
     let expires = "";
@@ -631,21 +632,7 @@ const routes = new Map([
           </div>
           <div class="tournament-details-wrapper">
             <div class="tournament-data-wrapper">
-              <div class="tournament-participants">
-                <div class="tournament-participant">
-                  <div class="participant-details">
-                    <div class="participant-image-wrapper">
-                      <img
-                        src="https://picsum.photos/seed/picsum/200/300"
-                        alt=""
-                      />
-                    </div>
-                    <span>BSAMLI</span>
-                  </div>
-                  <div class="participant-status">
-                    <span>ONLINE</span>
-                  </div>
-                </div>
+              <div class="tournament-participants" id="tournament-participants">
               </div>
               <div class="joined-details">
                 <div class="joined-wrapper">
@@ -660,8 +647,7 @@ const routes = new Map([
                 </div>
               </div>
             </div>
-            <div class="joined-ready-button">
-              <button id="joined-ready-button">READY</button>
+              <div class="tournament-buttons" id="button-wrapper">
             </div>
           </div>
         </div>
@@ -684,14 +670,7 @@ const routeToFile = [
     [[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'tournament'],
 ]
 const requiredScripts = [
-    '/static/components/Notification.js',
-    '/static/scripts/Request.js',
-    '/static/scripts/requests.js',
-    '/static/components/Component.js',
-    '/static/components/spinner.js',
-    '/static/scripts/utils.js',
-    '/static/scripts/inbox.js',
-    '/static/scripts/Status.js',
+
 ]
 export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
@@ -889,18 +868,3 @@ window.addEventListener('popstate', (event) => {
 
 document.addEventListener('DOMContentLoaded', App);
 
-document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
-    const refresh_token = getCookie('refresh_token')
-    if (refresh_token === 'null')
-        return
-    await request(`${API_URL}/token/blacklist`, {
-        method: 'POST',
-        body: JSON.stringify({
-            refresh: refresh_token
-        }),
-    });
-    localStorage.clear()
-    setCookie('access_token', null, 1);
-    setCookie('refresh_token', null, 1);
-    loadPage('/auth/login/')
-})

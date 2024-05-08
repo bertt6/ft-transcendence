@@ -1,0 +1,109 @@
+.profile-wrapper {
+    aspect-ratio: 1/1;
+    height: 3rem;
+    margin: 1rem;
+}
+
+.profile-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+}
+
+.home-wrapper {
+    height: 80%;
+    flex: 1;
+    display: flex;
+}
+
+.home-element {
+    flex: 1;
+    display: flex;
+    position: relative;
+    cursor: pointer;
+}
+
+.home-element::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: .3;
+    transition: opacity 0.8s ease;
+}
+
+.home-element:hover::after {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.home-element h1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    user-select: none;
+    transition: background-position 0.8s ease;
+    text-shadow: 2px 2px 0px black;
+}
+
+#single-menu {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)),
+    url("/static/public/SingleCloud.png");
+    background-size: cover;
+    background-position: center;
+    transition: background-position 0.8s ease;
+}
+
+#single-menu:hover {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)),
+    url("/static/public/SingleCloud.png");
+    background-size: cover;
+    transition: background-position 0.8s ease;
+}
+
+#multi-menu {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)),
+    url("/static/public/MultiCloud.png");
+    background-size: cover;
+    background-position: center;
+    transition: background-position 0.8s ease;
+}
+
+#multi-menu:hover {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)),
+    url("/static/public/MultiCloud.png");
+    background-size: cover;
+    transition: background-position 0.8s ease;
+}
+
+#social-menu {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("/static/public/SocialCloud.png");
+    background-size: cover;
+    background-position: center;
+    transition: background-position 0.8s ease;
+}
+
+#social-menu:hover {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)),
+    url("/static/public/SocialCloud.png");
+    background-size: cover;
+    transition: background-position 0.8s ease;
+}
+#tournament-menu {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("/static/public/TournamentCloud.png");
+    background-size: cover;
+    transition: background-position 0.8s ease;
+    background-position: center;
+}
+#tournament-menu:hover {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)),
+    url("/static/public/TournamentCloud.png");
+    background-size: cover;
+    transition: background-position 0.8s ease;
+}
