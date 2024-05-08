@@ -88,7 +88,7 @@ class ProfileStatsView(APIView):
             return Response({"error": "Profile not found"}, status=404)
         stats = profile.stats
         serializer = ProfileStatsSerializer(stats)
-        logger.info('Profile stats retrieved', extra={'profile': profile.nickname})
+        logger.info('Profile stats retrieved', extra={'profile': profile.nickname, 'stats': stats, 'status': 200}, geo='US')
         return Response(serializer.data, status=200)
 
     def post(self, request, profile_id):

@@ -1,0 +1,35 @@
+{
+    "title": "My Kibana Dashboard",
+    "panels": [
+        {
+            "id": "panel1",
+            "type": "visualization",
+            "visualizationId": "visualization1",
+            "width": 6,
+            "height": 4,
+            "x": 0,
+            "y": 0
+        },
+        {
+            "id": "panel2",
+            "type": "visualization",
+            "visualizationId": "visualization2",
+            "width": 6,
+            "height": 4,
+            "x": 6,
+            "y": 0
+        },
+        {
+            "id": "panel3",
+            "type": "visualization",
+            "visualizationId": "visualization3",
+            "width": 12,
+            "height": 6,
+            "x": 0,
+            "y": 4
+        }
+    ],
+    "options": {
+        "darkTheme": true
+    }
+}

@@ -51,6 +51,8 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    networks:
+      - backend
 
   nginx:
     image: elk-nginx:latest
@@ -176,11 +178,15 @@ services:
         hard: -1
     volumes:
       - ./Devops/elk-stack/elasticsearch_volume:/usr/share/elasticsearch/data
+      - ./Devops/elk-stack/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
   kibana:
     image: kibana:latest
     build:
       context: ./Devops/elk-stack/kibana
       dockerfile: kibana.Dockerfile
+    volumes:
+      - ./Devops/elk-stack/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./Devops/elk-stack/kibana-dashboard:/usr/share/kibana/config/kibana-dashboard
     restart: always
     ports:
       - 5601:5601
