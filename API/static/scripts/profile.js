@@ -4,7 +4,6 @@ import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
 import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
 
-
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -46,27 +45,54 @@ class BlockedUsers extends BaseComponent {
         super(state, parentElement);
         this.html = this.handleHTML();
     }
+
+    async removeBlockedUser(id, index) {
+        try {
+            let data = await request('profile/block-users/', {
+                method: "POST",
+                body: JSON.stringify({
+                    profile_id: id
+                })
+            });
+            let wrapper = document.getElementById(`${index}-blocked-user-wrapper`)
+
+            wrapper.remove()
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+            notify('Error fetching friends', 3, 'error');
+        }
+    }
+
     handleHTML() {
         return `
         <div class="blocked-users-wrapper">
-        ${this.state.blockedUsers.map(user => `
-            <div class="blocked-user-wrapper">
-                <div class="blocked-user-info">
-                  <div class="blocked-user-image">
-                    <img src="${user.profile_picture}" alt="" />
-                  </div>
-                  <div class="blocked-user-data">
-                    <h6>${user.nickname}</h6>
+            ${this.state.blockedUsers.map((user, index) => `
+                <div id="${index}-blocked-user-wrapper" class="blocked-user-wrapper">
+                    <div class="blocked-user-info">
+                        <div class="blocked-user-image">
+                            <img src="${user.profile_picture}" alt="" />
+                        </div>
+                        <div class="blocked-user-data">
+                            <h6>${user.nickname}</h6>
+                        </div>
                     </div>
-                    </div>
-                    <button class="unblock-button">Unblock</button>
-            </div>
-        `).join('')}
+                    <button id="${index}-button" class="unblock-button" >Unblock</button>
+                </div>
+            `).join('')}
         </div>
-        `
+        `;
     }
+
     render() {
         this.parentElement.innerHTML = this.html;
+        for (let i = 0; this.state.blockedUsers.length > i; i++) {
+            console.log(this.state.blockedUsers[i].id)
+            document.getElementById(`${i}-button`).addEventListener("click", () =>
+                this.removeBlockedUser(this.state.blockedUsers[i].id, i)
+            )
+        }
+
     }
 }
 
@@ -77,7 +103,6 @@ class PaddleColor extends BaseComponent {
     }
 
     handleHTML() {
-        
         return `
         <form>
     <div class="paddle-color-wrapper">
@@ -407,17 +432,6 @@ async function assignDataRouting() {
     });
 }
 
-async function fetchBlockedUsers() {
-    const users = [
-        { nickname: "user1", profile_picture: "https://example.com/user1.jpg" },
-        { nickname: "user2", profile_picture: "https://example.com/user2.jpg" },
-        { nickname: "user3", profile_picture: "https://example.com/user3.jpg" },
-        { nickname: "user4", profile_picture: "https://example.com/user4.jpg" },
-        { nickname: "user5", profile_picture: "https://example.com/user5.jpg" }
-    ];
-    return users;
-}
-
 async function fetchPaddleColor() {
     const colors = [
         { color: "red", hex: "#FF0000" },
@@ -453,6 +467,20 @@ async function fetchFriends() {
         notify('Error fetching friends', 3, 'error')
     }
 }
+
+async function fetchBlockedUsers() {
+    try {
+        let data = await request('profile/block-users/', {
+            method: "GET"
+        })
+        console.log(data)
+        return data
+    } catch (error) {
+        console.error('Error:', error);
+        notify('Error fetching friends', 3, 'error')
+    }
+}
+
 async function fetchHistory()
 {
     try
@@ -476,6 +504,7 @@ async function fetchHistory()
     return []
         }
 }
+
 async function handleRouting() {
     const hash = location.hash;
     const parentElement = document.getElementById('data-wrapper');
