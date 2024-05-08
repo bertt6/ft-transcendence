@@ -165,8 +165,6 @@ class ProfileFriendsView(APIView):
 class ProfileBlockedUsersView(APIView):
     def get(self, request):
         profile = request.user.profile
-        if not profile:
-            return Response({"error": "Profile not found"}, status=404)
         serializer = ProfileFriendsSerializer(profile.blocked_users, many=True)
         return Response(serializer.data, status=200)
 
