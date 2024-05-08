@@ -49,7 +49,7 @@ document.getElementById("verify").addEventListener("click", async function() {
 
 async function postVerificationCode(value) {
     try {
-        let response = await request(`email-verification/`, {
+        let response = await request(`auth/email-verification/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
