@@ -2,6 +2,7 @@ import {API_URL, loadPage} from "./spa.js";
 import Spinner from "../components/spinner.js";
 import {notify} from "../components/Notification.js";
 import {parseErrorToNotify} from "./utils.js";
+import {request} from "./Request.js";
 
 const registerSubmit = async (event) => {
     event.preventDefault();
@@ -16,7 +17,7 @@ const registerSubmit = async (event) => {
     spinner.render();
     button.disabled = true;
 try{
-    const response = await fetch(`register/`, {
+    const response = await request(`register/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

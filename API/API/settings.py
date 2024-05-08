@@ -15,6 +15,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 import datetime
 
+
+
 import Apps.Tournament.apps
 from Apps.Profile.logger import CustomisedJSONFormatter
 
@@ -28,6 +30,8 @@ load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '0a4fd7e3567eab20bab2f2d6682ea96d0d865050bfcde9c293aa7f9ec48bce55'
 
+#yeni
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "API.settings")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -48,6 +52,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
     'daphne',
+    'uvicorn',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -103,7 +108,7 @@ LOGGING = {
     }
 }
 
-STATIC_ROOT = Path(BASE_DIR).resolve().joinpath('staticfiles');
+STATIC_ROOT = Path(BASE_DIR).resolve().joinpath('BASE_DIR', 'static');
 STATICFILES_DIRS = []
 
 
@@ -170,7 +175,6 @@ REST_FRAMEWORK = {
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = ""
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 

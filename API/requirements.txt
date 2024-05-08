@@ -22,3 +22,5 @@ python-logstash==0.4.8
 python-logstash-async
 json_log_formatter
 config
+uvicorn
+gunicorn
