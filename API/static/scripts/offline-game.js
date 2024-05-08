@@ -11,7 +11,7 @@ let ballSpeedY = 3;
 
 const paddleHeight = 200;
 const paddleWidth = 10;
-const paddleSpeed = 8;
+const paddleSpeed = 5;
 
 let player1Y = canvas.height / 2 - paddleHeight / 2;
 let player2Y = canvas.height / 2 - paddleHeight / 2;
@@ -22,6 +22,8 @@ let firstStart = true
 
 let playerOneScore = 0
 let playerTwoScore = 0
+
+let keysPressed = {};
 
 function drawRect(x, y, width, height, color) {
     ctx.fillStyle = color;
@@ -60,6 +62,8 @@ function draw() {
 }
 
 function update() {
+    ballSpeedY *= 1.0004
+    ballSpeedX *= 1.0004
     ballX += ballSpeedX;
     ballY += ballSpeedY;
 
@@ -93,6 +97,7 @@ function update() {
 
 function gameLoop() {
     if (!pause && !finish) {
+        updatePaddlePositions();
         update();
         draw();
     }
@@ -122,33 +127,42 @@ function setCurrentPoints() {
 }
 
 // handle player controls
+// Object to track pressed keys
+
+// Handle keydown event
 window.addEventListener('keydown', function (event) {
-    if (!pause) {
-        switch (event.key) {
-            case 'w':
-                if (player1Y > 0) { // Check if paddle 1 is not at the top edge
-                    player1Y -= paddleSpeed;
-                }
-                break;
-            case 's':
-                if (player1Y < canvas.height - paddleHeight) { // Check if paddle 1 is not at the bottom edge
-                    player1Y += paddleSpeed;
-                }
-                break;
-            case 'ArrowUp':
-                if (player2Y > 0) { // Check if paddle 2 is not at the top edge
-                    player2Y -= paddleSpeed;
-                }
-                break;
-            case 'ArrowDown':
-                if (player2Y < canvas.height - paddleHeight) { // Check if paddle 2 is not at the bottom edge
-                    player2Y += paddleSpeed;
-                }
-                break;
+    keysPressed[event.key] = true;
+});
+
+// Handle keyup event
+window.addEventListener('keyup', function (event) {
+    keysPressed[event.key] = false;
+});
+
+
+// Update paddle positions based on keys pressed
+function updatePaddlePositions() {
+    if (keysPressed['w']) {
+        if (player1Y > 0) { // Check if paddle 1 is not at the top edge
+            player1Y -= paddleSpeed;
         }
     }
-
-});
+    if (keysPressed['s']) {
+        if (player1Y < canvas.height - paddleHeight) { // Check if paddle 1 is not at the bottom edge
+            player1Y += paddleSpeed;
+        }
+    }
+    if (keysPressed['ArrowUp']) {
+        if (player2Y > 0) { // Check if paddle 2 is not at the top edge
+            player2Y -= paddleSpeed;
+        }
+    }
+    if (keysPressed['ArrowDown']) {
+        if (player2Y < canvas.height - paddleHeight) { // Check if paddle 2 is not at the bottom edge
+            player2Y += paddleSpeed;
+        }
+    }
+}
 
 
 function printCountdown() {
