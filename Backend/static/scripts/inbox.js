@@ -1,12 +1,14 @@
 import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
-import {API_URL, assignRouting, BASE_URL, checkIfAuthRequired, loadPage, setCookie,getCookie} from "./spa.js";
-import {getActiveUserNickname} from "./utils.js";
-class ProfileData extends BaseComponent{
-    constructor(state,parentElement=null){
-        super(state,parentElement);
+import {API_URL, assignRouting, BASE_URL, checkIfAuthRequired, loadPage, setCookie, getCookie} from "./spa.js";
+import {getActiveUserNickname, getProfile} from "./utils.js";
+
+class ProfileData extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
     }
-    handleHtml(){
+
+    handleHtml() {
         return `
     <div class="main-profile-data" id="inbox-data-wrapper">
         <pong-redirect class="inbox-profile-wrapper" id="profile-image-wrapper">
@@ -28,45 +30,45 @@ class ProfileData extends BaseComponent{
       </div>
         `
     }
-    render(){
-    this.html = this.handleHtml();
 
-    let tmpWrapper = document.createElement('div');
-    tmpWrapper.innerHTML = this.html;
-    let parsedHtml = tmpWrapper.firstChild;
-    document.body.insertAdjacentHTML('afterbegin', this.html);
-    document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
-    const refresh_token = getCookie('refresh_token')
-    if (refresh_token === 'null')
-        return
-    await request(`${API_URL}/token/blacklist`, {
-        method: 'POST',
-        body: JSON.stringify({
-            refresh: refresh_token
-        }),
-    });
-    localStorage.clear()
-    setCookie('access_token', null, 1);
-    setCookie('refresh_token', null, 1);
-    loadPage('/auth/login/')
-})
-    assignRouting();
+    render() {
+        this.html = this.handleHtml();
+        let tmpWrapper = document.createElement('div');
+        tmpWrapper.innerHTML = this.html;
+        document.body.insertAdjacentHTML('afterbegin', this.html);
+        document.getElementById('logout-wrapper')?.addEventListener('click', async () => {
+            const refresh_token = getCookie('refresh_token')
+            if (refresh_token === 'null') return
+            await request(`token/blacklist`, {
+                method: 'POST', body: JSON.stringify({
+                    refresh: refresh_token
+                }),
+            });
+            localStorage.clear()
+            setCookie('access_token', null, 1);
+            setCookie('refresh_token', null, 1);
+            loadPage('/auth/login/')
+        })
+        assignRouting();
     }
 }
-class Inbox  extends BaseComponent{
-    constructor(state,parentElement=null){
-        super(state,parentElement);
+
+class Inbox extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
     }
-    handleEmptyInboxHTML(){
+
+    handleEmptyInboxHTML() {
         return `
             <li class="inbox-list-item">
               <span>No new notifications</span>
             </li>
         `
     }
-    parseMessage(request){
+
+    parseMessage(request) {
         console.log(request.type)
-        switch (request.type){
+        switch (request.type) {
             case 'friend':
                 return `You have a friend request from ${request.sender.nickname}`;
             case 'game':
@@ -75,7 +77,8 @@ class Inbox  extends BaseComponent{
                 return `You have a new notification from ${request.sender.nickname}`;
         }
     }
-    handleInboxHTML(){
+
+    handleInboxHTML() {
         return `
             ${this.state.requests.map(request => `
           <li class="inbox-element">
@@ -94,86 +97,79 @@ class Inbox  extends BaseComponent{
         </li>`).join('')}
         `
     }
+
     render() {
-        if(this.state.requests.length === 0){
+        if (this.state.requests.length === 0) {
             this.parentElement.innerHTML = this.handleEmptyInboxHTML();
-        }
-        else{
+        } else {
             this.parentElement.innerHTML = this.handleInboxHTML();
         }
         let buttonWrapper = this.parentElement.querySelector('.inbox-element-interactions');
-        if(!buttonWrapper){
+        if (!buttonWrapper) {
             return
         }
         let acceptButton = buttonWrapper.querySelector('[data-type="accept"]');
         let rejectButton = buttonWrapper.querySelector('[data-type="reject"]');
-        acceptButton.addEventListener('click',async ()=>{
-            let response = await request(`${API_URL}/request/${request.sender.nickname}/`,{
-                'method':'PUT',
-                body:JSON.stringify({status:'accepted'}),
+        acceptButton.addEventListener('click', async () => {
+            let response = await request(`${API_URL}/request/${request.sender.nickname}/`, {
+                'method': 'PUT', body: JSON.stringify({status: 'accepted'}),
             })
         })
-        rejectButton.addEventListener('click',async ()=>{
-            let response = await request(`${API_URL}/request/${request.sender.nickname}/`,{
-                'method':'PUT',
-                body:JSON.stringify({status:'rejected'}),
+        rejectButton.addEventListener('click', async () => {
+            let response = await request(`${API_URL}/request/${request.sender.nickname}/`, {
+                'method': 'PUT', body: JSON.stringify({status: 'rejected'}),
             })
         })
     }
 }
+
 function getRequests() {
-    try{
-    return request(`${API_URL}/request/`, {
-        method: 'GET',
-    });
-    }
-    catch (error)
-    {
+    try {
+        return request(`${API_URL}/request/`, {
+            method: 'GET',
+        });
+    } catch (error) {
         console.error(error)
     }
 }
-async function handleProfileImage(){
-        let profile = await request(`${API_URL}/profile/`,{
-        method:'GET',
-    })
+
+async function handleProfileImage() {
+    let profile = await getProfile();
+    console.log(profile)
     let image = document.getElementById('profile-image');
-    if(image)
-    {
+    if (image) {
         image.src = `${BASE_URL}${profile.profile_picture}`;
     }
-    document.getElementById('profile-image-wrapper').setAttribute('href',`/profile/${profile.nickname}`)
+    document.getElementById('profile-image-wrapper').setAttribute('href', `/profile/${profile.nickname}`)
 }
-function checkInboxRequired()
-{
+
+function checkInboxRequired() {
     let nonRequiredPaths = ['/login/', '/register/', '/auth/verification/'];
     return !nonRequiredPaths.includes(window.location.pathname);
 
 }
-async function App(){
-    if(getActiveUserNickname() === null || !checkIfAuthRequired(window.location.pathname) && checkInboxRequired(window.location.pathname))
-        return;
-    let profile = new ProfileData({},document.getElementById('profile-data'));
+
+async function App() {
+    console.log("Inbox App")
+    if (getActiveUserNickname() === null || !checkIfAuthRequired(window.location.pathname) && checkInboxRequired(window.location.pathname)) return;
+    let profile = new ProfileData({}, document.getElementById('profile-data'));
     profile.render();
     const inboxList = document.getElementById('inbox-list');
-    if(!inboxList)
-    {
+    if (!inboxList) {
         throw new Error("Inbox Error: Inbox list not found or user not logged in")
     }
     await handleProfileImage();
     let requests = await getRequests();
-    const inbox = new Inbox({requests:requests},inboxList);
+    const inbox = new Inbox({requests: requests}, inboxList);
     inbox.render();
 }
-window.addEventListener('popstate',() => {
-    if(checkInboxRequired())
-    {
-        if(document.getElementById("inbox-data-wrapper"))
-            return
-        let profile = new ProfileData({},document.getElementById('profile-data'));
+
+window.addEventListener('popstate', () => {
+    if (checkInboxRequired()) {
+        if (document.getElementById("inbox-data-wrapper")) return
+        let profile = new ProfileData({}, document.getElementById('profile-data'));
         profile.render();
-    }
-    else
-    {
+    } else {
         document.getElementById('data-wrapper').remove();
     }
 })

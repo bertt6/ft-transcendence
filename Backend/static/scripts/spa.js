@@ -670,14 +670,7 @@ const routeToFile = [
     [[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'tournament'],
 ]
 const requiredScripts = [
-    '/static/components/Notification.js',
-    '/static/scripts/Request.js',
-    '/static/scripts/requests.js',
-    '/static/components/Component.js',
-    '/static/components/spinner.js',
-    '/static/scripts/utils.js',
-    '/static/scripts/inbox.js',
-    '/static/scripts/Status.js',
+
 ]
 export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
