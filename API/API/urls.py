@@ -21,13 +21,14 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('Apps.Profile.api.urls')),
-    path('api/v1/', include('Apps.Auth.api.urls')),
-    path('api/v1/tournaments/', include('Apps.Tournament.api.urls')),
-    path('api/v1/', include('Apps.SocialMedia.api.urls')),
-    path("api/v1/", include("Apps.Chat.api.urls")),
-    path("api/v1/", include("Apps.Request.api.urls")),
-    path('api/v1/', include('Apps.Game.api.urls')),
+    path('api/v1/', include('API.api_urls')),
+    path('auth/', include('Apps.Auth.urls')),
+    path('', include('Apps.Home.urls')),
+    path('profile/', include('Apps.Profile.urls')),
+    path('social/', include('Apps.SocialMedia.urls')),
+    path('game/', include('Apps.Game.urls')),
+    path('matchmaking/', include('Apps.Matchmaking.urls')),
+    path('', include('Apps.Tournament.urls'))
 ]
 
 if settings.DEBUG:
