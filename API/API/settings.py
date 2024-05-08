@@ -15,8 +15,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 import datetime
 
-
-
 import Apps.Tournament.apps
 from Apps.Profile.logger import CustomisedJSONFormatter
 
@@ -28,28 +26,14 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0a4fd7e3567eab20bab2f2d6682ea96d0d865050bfcde9c293aa7f9ec48bce55'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-#yeni
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "API.settings")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-    "http://localhost:3030",
-]
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3030",
-]
+DEBUG = False
 
 CORS_ALLOW_CREDENTIALS = True
-
+ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'daphne',
     'uvicorn',
@@ -72,9 +56,7 @@ INSTALLED_APPS = [
     "Apps.Game.apps.GameConfig",
 ]
 
-
 STATIC_URL = '/static/'
-APP_ID = 'elk_demo'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -108,10 +90,11 @@ LOGGING = {
     }
 }
 
-STATIC_ROOT = Path(BASE_DIR).resolve().joinpath('BASE_DIR', 'static');
-STATICFILES_DIRS = []
-
-
+APP_ID = 'elk_demo'
+STATIC_ROOT = Path(BASE_DIR).resolve().joinpath('prod_static');
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -119,6 +102,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -158,23 +142,16 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_THROTTLE_CLASSES': [
-
         'rest_framework.throttling.AnonRateThrottle',
-
         'rest_framework.throttling.UserRateThrottle'
-
     ],
     'DEFAULT_THROTTLE_RATES': {
-
         'anon': '50/min',
-
         'user': '100/min'
-
     }
 }
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -188,7 +165,6 @@ DATABASES = {
         "PORT": os.getenv('PG_PORT'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -208,7 +184,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -219,7 +194,6 @@ TIME_ZONE = 'Europe/Istanbul'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -257,7 +231,6 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': datetime.timedelta(days=1),
 }
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
