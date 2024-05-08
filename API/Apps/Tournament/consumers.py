@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from channels.generic.websocket import WebsocketConsumer
 from django.core.cache import cache
 
-from .cache import add_player_to_cache, remove_player_from_cache, get_players_from_cache
+from .cache import add_player_to_cache, remove_player_from_cache, get_players_from_cache, get_player_from_cache
 from ..Tournament.Serializers import TournamentPostSerializer, TournamentProfileSerializer
 import urllib.parse
 from ..Game.models import Game
@@ -68,22 +68,44 @@ class TournamentConsumer(WebsocketConsumer):
         )
         tournament.current_participants.add(instance)
         tournament.save()
-        self.send_to_group(data, "player_list")
+        tournament_info = {
+            "tournament_name": tournament.name,
+            "players": data
+        }
+        self.send_to_group(tournament_info, "tournament_info")
 
     def receive(self, text_data):
         data = json.loads(text_data)
-        if data['request_type'] == 'checkMatch':
+        if data['send_type'] == 'checkMatch':
             self.checkMatch(self.nickname, self.tournament_id)
-        elif data['request_type'] == 'StartTournament':
-            self.StartTournament(self.nickname, self.tournament_id)
+        elif data['send_type'] == 'start':
+            self.check_start_conditions()
+            # self.StartTournament(data)
+
+    def check_start_conditions(self):
+        player = get_player_from_cache(f"user_{self.tournament_id}", self.nickname)
+        if not player['owner']:
+            self.send_error("invalid_profile")
+            return
+        players = get_players_from_cache(f"user_{self.tournament_id}")
+        if len(players) < 3:
+            self.send_error("invalid_tournament")
+            return
+        for player in players:
+            if not player['is_ready']:
+                self.send_error("players_not_ready")
+                return
 
     def send_error(self, error_type):
         if error_type == "invalid_profile":
-            self.send(text_data=json.dumps({"error": "Invalid Profile"}))
+            self.send(text_data=json.dumps(
+                {"error": 'invalid_profile', "message": "Only the creator can start the tournament"}))
         elif error_type == "invalid_tournament":
-            self.send(text_data=json.dumps({"error": "Invalid tournament"}))
-        elif error_type == "Tournament Already Started":
-            self.send(text_data=json.dumps({"error": "Tournament Already Started"}))
+            self.send(text_data=json.dumps({"error": "invalid_tournament", "message": "Not enough players"}))
+        elif error_type == "tournament_started":
+            self.send(text_data=json.dumps({"error": "tournament_started", "message": "Tournament Already Started"}))
+        elif error_type == "players_not_ready":
+            self.send(text_data=json.dumps({"error": "players_not_ready", "message": "All players must be ready"}))
 
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
@@ -104,11 +126,11 @@ class TournamentConsumer(WebsocketConsumer):
             else:
                 tournament.delete()
 
-    def StartTournament(self, profile_id, tournament_id1):
-        tournament = Tournament.objects.get(id=tournament_id1)
+    def StartTournament(self, data):
+        tournament = Tournament.objects.get(id=self.tournament_id)
         participants = tournament.current_participants.all()
         if tournament.rounds.exists():
-            self.send_error("Tournament Already Started")
+            self.send_error("tournament_started")
             return
         if tournament.current_participants.count() > 2:
             round_number = 1
@@ -129,7 +151,7 @@ class TournamentConsumer(WebsocketConsumer):
                             profile2 = Profile.objects.get(id=participants_ids[i + 1])
                         except Profile.DoesNotExist:
                             return
-                        game = Game.objects.create(player1=profile1, player2=profile2, tournament_id=tournament_id1)
+                        game = Game.objects.create(player1=profile1, player2=profile2, tournament_id=self.tournament_id)
                         game_id = str(game.id)
                         player1_nick = str(profile1.nickname)
                         player2_nick = str(profile2.nickname)

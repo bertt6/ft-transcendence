@@ -27,3 +27,12 @@ def remove_player_from_cache(key, nickname):
 
 def get_players_from_cache(key):
     return cache.get(key) or []
+
+def get_player_from_cache(key, nickname):
+    cached_data = cache.get(key)
+
+    if cached_data is not None:
+        for player in cached_data:
+            if player['nickname'] == nickname:
+                return player
+    return None

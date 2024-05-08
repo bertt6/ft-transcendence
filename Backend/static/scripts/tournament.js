@@ -1,6 +1,7 @@
 import {BASE_URL, loadPage, WEBSOCKET_URL} from "./spa.js";
 import {getActiveUserNickname} from "./utils.js";
 import BaseComponent from "../components/Component.js";
+import {notify} from "../components/Notification.js";
 class TournamentPlayers extends BaseComponent {
     constructor(state, parentElement) {
         super(state, parentElement);
@@ -29,21 +30,50 @@ class TournamentPlayers extends BaseComponent {
 
     }
 }
-function handleButtons(players)
+function handleButtons(players,socket)
 {
-    console.log("players",players)
     const nickname = getActiveUserNickname();
     const buttonWrapper = document.getElementById("button-wrapper");
-    let player = players.data.find(player => player.nickname === nickname)
+    let player = players.find(player => player.nickname === nickname)
     if(!player)
         return
     if(player.owner)
+    {
         buttonWrapper.innerHTML = `<button id="start-button">Start</button>`
+        let button = document.getElementById("start-button");
+        button.addEventListener("click", () => {
+            socket.send(JSON.stringify({send_type: "start", data: {nickname: nickname}}));
+        });
+    }
     else
+    {
         buttonWrapper.innerHTML = `<button id="ready-button">Ready</button>`
+        let button = document.getElementById("ready-button");
+        button.addEventListener("click", () => {
+            socket.send(JSON.stringify({send_type: "ready", data: {nickname: nickname}}));
+        });
+    }
+}
+function handleErrorStates(data)
+{
+    notify(data.message,3,'error')
+}
+function renderTournamentInfo(response,socket)
+{
+     let parentElement = document.getElementById("tournament-participants");
+    const tournamentPlayers = new TournamentPlayers({players: response.data.players}, parentElement);
+    tournamentPlayers.render();
+    handleButtons(response.data.players,socket)
+    document.getElementById("tournament-header").innerText = response.data.tournament_name;
 }
 function connectToSocket()
 {
+    let errorStates = [
+        "invalid_profile",
+        "invalid_tournament",
+        "tournament_started",
+        "players_not_ready",
+    ]
     try
     {
         const nickname = getActiveUserNickname();
@@ -54,18 +84,19 @@ function connectToSocket()
             console.log("connected to the server");
         }
         socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log("socket sent data", data)
-            if(data.send_type === "player_list")
+            const response = JSON.parse(event.data);
+            console.log("socket sent data", response)
+            if(errorStates.includes(response.send_type))
             {
-                let parentElement = document.getElementById("tournament-participants");
-                const tournamentPlayers = new TournamentPlayers({players: data.data}, parentElement);
-                handleButtons(data)
-                tournamentPlayers.render();
+                handleErrorStates(response);
             }
-            else if(data.send_type === "game_info")
+            if(response.send_type === "tournament_info")
             {
-                handleGameRedirection(data);
+                renderTournamentInfo(response,socket);
+            }
+            else if(response.send_type === "game_info")
+            {
+                handleGameRedirection(response);
             }
         }
         socket.onclose = () => {
