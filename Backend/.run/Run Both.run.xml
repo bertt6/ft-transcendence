@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Both" type="CompoundRunConfigurationType">
-    <toRun name="API" type="Python.DjangoServer" />
-    <toRun name="Backend" type="Python.DjangoServer" />
-    <method v="2" />
-  </configuration>
-</component>
