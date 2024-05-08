@@ -4,16 +4,17 @@ import Spinner from "../components/spinner.js";
 import {request} from "./Request.js";
 
 document.getElementById('ecole-login-button').addEventListener('click', async () => {
-    const response = await request(`direct-42-login-page/`, {
+    const response = await request(`auth/direct-42-login-page/`, {
         method: 'POST',
     })
+    console.log(response)
     if (response.oauth_url) {
         window.location.href = response.oauth_url
     }
 })
 
 async function handle42APICallback(code) {
-    const response = await request(`login-with-42/${code}/`, {
+    const response = await request(`auth/login-with-42/${code}/`, {
         method: "POST",
     })
     if (response) {
@@ -32,7 +33,7 @@ async function loginForm(event)
         username: username,
         password: password
     };
-    const endpoint = `send-email-for-verification/`;
+    const endpoint = `auth/send-email-for-verification/`;
     const loginButton = document.getElementById('login-button');
     loginButton.disabled = true;
     const spinner = new Spinner({isVisible:true,className:"login-button-loader"}, loginButton);
