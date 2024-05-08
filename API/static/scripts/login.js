@@ -32,13 +32,13 @@ async function loginForm(event)
         username: username,
         password: password
     };
-    const endpoint = `send-email-for-verification/`;
+    const endpoint = `auth/send-email-for-verification/`;
     const loginButton = document.getElementById('login-button');
     loginButton.disabled = true;
     const spinner = new Spinner({isVisible:true,className:"login-button-loader"}, loginButton);
     spinner.render();
         try{
-        let response = await fetch(endpoint, {
+        let response = await request(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
