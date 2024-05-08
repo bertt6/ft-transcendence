@@ -522,57 +522,6 @@ const routes = new Map([
         </div>
             `
     }],
-    ['game', {
-        auth_required: true,
-        url: ['/play/'],
-        html: `
-
-     <div
-        class="background container-fluid social-background"
-        style="padding: 0"
-      >
-    <div class="game-container">
-
-        <div class="game-wrapper">
-            <div class="game-data-wrapper">
-                
-            <div class="game-player-data" id="player-one">
-                <div class="player-image">
-                     <img src="https://picsum.photos/seed/picsum/200/300" alt="Player 2">
-                </div>
-                <div class="player-description" id="player-one-details">
-                    <span class="player-name">Player 1</span>
-                    <span class="player-points">Points?</span>
-                </div>
-            </div>
-            <div class="game-points">
-                <h1 id="game-points" class="skeleton">
-
-                </h1>
-            </div>
-            <div class="game-player-data" id="player-two">
-                <div class="player-image">
-                     <img src="https://picsum.photos/seed/picsum/200/300" alt="Player 2">
-                </div>
-                <div class="player-description" id="player-two-details">
-                    <span class="player-name">Player 2</span>
-                    <span class="player-name">Points?</span>
-                </div>
-            </div>
-
-        </div>
-           <div class="" id="canvas-wrapper">
-        <div class="spectators-wrapper" id="spectators-wrapper">
-        </div>
-               <div class="canvas-wrapper">
-                <canvas class="canvas-class" id="pongCanvas" width="1368" height="600"></canvas>
-               </div>
-           </div>
-        </div>
-    </div>
-        </div>
-            `
-    }],
     ['error', {
         auth_required: false,
         url: ['/error/'],
@@ -762,12 +711,12 @@ const routeToFile = [
     [['/social/', '/social/\\w+/g'], 'social'],
     [['/home/'], 'home'],
     [['/verification/'], 'verification'],
-    [['/play/'], 'offline-game'],
     [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
     [['/matchmaking/'], 'matchmaking'],
     [['/tournaments/'], 'tournaments'],
     [['/create-tournament/'], 'create-tournament'],
     [[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'tournament'],
+    [['/play/'], 'offline-game'],
 ]
 const requiredScripts = [
     '/static/components/Notification.js',
