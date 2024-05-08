@@ -647,9 +647,7 @@ const routes = new Map([
                 </div>
               </div>
             </div>
-            <div class="joined-ready-button">
-              <button id="exit-button">EXIT</button>
-                <button id="test-start-button">Start</button>
+              <div class="tournament-buttons" id="button-wrapper">
             </div>
           </div>
         </div>
