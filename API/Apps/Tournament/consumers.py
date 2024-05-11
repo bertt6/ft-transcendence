@@ -209,10 +209,19 @@ class TournamentConsumer(WebsocketConsumer):
                 winners.append(last_round.participants.first())
             new_round.participants.set(winners)
             tournament.rounds.add(new_round)
-
+            all_games = []
             for i in range(0, len(winners), 2):
                 if i + 1 < len(winners):
                     game = Game.objects.create(player1=winners[i], player2=winners[i + 1])
+                    game_id = str(game.id)
+                    game.tournament_id = self.tournament_id
+                    player1_nick = str(winners[i].nickname)
+                    player2_nick = str(winners[i + 1].nickname)
+                    game_info = {
+                        "game_id": game_id,
+                        "players": [player1_nick, player2_nick]
+                    }
+                    all_games.append(game_info)
                     new_round.matches.add(game)
                     new_round.participants.remove(winners[i])
                     new_round.participants.remove(winners[i + 1])
