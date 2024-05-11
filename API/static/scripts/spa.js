@@ -779,7 +779,7 @@ async function tryRefreshToken() {
         return;
     try {
 
-        let data = await request(`token/refresh/`, {
+        let data = await request(`auth/token/refresh/`, {
             method: 'POST',
             body: JSON.stringify({
                 refresh: refresh_token

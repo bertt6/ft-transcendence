@@ -127,11 +127,12 @@ function setPlayerData(state)
 }
 function handleInitialState(state)
 {
+
   setCurrentPoints(state)
   setPlayerData(state);
   draw(state.game,"red","blue");
 }
-function printWinner(winner,socket){
+function printWinner(data,winner,socket){
   let winnerHTML = `
           <div class="winner-wrapper">
           <div class="winner-image-wrapper">
@@ -146,8 +147,21 @@ function printWinner(winner,socket){
     document.body.appendChild(element);
     setTimeout(() => {
         element.remove();
-        loadPage("/home/");
         }, 5000);
+    console.log(data)
+    if(data.tournament_id)
+    {
+        localStorage.setItem("tournament_id",data.tournament_id);
+        setTimeout(() => {
+            loadPage(`/tournament/${data.tournament_id}/`);
+        }, 5000);
+    }
+    else
+    {
+        setTimeout(() => {
+            loadPage("/home/");
+        }, 5000);
+    }
 }
 function printCountdown()
 {
@@ -204,6 +218,7 @@ async function connectToServer()
 
     socket.onmessage = async  (event) => {
       const data = JSON.parse(event.data);
+        console.log(data)
       if(data.state_type === "initial_state")
       {
           try {
@@ -225,9 +240,8 @@ async function connectToServer()
         printCountdown();
       } else if (data.state_type === 'finish_state') {
         draw(data.game,"red","blue");
-
         setCurrentPoints(data);
-        printWinner(data.winner);
+        printWinner(data,data.winner);
       }
       else if(data.state_type === "game_state")
       {

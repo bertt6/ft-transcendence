@@ -66,6 +66,17 @@ function renderTournamentInfo(response,socket)
     handleButtons(response.data.players,socket)
     document.getElementById("tournament-header").innerText = response.data.tournament_name;
 }
+function handleGameRedirection(response)
+{
+    for (let game of response.data)
+    {
+        if(game.players.includes(getActiveUserNickname()))
+        {
+            console.log("redirecting to game")
+            loadPage(`/game/${game.game_id}`)
+        }
+    }
+}
 function connectToSocket()
 {
     let errorStates = [
@@ -73,6 +84,7 @@ function connectToSocket()
         "invalid_tournament",
         "tournament_started",
         "players_not_ready",
+        "invalid_params",
     ]
     try
     {
@@ -80,8 +92,14 @@ function connectToSocket()
         const  tournamentId =window.location.pathname.split("/").filter(Boolean)[1];
         const url = `${WEBSOCKET_URL}/tournament/?nickname=${nickname}&tournament_id=${tournamentId}`;
         const socket = new WebSocket(url);
+
         socket.onopen = () => {
-            console.log("connected to the server");
+        if(localStorage.getItem("tournament_id"))
+        {
+            localStorage.removeItem("tournament_id");
+            console.log("sending check_match")
+            socket.send(JSON.stringify({send_type: "checkMatch"}));
+        }
         }
         socket.onmessage = (event) => {
             const response = JSON.parse(event.data);
