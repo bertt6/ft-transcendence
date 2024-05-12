@@ -16,7 +16,7 @@ const registerSubmit = async (event) => {
     spinner.render();
     button.disabled = true;
 try{
-    const response = await fetch(`register/`, {
+    const response = await fetch(`${API_URL}/auth/register/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

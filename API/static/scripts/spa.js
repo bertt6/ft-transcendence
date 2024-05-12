@@ -108,7 +108,7 @@ const routes = new Map([
                   <div class="register-input-wrapper">
                     <label for="password">password</label>
                     <input
-                      type="text"
+                      type="password"
                       class="register-input p-2"
                       placeholder="PASSWORD"
                       id="password"
@@ -118,7 +118,7 @@ const routes = new Map([
                   <div class="register-input-wrapper">
                     <label for="password">Re enter your password</label>
                     <input
-                      type="text"
+                      type="password"
                       class="register-input p-2"
                       id="password2"
                       required
