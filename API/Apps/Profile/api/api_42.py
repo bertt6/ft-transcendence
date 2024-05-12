@@ -1,9 +1,9 @@
 import os
+import random
 
 import requests
 from django.contrib.auth.models import User
 from rest_framework.response import Response
-
 from Apps.Auth.serializers import RegisterWith42Serializer
 from Apps.Auth.utils import send_email
 from Apps.Profile.api.Serializers import UserSerializer
@@ -28,14 +28,17 @@ def api_42(code):
 
 
 def login_with_42(username, email, image):
-    if not User.objects.filter(username=username).exists():
+    if not User.objects.filter(email=email).exists():
+        if User.objects.filter(username=username).exists():
+            username = username + "_" + str(random.randint(1000, 9999))
         serializer = RegisterWith42Serializer(data={"username": username, "email": email})
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save()
-    user = User.objects.get(username=username)
-    if not user.profile.profile_picture:
+    user = User.objects.get(email=email)
+    if user.profile.profile_picture == 'profile-pictures/default.svg':
         user.profile.save_image_from_url(image)
+    user.profile.save()
     if user:
         send_email(user)
         return Response(data={'user': UserSerializer(user).data}, status=200)
