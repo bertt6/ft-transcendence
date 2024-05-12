@@ -139,3 +139,19 @@
   gap: 2rem;
   align-items: center;
 }
+
+.winner-wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 1s;
+}
+.winner-wrapper h1{
+    margin: 0;
+}
+.winner-image-wrapper{
+    aspect-ratio: 1/1;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+}
