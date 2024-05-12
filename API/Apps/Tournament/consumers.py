@@ -79,11 +79,11 @@ class TournamentConsumer(WebsocketConsumer):
     def receive(self, text_data):
         data = json.loads(text_data)
         print("data",data)
-        if data['send_type'] == 'checkMatch':
+        if data['request_type'] == 'checkMatch':
             self.checkMatch(self.nickname, self.tournament_id)
-        elif data['send_type'] == 'start':
-            self.check_start_conditions()
-            self.StartTournament(data)
+        elif data['request_type'] == 'StartTournament':
+                self.check_start_conditions()
+                self.StartTournament(data)
 
     def check_start_conditions(self):
         player = get_player_from_cache(f"user_{self.tournament_id}", self.nickname)
@@ -130,10 +130,16 @@ class TournamentConsumer(WebsocketConsumer):
     def StartTournament(self, data):
         print(get_players_from_cache(f"user_{self.tournament_id}"))
         tournament = Tournament.objects.get(id=self.tournament_id)
+        print("turrrrrr",tournament.is_started)
+        if tournament.is_started == True:
+            print("31313131313")
+            return
         participants = tournament.current_participants.all()
         if tournament.current_participants.count() > 2:
             round_number = 1
             round_obj = Round.objects.create(round_number=round_number)
+            tournament.is_started = True
+            tournament.save()
             round_obj.participants.set(participants)
             tournament.rounds.add(round_obj)
             try:

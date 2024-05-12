@@ -38,7 +38,7 @@ class TournamentGetSerializer(serializers.ModelSerializer):
 class TournamentPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
-        fields = ['id', 'name', 'max_participants', 'created_by', 'current_participants']
+        fields = ['id', 'name', 'max_participants', 'created_by']
 
     def validate(self, val):
         if val['max_participants'] <= 2:
