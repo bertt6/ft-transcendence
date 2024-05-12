@@ -41,7 +41,6 @@ class TournamentConsumer(WebsocketConsumer):
         return True
 
     def connect(self):
-        self.accept()
         query_string = self.scope['query_string'].decode()
         params = urllib.parse.parse_qs(query_string)
 
@@ -53,12 +52,19 @@ class TournamentConsumer(WebsocketConsumer):
             self.channel_name
         )
         if self.check_params():
+            self.send_error("invalid_params")
             self.close(code=1000)
+            return
+        self.accept()
         instance = Profile.objects.get(nickname=self.nickname)
         serializer = TournamentProfileSerializer(instance)
         cache_key = f"user_{self.tournament_id}"
         created_by = False
         tournament = Tournament.objects.get(id=self.tournament_id)
+        if tournament.is_finished:
+            self.send_error("tournament_finished")
+            self.close(code=1000)
+            return
         if tournament.created_by == instance:
             created_by = True
         data = add_player_to_cache(serializer.data, cache_key, created_by)
@@ -76,11 +82,12 @@ class TournamentConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
+        print("data", data)
         if data['send_type'] == 'checkMatch':
             self.checkMatch(self.nickname, self.tournament_id)
         elif data['send_type'] == 'start':
             self.check_start_conditions()
-            # self.StartTournament(data)
+            self.StartTournament(data)
 
     def check_start_conditions(self):
         player = get_player_from_cache(f"user_{self.tournament_id}", self.nickname)
@@ -91,10 +98,6 @@ class TournamentConsumer(WebsocketConsumer):
         if len(players) < 3:
             self.send_error("invalid_tournament")
             return
-        for player in players:
-            if not player['is_ready']:
-                self.send_error("players_not_ready")
-                return
 
     def send_error(self, error_type):
         if error_type == "invalid_profile":
@@ -106,7 +109,10 @@ class TournamentConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"error": "tournament_started", "message": "Tournament Already Started"}))
         elif error_type == "players_not_ready":
             self.send(text_data=json.dumps({"error": "players_not_ready", "message": "All players must be ready"}))
-
+        elif error_type == "invalid_params":
+            self.send(text_data=json.dumps({"error": "invalid_params", "message": "Something went wrong"}))
+        elif error_type == "tournament_finished":
+            self.send(text_data=json.dumps({"error": "tournament_finished", "message": "Tournament is finished"}))
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
@@ -129,9 +135,6 @@ class TournamentConsumer(WebsocketConsumer):
     def StartTournament(self, data):
         tournament = Tournament.objects.get(id=self.tournament_id)
         participants = tournament.current_participants.all()
-        if tournament.rounds.exists():
-            self.send_error("tournament_started")
-            return
         if tournament.current_participants.count() > 2:
             round_number = 1
             round_obj = Round.objects.create(round_number=round_number)
@@ -153,6 +156,7 @@ class TournamentConsumer(WebsocketConsumer):
                             return
                         game = Game.objects.create(player1=profile1, player2=profile2, tournament_id=self.tournament_id)
                         game_id = str(game.id)
+                        game.tournament_id = self.tournament_id
                         player1_nick = str(profile1.nickname)
                         player2_nick = str(profile2.nickname)
                         game_info = {
@@ -169,11 +173,7 @@ class TournamentConsumer(WebsocketConsumer):
 
     def checkMatch(self, profile_id1, tournament_id):
         try:
-            profile_id = int(profile_id1)
-        except ValueError:
-            print("Tournament ID metin olarak beklenen türde değil.")
-        try:
-            tournament = Tournament.objects.get(pk=tournament_id)
+            tournament = Tournament.objects.get(pk=self.tournament_id)
             last_round = tournament.rounds.order_by('-round_number').first()
         except Tournament.DoesNotExist:
             print("Turnuva Yok")
@@ -190,20 +190,16 @@ class TournamentConsumer(WebsocketConsumer):
 
             player_participated = False
             for game in last_round.matches.all():
-                if game.player1.id == profile_id or game.player2.id == profile_id:
-                    print(game.player1.id, game.player2.id)
+                if game.player1.nickname == self.nickname or game.player2.nickname == self.nickname:
                     player_participated = True
-                    if game.winner is None:
-                        game.winner = game.player2
-                        game.save()
-                        print("Maçı Player 2 kazandı")
-                        return
 
             if last_round.matches.count() == 1 and not last_round.participants.exists() and last_round.matches.first().winner:
                 game = last_round.matches.first()
                 tournament.winner = game.winner
                 tournament.is_finished = True
                 tournament.save()
+                self.send_to_group({"winner": game.winner.nickname, "profile_picture": game.winner.profile_picture.url},
+                                   "tournament_finished")
             if not player_participated:
                 print("Player Maclarda Yok")
                 return
@@ -211,15 +207,25 @@ class TournamentConsumer(WebsocketConsumer):
             winners = [game.winner for game in last_round.matches.all()]
             if len(last_round.participants.all()) == 1:
                 winners.append(last_round.participants.first())
+            print(winners)
             new_round.participants.set(winners)
             tournament.rounds.add(new_round)
-
+            all_games = []
             for i in range(0, len(winners), 2):
                 if i + 1 < len(winners):
-                    game = Game.objects.create(player1=winners[i], player2=winners[i + 1])
+                    game = Game.objects.create(player1=winners[i], player2=winners[i + 1], tournament=tournament)
+                    game_id = str(game.id)
+                    game.tournament_id = self.tournament_id
+                    player1_nick = str(winners[i].nickname)
+                    player2_nick = str(winners[i + 1].nickname)
+                    game_info = {
+                        "game_id": game_id,
+                        "players": [player1_nick, player2_nick]
+                    }
+                    all_games.append(game_info)
                     new_round.matches.add(game)
                     new_round.participants.remove(winners[i])
                     new_round.participants.remove(winners[i + 1])
                 new_round.save()
-            print("Yeni Turnuva Oluşturuldu")
+                self.send_to_group(all_games, "game_info")
             return

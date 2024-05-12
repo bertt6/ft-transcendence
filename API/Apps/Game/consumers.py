@@ -16,13 +16,16 @@ from Apps.Profile.api.Serializers import ProfileGetSerializer
 from Apps.Profile.models import Profile
 from Apps.Game.matchmaking import match
 
+from django.core.serializers.json import DjangoJSONEncoder
+
 
 class MatchMakingConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
-        self.profile = ProfileGetSerializer(Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
+        self.profile = ProfileGetSerializer(
+            Profile.objects.get(nickname=self.scope['url_route']['kwargs']['nickname'])).data
         async_to_sync(self.channel_layer.group_add)(
-            'player-%s' %self.profile['nickname'],
+            'player-%s' % self.profile['nickname'],
             self.channel_name
         )
         add_player_in_que(self.profile)
@@ -176,7 +179,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'state_type': 'initial_state',
             'details': data,
             'game': GameConsumer.game_states[self.game_id]
-        }))
+        }, cls=DjangoJSONEncoder))
 
     async def send_score_state(self, event):
         await self.send(text_data=json.dumps({
@@ -189,6 +192,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'state_type': 'finish_state',
             'game': event['game'],
             'winner': event['winner'],
+            'tournament_id': str(event['tournament_id'])
         }))
         await self.close()
 
@@ -240,7 +244,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         paddle_height = 200
         ball_speed = 1.0006
 
-        winner_ball_count = 5
+        winner_ball_count = 1
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']
         player2_score = GameConsumer.game_states[self.game_id]['player_two']['score']
@@ -295,13 +299,15 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dy': random.choice([-5, 5])
             })
             if GameConsumer.game_states[self.game_id]['player_two']['score'] >= winner_ball_count:
-                self.finish_game(self.player2['nickname'])
+                game = await self.get_game()
+                await self.finish_game(self.player2['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,
                     {
                         'type': 'send_finish_state',
                         'game': GameConsumer.game_states[self.game_id],
-                        'winner': self.player2
+                        'winner': self.player2,
+                        'tournament_id': str(game['tournament'])
                     }
                 )
                 self.stop_event.set()
@@ -325,13 +331,15 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dy': random.choice([-5, 5])
             })
             if GameConsumer.game_states[self.game_id]['player_one']['score'] >= winner_ball_count:
-                self.finish_game(self.player1['nickname'])
+                game = await self.get_game()
+                await self.finish_game(self.player1['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,
                     {
                         'type': 'send_finish_state',
                         'game': GameConsumer.game_states[self.game_id],
-                        'winner': self.player1
+                        'winner': self.player1,
+                        'tournament_id': str(game['tournament'])
                     }
                 )
                 self.stop_event.set()

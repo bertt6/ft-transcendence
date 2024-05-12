@@ -39,7 +39,7 @@ async function loginForm(event)
     const spinner = new Spinner({isVisible:true,className:"login-button-loader"}, loginButton);
     spinner.render();
         try{
-        let response = await fetch(endpoint, {
+        let response = await request(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
