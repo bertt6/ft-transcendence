@@ -33,13 +33,12 @@ def send_email_for_verification(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def email_verification_and_login(request):
-    username = request.data.get('username')
     verification_code = request.data.get('verification_code')
 
-    if not username or not verification_code:
-        return Response(data={'message': 'Username and verification code are required!'}, status=400)
+    if not verification_code:
+        return Response(data={'message': 'Verification code are required!'}, status=400)
 
-    user, error_response = Authenticator.authenticate_user(username, verification_code)
+    user, error_response = Authenticator.authenticate_user(verification_code)
     if error_response:
         return error_response
 

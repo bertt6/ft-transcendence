@@ -7,26 +7,22 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 class Authenticator:
     @staticmethod
-    def authenticate_user(username, verification_code):
+    def authenticate_user(verification_code):
         try:
-            db_verification_code = VerificationCode.objects.get(code=verification_code, username=username)
+            db_verification_code = VerificationCode.objects.get(code=verification_code)
         except VerificationCode.DoesNotExist:
             return None, Response(data={'message': 'Invalid verification code!'}, status=400)
 
         if verification_code != db_verification_code.code:
             return None, Response(data={'message': 'Incorrect verification code!'}, status=400)
 
-        if (datetime.now().astimezone(timezone('UTC')) - db_verification_code.expired_date) > timedelta(minutes=15):
+        if (timezone.now() - db_verification_code.expired_date) > timedelta(minutes=15):
             db_verification_code.delete()
             return None, Response(data={'message': 'Verification code expired!'}, status=400)
 
         db_verification_code.delete()
 
-        user = db_verification_code.user
-        user.profile.is_verified = True
-        user.profile.save()
-
-        return user, None
+        return db_verification_code.user.user, None
 
 
 class TokenGenerator:

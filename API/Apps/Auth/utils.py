@@ -1,23 +1,9 @@
 import os
-
 import pyotp
 from datetime import datetime, timedelta
-
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from rest_framework import status
-from rest_framework.response import Response
-
 from Apps.Auth.models import VerificationCode
-from Apps.Profile.models import Profile
-
-
-def token_expired_callback(token):
-    print('girdiiii!')
-    user_id = token['user_id']
-    user = User.objects.get(id=user_id)
-    user.profile.is_verified = False
-    user.save()
 
 
 def generate_otp():
@@ -48,6 +34,4 @@ def send_email(user):
     recipient_list = [receiver]
     send_mail(subject, message, from_email, recipient_list)
 
-    VerificationCode.objects.create(code=otp_code['otp'], expired_date=otp_code['otp'], username=user)
-
-
+    VerificationCode.objects.create(code=otp_code['otp'], expired_date=otp_code['otp'], user=user.profile)

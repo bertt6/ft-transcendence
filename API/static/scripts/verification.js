@@ -1,4 +1,4 @@
-import {API_URL, getCookie, setCookie,loadPage} from "./spa.js";
+import {setCookie, loadPage} from "./spa.js";
 import {request} from "./Request.js";
 
 import {notify} from "../components/Notification.js";
@@ -55,7 +55,6 @@ async function postVerificationCode(value) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                username: localStorage.getItem('username'),
                 verification_code: value,
             }),
         });
