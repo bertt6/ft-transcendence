@@ -6,6 +6,7 @@ from ..Game.models import Game
 
 
 class Round(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     round_number = models.PositiveIntegerField()
     matches = models.ManyToManyField(Game, blank=True, related_name='game')
     participants = models.ManyToManyField(Profile, related_name='round_participants')

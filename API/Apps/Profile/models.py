@@ -5,9 +5,11 @@ from django.db.models.signals import m2m_changed
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 import urllib.request
+import uuid
 
 
 class Stats(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     total_games = models.IntegerField()
     total_wins = models.IntegerField()
     total_losses = models.IntegerField()
@@ -18,6 +20,7 @@ class Stats(models.Model):
 
 
 class Profile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     nickname = models.CharField(max_length=100, blank=True, null=True, default=None, unique=True)
     stats = models.OneToOneField(Stats, on_delete=models.CASCADE, null=True)

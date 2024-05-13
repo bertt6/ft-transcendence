@@ -10,7 +10,10 @@ class Room(models.Model):
 
     def __str__(self):
         return f"{self.first_user.nickname} - {self.second_user.nickname}"
+
+
 class Message(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.ForeignKey(Profile, related_name='messages', on_delete=models.CASCADE)
     room = models.ForeignKey(Room, related_name='messages', on_delete=models.CASCADE)
     content = models.TextField()
