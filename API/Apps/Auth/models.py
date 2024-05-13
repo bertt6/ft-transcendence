@@ -1,5 +1,4 @@
 from time import timezone
-
 from django.db import models
 
 

@@ -2,10 +2,7 @@ import json
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
-from django.contrib.auth.models import User
-from rest_framework_simplejwt.backends import TokenBackend
 from Apps.Chat.models import Message
-from urllib.parse import parse_qsl
 
 from Apps.Profile.models import Profile
 

@@ -46,10 +46,10 @@ input::-webkit-outer-spin-button {
     border-radius: 20px!important;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
     transition-duration: 0.5s;
-    color: white!important;
+    color: white;
 }
 
 button:hover {
     background-color: white;
-    color: black;
+    color: black !important;
 }
