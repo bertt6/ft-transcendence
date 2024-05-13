@@ -1,3 +1,5 @@
+import os
+
 import pyotp
 from datetime import datetime, timedelta
 
@@ -28,12 +30,24 @@ def generate_otp():
 
 def send_email(user):
     otp_code = generate_otp()
-    receiver = user.email  # test
-    subject = 'LAST DANCE Email Verification'
-    message = f'Hi! {user} your one-time verification code is {otp_code['otp']}'
-    from_email = 'kaanmesum@gmail.com'
+    receiver = user.email
+    subject = 'Transcendence Email Verification'
+    message = f'''
+    Hello {user.username},
+
+    You can use the following one-time code to verify your Transcendence account:
+
+    Verification Code: {otp_code['otp']}
+
+    This code will help you securely verify your account.
+
+    Regards,
+    Transcendence Team
+    '''
+    from_email = os.getenv("EMAIL_HOST_USER")
     recipient_list = [receiver]
     send_mail(subject, message, from_email, recipient_list)
 
     VerificationCode.objects.create(code=otp_code['otp'], expired_date=otp_code['otp'], username=user)
+
 

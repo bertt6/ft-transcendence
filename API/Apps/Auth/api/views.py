@@ -1,4 +1,5 @@
 import os
+import threading
 
 from django.http import HttpResponseRedirect
 from pytz import timezone
@@ -24,23 +25,6 @@ def register(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsEmailVerified])
-def login(request):
-    user = User.objects.filter(username=request.data['username']).first()
-
-    refresh = RefreshToken.for_user(user)
-    response = Response()
-    response.set_cookie(key='jwt', value=str(refresh.access_token), httponly=True)
-    response.data = {
-        'tokens': {'access': str(refresh.access_token), 'refresh': str(refresh)},
-        'user_id': user.pk,
-        'username': user.username
-    }
-    response.status_code = 200
-    return response
-
-
-@api_view(['POST'])
 @permission_classes([AllowAny])
 def send_email_for_verification(request):
     username = request.data['username']
@@ -48,13 +32,14 @@ def send_email_for_verification(request):
     user = User.objects.get(username=username)
     if user is None or not user.check_password(password):
         raise AuthenticationFailed("Wrong Password or Username!")
-    send_email(user)
+    thread = threading.Thread(target=send_email, args=[user])
+    thread.start()
     return Response(data={'message': 'Email sent successfully!'}, status=200)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def email_verification(request):
+def email_verification_and_login(request):
     try:
         username = request.data['username']
         verification_code = request.data['verification_code']
@@ -69,6 +54,7 @@ def email_verification(request):
 
     expiration_time = timedelta(minutes=15)
     if (datetime.now().astimezone(timezone('UTC')) - db_verification_code.expired_date) > expiration_time:
+        db_verification_code.delete()
         return Response(data={'message': 'Verification code expired!'}, status=400)
     db_verification_code.delete()
 
