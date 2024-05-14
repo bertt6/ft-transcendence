@@ -2,13 +2,18 @@
   --main-color: #201433;
 }
 
+@font-face {
+  font-family: "Retro Gaming";
+  src: url('../fonts/retro_gaming/Retro Gaming.ttf') format('truetype') /* TrueType font */
+}
+
 html,
 body {
   height: 100%;
   margin: 0 !important;
 }
 * {
-  font-family: "Pixelify Sans",sans-serif;
+  font-family: "Retro Gaming", Arial, sans-serif;
   box-sizing: border-box;
   color: white;
 }

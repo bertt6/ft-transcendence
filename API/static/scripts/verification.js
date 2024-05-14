@@ -32,17 +32,15 @@ document.getElementById("verify").addEventListener("click", async function() {
         alert('Wrong code format!')
     }
     else {
-        await postVerificationCode(value)
-       /*
-    var player = document.getElementById('player');
-        player.volume = 0.1;
-        player.play();
-        player.onended = function () {
-            player.currentTime = 0;
+        await postVerificationCode(value).then(() => {
+            const player = document.getElementById('player');
+            player.volume = 0.1;
             player.play();
-        };
-       */
-
+            player.onended = function () {
+                player.currentTime = 0;
+                player.play();
+            };
+        })
     }
 })
 

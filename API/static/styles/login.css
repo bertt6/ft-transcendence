@@ -4,7 +4,20 @@
   border-radius: 1rem;
   background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
   align-items: center;
+  animation: bounce2 1s;
 }
+
+@keyframes bounce2 {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
 .login-input {
   background-color: white;
   border-radius: 10rem;

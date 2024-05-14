@@ -1,4 +1,7 @@
 import threading
+
+from rest_framework.response import Response
+
 from Apps.Auth.serializers import RegisterSerializer, ChangePasswordSerializer
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.decorators import api_view, permission_classes
@@ -19,7 +22,7 @@ def register(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def send_email_for_verification(request):
+def send_verification_email(request):
     username = request.data['username']
     password = request.data['password']
     user = User.objects.get(username=username)
@@ -32,7 +35,7 @@ def send_email_for_verification(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def email_verification_and_login(request):
+def verify_email_and_login(request):
     verification_code = request.data.get('verification_code')
 
     if not verification_code:

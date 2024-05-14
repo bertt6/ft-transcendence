@@ -465,8 +465,8 @@ const routes = new Map([
                 </p>
             </div>
         </div>
+        <audio id="player" src='../../static/public/withoutdrum.mp3'></audio>
     </div>
-
         `
     }],
     ['game', {

@@ -10,15 +10,25 @@ def get_players_in_que():
 
 
 def add_player_in_que(player):
+    player_data = {
+        'id': player["id"],
+        'nickname': player["nickname"],
+        'mmr': player["mmr"],
+    }
     all_keys = get_players_in_que()
-    all_keys.append(player)
+    all_keys.append(player_data)
     cache.set('players-in-que', json.dumps(all_keys))
 
 
 def remove_player_in_que(player):
+    player_data = {
+        'id': player["id"],
+        'nickname': player["nickname"],
+        'mmr': player["mmr"],
+    }
     all_keys = get_players_in_que()
-    if player in all_keys:
-        all_keys.remove(player)
+    if player_data in all_keys:
+        all_keys.remove(player_data)
     cache.set('players-in-que', json.dumps(all_keys))
 
 
