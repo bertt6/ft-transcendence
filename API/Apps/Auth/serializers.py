@@ -21,7 +21,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())]
+        validators=[
+            UniqueValidator(queryset=User.objects.all(), message='This email address is already in use.')
+        ]
     )
 
     class Meta:

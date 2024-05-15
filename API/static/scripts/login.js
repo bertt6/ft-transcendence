@@ -7,7 +7,6 @@ document.getElementById('ecole-login-button').addEventListener('click', async ()
     const response = await request(`auth/direct-42-login-page/`, {
         method: 'POST',
     })
-    console.log(response)
     if (response.oauth_url) {
         window.location.href = response.oauth_url
     }
@@ -18,7 +17,6 @@ async function handle42APICallback(code) {
         method: "POST",
     })
     if (response) {
-        console.log(response)
         localStorage.setItem('username', response.user.username);
         loadPage('/auth/verification/');
     }
@@ -69,10 +67,12 @@ const App = async () => {
         notify('Already logged in', 3, 'success')
     }
     const form = document.getElementById('login-form');
-   form.addEventListener('submit', loginForm);
+    form.addEventListener('submit', loginForm);
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     if (code) {
+        let spinner = new Spinner({isVisible: true, className: "create-button-loader"}, form);
+        spinner.render();
         await handle42APICallback(code)
     }
 }

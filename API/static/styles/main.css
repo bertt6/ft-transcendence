@@ -28,7 +28,7 @@ body {
   background-color: black;
 }
 .background {
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
     url("../public/disarda-fotor-202312242273.jpg");
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -388,4 +388,17 @@ pong-redirect{
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+}
+
+@keyframes bounce {
+    0% {
+        opacity: 0;
+        filter: blur(20px);
+    }
+
+    20% {
+        transform: translateY(-50px);
+        filter: blur(20px);
+        opacity: 0;
+    }
 }

@@ -6,6 +6,7 @@
     width: 50%;
     gap: 10px;
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+    animation: bounce 1s;
 }
 
 p,

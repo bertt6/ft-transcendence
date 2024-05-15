@@ -10,6 +10,11 @@ document.getElementById('singleDigitInput1').addEventListener('paste', function(
     }
 })
 
+window.addEventListener('popstate', function (event) {
+    localStorage.removeItem("timer")
+    loadPage("/auth/login/")
+});
+
 inputs.forEach(function(input, index) {
     input.addEventListener('input', function() {
         let nextInput = inputs[index + 1]
@@ -61,6 +66,7 @@ async function postVerificationCode(value) {
         setCookie('refresh_token', response.tokens.refresh, 30);
         loadPage('/home/')
         notify('Successfully verified', 3, 'success')
+        localStorage.removeItem("timer")
     }
     catch (e) {
         console.log(e.json())
@@ -69,26 +75,36 @@ async function postVerificationCode(value) {
 
 function startTimer()
 {
-    let minutes = 14;
-    let seconds = 59;
+    let time = JSON.parse(localStorage.getItem("timer"))
+    let minutes = time.minutes ? time.minutes : 14;
+    let seconds = time.seconds ? time.seconds : 59;
     let timer = setInterval(function() {
         let timerElement = document.getElementById('timer');
-        if(timerElement)
-            timerElement.innerText = `${minutes}:${seconds}`;
+        if (timerElement) {
+            let time_info
+            if (minutes < 10 && seconds < 10)
+                time_info = `0${minutes}:0${seconds}`
+            else if (minutes < 10)
+                time_info = `0${minutes}:${seconds}`
+            else if (seconds < 10)
+                time_info = `${minutes}:0${seconds}`
+            timerElement.innerText = time_info;
+        }
         if(minutes === 0 && seconds === 0)
         {
             clearInterval(timer);
-            document.getElementById('timer').innerText = '0:0';
+            document.getElementById('timer').innerText = '00:00';
+            loadPage("/auth/login/")
         }
-    if(seconds === 0 )
-        {
+        if (seconds === 0) {
             minutes--;
             seconds = 59;
         }
         else
             seconds--;
-
+        localStorage.setItem("timer", JSON.stringify({"minutes": minutes, "seconds": seconds}));
     }, 1000)
 }
+
 startTimer()
 
