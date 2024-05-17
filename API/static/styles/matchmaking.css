@@ -1,8 +1,8 @@
 .matchmaking-wrapper {
   height: 80%;
   width: 100%;
-  background: url("/static/public/8351324.gif") no-repeat;
-  background-size: cover;
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("/static/public/pixelShop.gif");
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;

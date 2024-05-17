@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User
 from django.db import models
 from Apps.Profile.models import Profile
+import uuid
 
 
 class Tweet(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     from_user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, blank=True)
     content = models.TextField(max_length=250, blank=True, null=True, default=None)
     image = models.ImageField(upload_to='', blank=True, null=True, default=None)
@@ -15,6 +17,7 @@ class Tweet(models.Model):
 
 
 class Comment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     from_user = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, blank=True)
     content = models.TextField(max_length=250, blank=True, null=True, default=None)
     tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE, related_name='comments')

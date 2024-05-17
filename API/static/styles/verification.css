@@ -6,6 +6,7 @@
     width: 50%;
     gap: 10px;
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+    animation: bounce 1s;
 }
 
 p,
@@ -46,10 +47,10 @@ input::-webkit-outer-spin-button {
     border-radius: 20px!important;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
     transition-duration: 0.5s;
-    color: white!important;
+    color: white;
 }
 
 button:hover {
     background-color: white;
-    color: black;
+    color: black !important;
 }

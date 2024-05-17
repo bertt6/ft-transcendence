@@ -6,19 +6,21 @@
   align-items: center;
   flex-basis: 10px;
   position: relative;
+    animation: bounce 1s;
 }
 .register-input {
   background-color: white;
   border-radius: 10rem;
   outline: none;
   color: black;
+    border: none;
 }
 .register-input::-webkit-input-placeholder {
   font-size: larger;
 }
 .register-button {
   border-radius: 1rem;
-  width: 7rem;
+    width: 10rem;
   background-color: var(--main-color);
   border: 2px solid white;
   color: white;
@@ -26,6 +28,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+    padding: 5px;
 }
 .ecole-register-button {
   position: relative;

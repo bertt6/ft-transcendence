@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import *
 from rest_framework.response import Response
 from .serializers import TweetPostSerializer, TweetGetSerializer, \
-    CommentPostSerializer, TweetGetWithDetailSerializer, CommentGetSerializer
+    CommentPostSerializer, CommentGetSerializer
 from ..models import Tweet, Comment
 from rest_framework.pagination import PageNumberPagination
 

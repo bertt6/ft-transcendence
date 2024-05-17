@@ -393,7 +393,6 @@ const fetchSocialPosts = async () => {
     try {
         let response = await request(`tweets/`, {method: 'GET'})
         socialPostsComponent.setState({tweets: response.results.tweets, next: response.next});
-
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching social posts', 3, 'error');
@@ -464,6 +463,7 @@ async function assignDeleteButtons() {
         let tweetId = button.getAttribute('data-tweet-id');
         button.addEventListener('click', async () => {
             try {
+                console.log(tweetId)
                 let data = await request(`delete-tweet/${tweetId}/`, {
                     method: 'DELETE',
                 });

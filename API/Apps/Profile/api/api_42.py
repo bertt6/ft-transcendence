@@ -9,7 +9,7 @@ from Apps.Auth.utils import send_email
 from Apps.Profile.api.Serializers import UserSerializer
 
 
-def api_42(code):
+def connect_api_42(code):
     response = requests.post(f"{os.getenv("42_API_URL")}/oauth/token", data={
         'grant_type': 'authorization_code',
         'code': code,

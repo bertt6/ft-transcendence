@@ -4,7 +4,6 @@ import random
 import threading
 import time
 import uuid
-
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
@@ -15,7 +14,6 @@ from Apps.Game.models import Game
 from Apps.Profile.api.Serializers import ProfileGetSerializer
 from Apps.Profile.models import Profile
 from Apps.Game.matchmaking import match
-
 from django.core.serializers.json import DjangoJSONEncoder
 
 

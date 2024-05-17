@@ -1,3 +1,5 @@
+import uuid
+
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
@@ -19,7 +21,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())]
+        validators=[
+            UniqueValidator(queryset=User.objects.all(), message='This email address is already in use.')
+        ]
     )
 
     class Meta:
@@ -88,14 +92,14 @@ class RegisterWith42Serializer(serializers.Serializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email',)
+        fields = ('username', 'email')
 
     def create(self, validated_data):
-        print(validated_data)
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
         )
+        user.set_password(str(uuid.uuid1()))
 
         profile = Profile.objects.create(
             user=user,
