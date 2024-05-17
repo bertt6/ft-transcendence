@@ -4,6 +4,7 @@ import Spinner from "../components/spinner.js";
 import {request} from "./Request.js";
 
 document.getElementById('ecole-login-button').addEventListener('click', async () => {
+    localStorage.removeItem("timer")
     const response = await request(`auth/direct-42-login-page/`, {
         method: 'POST',
     })
@@ -24,6 +25,7 @@ async function handle42APICallback(code) {
 
 async function loginForm(event)
 {
+    localStorage.removeItem("timer")
     event.preventDefault();
     let username = document.getElementById('username').value;
     let password = document.getElementById('password').value;
@@ -75,6 +77,7 @@ const App = async () => {
         spinner.render();
         await handle42APICallback(code)
     }
+    localStorage.removeItem("timer")
 }
 
 App().catch((error) => {

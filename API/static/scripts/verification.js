@@ -10,11 +10,6 @@ document.getElementById('singleDigitInput1').addEventListener('paste', function(
     }
 })
 
-window.addEventListener('popstate', function (event) {
-    localStorage.removeItem("timer")
-    loadPage("/auth/login/")
-});
-
 inputs.forEach(function(input, index) {
     input.addEventListener('input', function() {
         let nextInput = inputs[index + 1]
@@ -76,8 +71,14 @@ async function postVerificationCode(value) {
 function startTimer()
 {
     let time = JSON.parse(localStorage.getItem("timer"))
-    let minutes = time.minutes ? time.minutes : 14;
-    let seconds = time.seconds ? time.seconds : 59;
+    let minutes = 14;
+    let seconds = 59;
+
+    if (time) {
+        minutes = time.minutes
+        seconds = time.seconds
+    }
+
     let timer = setInterval(function() {
         let timerElement = document.getElementById('timer');
         if (timerElement) {
@@ -88,6 +89,8 @@ function startTimer()
                 time_info = `0${minutes}:${seconds}`
             else if (seconds < 10)
                 time_info = `${minutes}:0${seconds}`
+            else
+                time_info = `${minutes}:${seconds}`
             timerElement.innerText = time_info;
         }
         if(minutes === 0 && seconds === 0)
