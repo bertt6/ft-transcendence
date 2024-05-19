@@ -833,7 +833,6 @@ async function tryRefreshToken() {
             }),
         });
         setCookie('access_token', data.access, 1);
-        setCookie('refresh_token', data.refresh, 1);
         return true;
     } catch (error) {
         notify('Please login again', 3, 'error')
