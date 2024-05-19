@@ -331,7 +331,6 @@ class ProfileInfo extends BaseComponent {
                     'Content-Type': '',
                 }
             });
-            console.log(response)
             notify('Profile updated', 3, 'success');
 
             this.setState({ ...this.state, profile: response });

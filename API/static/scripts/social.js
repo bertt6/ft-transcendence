@@ -332,7 +332,6 @@ class ConversationComponent extends BaseComponent {
             `).join('')
         }
         `
-
     }
 
     render() {
@@ -467,7 +466,6 @@ async function assignEventListeners() {
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl: url});
     });
-
     await assignLikeButtons();
     await assignCommentButtons();
     await assignDeleteButtons();
