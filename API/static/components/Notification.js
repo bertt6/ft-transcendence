@@ -9,7 +9,7 @@ class Notification extends BaseComponent {
         return `
       <div class="notification-wrapper" id="notification">
         <div class="notification-message-wrapper">
-          <div>
+          <div class="error-wrapper">
             <img src="/static/public/error.svg" alt="" />
           </div>
           <span>${this.state.message}</span>

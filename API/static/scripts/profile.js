@@ -2,7 +2,7 @@ import BaseComponent from "../components/Component.js";
 import {API_URL, assignRouting, BASE_URL, loadPage} from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
-import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname, parseErrorToNotify} from "./utils.js";
 
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -285,8 +285,7 @@ class ProfileInfo extends BaseComponent {
                 </div>
               </div>
               <div>
-                <input class="transparent-input" id="profile-nickname" value="${nickname ? nickname : "no nickname is set!"}"/>
-                <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name : "no first name is set"}">
+                <input class="transparent-input" id="profile-nickname" value="${nickname}"/>
               </div>
               <div>
                 <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">${bio ? bio : 'No bio available'}</textarea>  
@@ -322,7 +321,6 @@ class ProfileInfo extends BaseComponent {
     }
 
     updateProfile = async (formData) => {
-
         try {
             let response = await request(`profile/`, {
                 method: 'PUT',
@@ -331,6 +329,13 @@ class ProfileInfo extends BaseComponent {
                     'Content-Type': '',
                 }
             });
+            console.log(response)
+            if(!response.ok)
+            {
+                let message = parseErrorToNotify(response)
+                notify(message, 3, 'error')
+                return
+            }
             notify('Profile updated', 3, 'success');
 
             this.setState({ ...this.state, profile: response });

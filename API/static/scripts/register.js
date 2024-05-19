@@ -2,6 +2,7 @@ import {API_URL, loadPage} from "./spa.js";
 import Spinner from "../components/spinner.js";
 import {notify} from "../components/Notification.js";
 import {parseErrorToNotify} from "./utils.js";
+import {request} from "./Request.js";
 
 const registerSubmit = async (event) => {
     event.preventDefault();
@@ -16,22 +17,22 @@ const registerSubmit = async (event) => {
     spinner.render();
     button.disabled = true;
 try{
-    const response = await fetch(`${API_URL}/auth/register/`, {
+    const data = await request(`auth/register/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
     });
-    if (response.status === 201)
+    if (data.ok)
     {
         notify("Registration successful. You will be redirected to the login page", 3, "success");
         loadPage('/auth/login/');
     } else {
-        const data = await response.json();
         spinner.setState({isVisible: false});
         button.disabled = false;
         button.innerText = 'REGISTER';
+        console.log(data)
         const message = parseErrorToNotify(data);
         notify(message, 3, 'error');
     }

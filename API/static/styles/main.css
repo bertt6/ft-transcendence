@@ -238,7 +238,6 @@ pong-redirect{
   transform: scaleY(0);
   opacity: 0;
   list-style: none;
-  padding: 0;
   position: absolute;
   top: 3.3rem;
   right: 1rem;
@@ -246,10 +245,10 @@ pong-redirect{
   border-radius: 10px;
   margin: 0;
   z-index: 20;
-  display: flex;
   flex-direction: column;
   width: max-content;
   max-width: 20rem;
+  padding: .5rem 1rem;
 }
 .inbox-element > div:first-child {
   display: flex;
@@ -295,6 +294,13 @@ pong-redirect{
   border-radius: 5px;
   padding: 1rem;
   transition: all 1s ease-in-out;
+}
+.error-wrapper{
+  min-width: 16px;
+}
+.error-wrapper img{
+  width: 100%;
+  height: 100%;
 }
 .request-wrapper {
   display: flex;

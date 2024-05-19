@@ -1,3 +1,4 @@
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -28,7 +29,7 @@ class Profile(models.Model):
         ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    nickname = models.CharField(max_length=100, blank=True, null=True, default=None, unique=True)
+    nickname = models.CharField(max_length=100, unique=True, blank=False, null=False, validators=[MinLengthValidator(3)])
     stats = models.OneToOneField(Stats, on_delete=models.CASCADE, null=True)
     profile_picture = models.ImageField(upload_to='profile-pictures/', default="profile-pictures/default.svg")
     is_online = models.BooleanField(default=False)
