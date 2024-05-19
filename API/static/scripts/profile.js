@@ -311,11 +311,11 @@ class ProfileInfo extends BaseComponent {
                 />
               </div>
               <div>
-                <h1>${escapeHTML(nickname)}</h1>
+                <h1>${nickname}</h1>
               </div>
               <div>
                 <p>
-                ${bio ? escapeHTML(bio) : 'No bio available'}
+                ${bio ? bio : 'No bio available'}
                 </p>
               </div>`
     }
@@ -361,8 +361,8 @@ class ProfileInfo extends BaseComponent {
                     formData.append('profile_picture', image.files[0]);
                     console.log(image.files[0])
                 }
-                formData.append('nickname', document.getElementById('profile-nickname').value)
-                formData.append('bio', document.getElementById('profile-bio').value)
+                formData.append('nickname', escapeHTML(document.getElementById('profile-nickname').value))
+                formData.append('bio',escapeHTML(document.getElementById('profile-bio').value))
                 await this.updateProfile(formData);
             });
 

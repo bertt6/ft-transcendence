@@ -139,7 +139,6 @@ function getRequests() {
 
 async function handleProfileImage() {
     const profile = await getProfile();
-    console.log(profile)
     let image = document.getElementById('profile-image');
     if (image) {
         image.src = `${BASE_URL}${profile.profile_picture}`;
