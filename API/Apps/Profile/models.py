@@ -20,6 +20,12 @@ class Stats(models.Model):
 
 
 class Profile(models.Model):
+    ColorChoices = [
+        ('white', 'White'),
+        ('blue', 'Blue'),
+        ('red', 'Red'),
+        ('green', 'Green'),
+        ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     nickname = models.CharField(max_length=100, blank=True, null=True, default=None, unique=True)
@@ -31,6 +37,7 @@ class Profile(models.Model):
     bio = models.TextField(blank=True, null=True, default=None)
     mmr = models.IntegerField(default=1000)
     blocked_users = models.ManyToManyField('Profile', blank=True, related_name='users_blocked')
+    preferred_color = models.CharField(max_length=7, default="white", choices=ColorChoices)
 
     def __str__(self):
         return self.nickname

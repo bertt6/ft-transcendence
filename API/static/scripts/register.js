@@ -26,7 +26,7 @@ try{
     if (response.status === 201)
     {
         notify("Registration successful. You will be redirected to the login page", 3, "success");
-        loadPage('login');
+        loadPage('/login/');
     } else {
         const data = await response.json();
         spinner.setState({isVisible: false});
