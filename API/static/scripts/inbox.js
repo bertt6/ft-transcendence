@@ -70,7 +70,6 @@ class Inbox extends BaseComponent {
     }
 
     parseMessage(request) {
-        console.log(request.type)
         switch (request.type) {
             case 'friend':
                 return `You have a friend request from ${request.sender.nickname}`;
