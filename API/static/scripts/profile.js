@@ -326,8 +326,12 @@ class ProfileInfo extends BaseComponent {
         try {
             let response = await request(`profile/`, {
                 method: 'PUT',
-                body: formData
+                body: formData,
+                headers: {
+                    'Content-Type': '',
+                }
             });
+            console.log(response)
             notify('Profile updated', 3, 'success');
 
             this.setState({ ...this.state, profile: response });
