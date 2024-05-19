@@ -428,6 +428,7 @@ async function assignDataRouting() {
 }
 
 async function fetchPaddleColor() {
+    //profile/ endpoint PUT Request to update paddle color
     const colors = [
         { color: "red", hex: "#FF0000" },
         { color: "green", hex: "#00FF00" },
@@ -509,25 +510,30 @@ async function handleRouting() {
         const history = new History({ histories: data }, parentElement);
         history.render();
     }
-    if (hash === '#friends') {
+    else if (hash === '#friends') {
         let data = await fetchFriends();
         const friends = new Friends({ friends: data }, parentElement);
         friends.render();
     }
-    if (hash === '#stats') {
+    else if (hash === '#stats') {
         let data = await fetchStats();
         const statsInfo = new Stats({ statsInfo: data }, parentElement);
         statsInfo.render();
     }
-    if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
+    else if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
         let data = await fetchBlockedUsers();
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
-    if (hash === '#paddlecolor') {
+    else if (hash === '#paddlecolor') {
         const paddleColor = await fetchPaddleColor();
         const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
         paddleColorComponent.render();
+    }
+    else {
+        let data = await fetchHistory();
+        const history = new History({ histories: data }, parentElement);
+        history.render();
     }
 }
 function getUsernameFromURL() {

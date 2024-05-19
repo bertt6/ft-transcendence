@@ -29,7 +29,6 @@ class ProfileView(APIView):
             return Response({"error": "Profile not found"}, status=404)
 
 
-
 class ProfileSearchView(APIView):
     def get(self, request):
         try:
@@ -188,4 +187,3 @@ class ProfileBlockedUsersView(APIView):
             from_profile.blocked_users.remove(to_profile)
             from_profile.save()
             return Response({"error": "Profile block removed"}, status=201)
-
