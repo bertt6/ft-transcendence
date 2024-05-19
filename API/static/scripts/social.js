@@ -458,7 +458,6 @@ async function assignDeleteButtons() {
         });
     }
 }
-
 async function assignEventListeners() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);

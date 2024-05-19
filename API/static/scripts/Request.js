@@ -21,18 +21,17 @@ export async function request(url, options = {}) {
             ...options.headers,
         },
     };
-
     if (mergedOptions.headers['Content-Type'] === '') {
         delete mergedOptions.headers['Content-Type'];
     }
     const fullUrl = `/api/v1/${url}`
-    if (options.method === 'GET' && responses.has(fullUrl)) {
+    if (mergedOptions.method === 'GET' && responses.has(fullUrl)) {
         return responses.get(fullUrl)
     }
     try {
         const response = await fetch(fullUrl, mergedOptions)
         const data = await response.json()
-        if (response.method === 'GET' && response.ok)
+        if (options.method === 'GET' && response.ok)
             responses.set(fullUrl, data)
         data.ok = response.ok
         return data

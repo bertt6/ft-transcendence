@@ -231,7 +231,7 @@ class Friends extends BaseComponent {
               <div class="friend-wrapper">
                 <div class="friend-info">
                   <div class="friend-image">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                    <img src="${friend.profile_picture}" alt="" />
                   </div>
                   <pong-redirect href="/profile/${friend.nickname}/" class="friend-data">
                     <span>${friend.nickname}</span>
