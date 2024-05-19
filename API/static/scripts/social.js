@@ -306,16 +306,8 @@ class ConversationComponent extends BaseComponent {
     }
 
     handleHtml() {
-        this.state.messages = [
-            {
-                content: "Hello",
-                user: {id: 1, nickname: "test"}
-            },
-            {
-                content: "Hi",
-                user: {id: 2, nickname: "MKM"}
-            }
-        ]
+        let username = getActiveUserNickname();
+        console.log(this.state)
         return `
         ${
             this.state.messages.map(message => `
@@ -363,7 +355,6 @@ let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
 const fetchChatFriends = async () => {
-
     const endpoint = `profile/friends`;
     try {
         let response = await request(endpoint, {
@@ -399,7 +390,6 @@ const fetchSocialPosts = async () => {
     }
 
 }
-
 async function submitTweet(event) {
     event.preventDefault();
     let inputValue = document.getElementById('social-text-input').value;
@@ -425,7 +415,6 @@ async function submitTweet(event) {
         notify('Error posting tweet', 3, 'error');
     }
 }
-
 async function assignLikeButtons() {
     let likeButtons = document.getElementsByClassName('like-button');
     for (let button of likeButtons) {
@@ -445,7 +434,6 @@ async function assignLikeButtons() {
         });
     }
 }
-
 async function assignCommentButtons() {
     let commentButtons = document.getElementsByClassName('comment-button');
     for (let button of commentButtons) {
@@ -740,8 +728,9 @@ async function fetchRoomData(element) {
         conversationWrapper.classList.remove('no-chat-wrapper')
         let conversationComponent = new ConversationComponent(
             {
-                senderId: parseInt(localStorage.getItem("activeUserId")),
-                receiverId: room.second_user
+                senderId: localStorage.getItem("activeUserId"),
+                receiverId: room.second_user,
+                messages: response.messages
             },
             conversationWrapper);
         spinner.setState({isVisible: false});
