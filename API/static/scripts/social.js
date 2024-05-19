@@ -736,6 +736,7 @@ function handleChatState() {
 }
 
 function handleChatEvents() {
+    console.log('Handling chat events')
     let elements = document.getElementsByClassName("user-wrapper");
     for (let element of elements) {
         element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
@@ -750,8 +751,8 @@ const App = async () => {
     else
         await renderAllPosts();
     assignRouting();
-    handleChatEvents();
     handleChatState();
+    handleChatEvents();
     //I don't know if this make sense but, I added this to prevent the form from submitting when
     //there is no chat active
     document.querySelectorAll('form').forEach(form => {

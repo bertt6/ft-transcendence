@@ -2,7 +2,7 @@ import BaseComponent from "../components/Component.js";
 import {API_URL, assignRouting, BASE_URL, loadPage} from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
-import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname, parseErrorToNotify} from "./utils.js";
 
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -285,8 +285,7 @@ class ProfileInfo extends BaseComponent {
                 </div>
               </div>
               <div>
-                <input class="transparent-input" id="profile-nickname" value="${nickname ? nickname : "no nickname is set!"}"/>
-                <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name : "no first name is set"}">
+                <input class="transparent-input" id="profile-nickname" value="${nickname}"/>
               </div>
               <div>
                 <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">${bio ? bio : 'No bio available'}</textarea>  
@@ -312,17 +311,16 @@ class ProfileInfo extends BaseComponent {
                 />
               </div>
               <div>
-                <h1>${escapeHTML(nickname)}</h1>
+                <h1>${nickname}</h1>
               </div>
               <div>
                 <p>
-                ${bio ? escapeHTML(bio) : 'No bio available'}
+                ${bio ? bio : 'No bio available'}
                 </p>
               </div>`
     }
 
     updateProfile = async (formData) => {
-
         try {
             let response = await request(`profile/`, {
                 method: 'PUT',
@@ -331,6 +329,13 @@ class ProfileInfo extends BaseComponent {
                     'Content-Type': '',
                 }
             });
+            console.log(response)
+            if(!response.ok)
+            {
+                let message = parseErrorToNotify(response)
+                notify(message, 3, 'error')
+                return
+            }
             notify('Profile updated', 3, 'success');
 
             this.setState({ ...this.state, profile: response });
@@ -356,8 +361,8 @@ class ProfileInfo extends BaseComponent {
                     formData.append('profile_picture', image.files[0]);
                     console.log(image.files[0])
                 }
-                formData.append('nickname', document.getElementById('profile-nickname').value)
-                formData.append('bio', document.getElementById('profile-bio').value)
+                formData.append('nickname', escapeHTML(document.getElementById('profile-nickname').value))
+                formData.append('bio',escapeHTML(document.getElementById('profile-bio').value))
                 await this.updateProfile(formData);
             });
 
