@@ -231,16 +231,14 @@ class Friends extends BaseComponent {
               <div class="friend-wrapper">
                 <div class="friend-info">
                   <div class="friend-image">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                    <img src="${friend.profile_picture}" alt="" />
                   </div>
                   <pong-redirect href="/profile/${friend.nickname}/" class="friend-data">
                     <span>${friend.nickname}</span>
                   </pong-redirect>
                 </div>
                 <div class="friend-more">
-                  <div><img src="/static/public/image.svg" alt="" /></div>
-                  <div><img src="/static/public/chat-bubble.svg" alt=""/></div>
-                  <div><img src="/static/public/more.svg" alt="" /></div>
+                  <div><button class="friend-block-button">Block</button></div>
                 </div>
               </div>
             `).join('')}
@@ -311,13 +309,10 @@ class ProfileInfo extends BaseComponent {
                 <img
                   src="${BASE_URL}${profile_picture}"
                   alt=""
-                  class=""
                 />
               </div>
               <div>
-
-                <h1>${nickname ? escapeHTML(nickname) : "no nickname is set!"}</h1>
-                <span>${first_name ? escapeHTML(first_name) : "no first name is set"}</span>
+                <h1>${escapeHTML(nickname)}</h1>
               </div>
               <div>
                 <p>
@@ -331,7 +326,10 @@ class ProfileInfo extends BaseComponent {
         try {
             let response = await request(`profile/`, {
                 method: 'PUT',
-                body: formData
+                body: formData,
+                headers: {
+                    'Content-Type': '',
+                }
             });
             notify('Profile updated', 3, 'success');
 
@@ -433,6 +431,7 @@ async function assignDataRouting() {
 }
 
 async function fetchPaddleColor() {
+    //profile/ endpoint PUT Request to update paddle color
     const colors = [
         { color: "red", hex: "#FF0000" },
         { color: "green", hex: "#00FF00" },
@@ -514,25 +513,30 @@ async function handleRouting() {
         const history = new History({ histories: data }, parentElement);
         history.render();
     }
-    if (hash === '#friends') {
+    else if (hash === '#friends') {
         let data = await fetchFriends();
         const friends = new Friends({ friends: data }, parentElement);
         friends.render();
     }
-    if (hash === '#stats') {
+    else if (hash === '#stats') {
         let data = await fetchStats();
         const statsInfo = new Stats({ statsInfo: data }, parentElement);
         statsInfo.render();
     }
-    if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
+    else if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
         let data = await fetchBlockedUsers();
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
-    if (hash === '#paddlecolor') {
+    else if (hash === '#paddlecolor') {
         const paddleColor = await fetchPaddleColor();
         const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
         paddleColorComponent.render();
+    }
+    else {
+        let data = await fetchHistory();
+        const history = new History({ histories: data }, parentElement);
+        history.render();
     }
 }
 function getUsernameFromURL() {

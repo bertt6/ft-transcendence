@@ -3,7 +3,7 @@
 }
 
 @font-face {
-  font-family: "Retro Gaming Pixelify Sans";
+  font-family: "Retro Gaming";
   src: url('../fonts/retro_gaming/Retro Gaming.ttf') format('truetype')
 }
 
@@ -13,7 +13,7 @@ body {
   margin: 0 !important;
 }
 * {
-  font-family: "Retro Gaming", Arial, sans-serif;
+  font-family: "Retro Gaming", 'Pixelify Sans', sans-serif;
   box-sizing: border-box;
   color: white;
 }

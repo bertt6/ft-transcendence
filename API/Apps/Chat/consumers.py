@@ -40,7 +40,7 @@ class ChatConsumer(WebsocketConsumer):
                 "type": "chat_message",
                 "message": message,
                 "nickname": self.profile.nickname,
-                "id": self.profile.id,
+                "id": str(self.profile.id),
             }
         )
 

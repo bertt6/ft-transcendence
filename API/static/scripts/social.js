@@ -4,7 +4,7 @@ import BaseComponent from "../components/Component.js";
 import {request} from "./Request.js";
 import Spinner from "../components/spinner.js";
 import {getSocket} from "./requests.js";
-import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname, getProfile} from "./utils.js";
 import {getStatusSocket} from "./Status.js";
 
 class ChatFriendsComponent extends BaseComponent {
@@ -203,9 +203,7 @@ class SelectedPostComponent extends BaseComponent {
     }
 
     handleHTML() {
-        const {results} = this.state.tweet;
-        const {tweet, comments} = results;
-        const {userId} = this.state;
+        let {tweet, userId,comments} = this.state;
         return `
             <div class="selected-post">
               <div class="post-container">
@@ -306,16 +304,7 @@ class ConversationComponent extends BaseComponent {
     }
 
     handleHtml() {
-        this.state.messages = [
-            {
-                content: "Hello",
-                user: {id: 1, nickname: "test"}
-            },
-            {
-                content: "Hi",
-                user: {id: 2, nickname: "MKM"}
-            }
-        ]
+        let username = getActiveUserNickname();
         return `
         ${
             this.state.messages.map(message => `
@@ -343,7 +332,6 @@ class ConversationComponent extends BaseComponent {
             `).join('')
         }
         `
-
     }
 
     render() {
@@ -353,7 +341,6 @@ class ConversationComponent extends BaseComponent {
 
     setState(newState) {
         this.state = {...this.state, ...newState};
-        console.log("state", this.state)
         this.render();
     }
 }
@@ -363,7 +350,6 @@ let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
 const fetchChatFriends = async () => {
-
     const endpoint = `profile/friends`;
     try {
         let response = await request(endpoint, {
@@ -399,7 +385,6 @@ const fetchSocialPosts = async () => {
     }
 
 }
-
 async function submitTweet(event) {
     event.preventDefault();
     let inputValue = document.getElementById('social-text-input').value;
@@ -425,7 +410,6 @@ async function submitTweet(event) {
         notify('Error posting tweet', 3, 'error');
     }
 }
-
 async function assignLikeButtons() {
     let likeButtons = document.getElementsByClassName('like-button');
     for (let button of likeButtons) {
@@ -436,7 +420,6 @@ async function assignLikeButtons() {
                     method: 'PATCH',
 
                 });
-                console.log(data);
                 button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
             } catch (error) {
                 console.error('Error:', error);
@@ -445,7 +428,6 @@ async function assignLikeButtons() {
         });
     }
 }
-
 async function assignCommentButtons() {
     let commentButtons = document.getElementsByClassName('comment-button');
     for (let button of commentButtons) {
@@ -456,14 +438,12 @@ async function assignCommentButtons() {
         });
     }
 }
-
 async function assignDeleteButtons() {
     let buttons = document.getElementsByClassName('post-delete-button');
     for (let button of buttons) {
         let tweetId = button.getAttribute('data-tweet-id');
         button.addEventListener('click', async () => {
             try {
-                console.log(tweetId)
                 let data = await request(`delete-tweet/${tweetId}/`, {
                     method: 'DELETE',
                 });
@@ -477,7 +457,6 @@ async function assignDeleteButtons() {
         });
     }
 }
-
 async function assignEventListeners() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
@@ -487,36 +466,18 @@ async function assignEventListeners() {
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl: url});
     });
-
     await assignLikeButtons();
     await assignCommentButtons();
     await assignDeleteButtons();
-}
-
-async function getProfile() {
-    try {
-        let data = await request(`profile/`, {
-            method: 'GET'
-        });
-        localStorage.setItem('activeUserId', data.id);
-        localStorage.setItem('activeUserNickname', data.nickname);
-        socialPostsComponent.setState({userId: data.id});
-        let nickname = document.getElementById('username');
-        nickname.innerText = data.nickname;
-    } catch (error) {
-        console.error('Error:', error);
-        notify('Error fetching profile', 3, 'error');
-    }
 }
 
 const renderIndividualPost = async (tweetId) => {
     let response = await request(`get-tweet-and-comments/${tweetId}/`, {
         method: 'GET',
     });
-
-    let data = await getProfile()
+    let data = await getProfile();
     let parentElement = document.getElementById('social-container');
-    let selectedPostComponent = new SelectedPostComponent({tweet: response, userId: data.id}, parentElement);
+    let selectedPostComponent = new SelectedPostComponent({tweet: response.results.tweet, userId: data.id,comments:response.results.comments}, parentElement);
     selectedPostComponent.render();
     await assignLikeButtons();
     await fetchChatFriends()
@@ -525,7 +486,7 @@ const renderIndividualPost = async (tweetId) => {
             event.preventDefault();
             let inputValue = document.getElementById('comment-input').value;
             try {
-                let data = await request(`$post-comment/`, {
+                let data = await request(`post-comment/`, {
                     method: 'POST',
                     body: JSON.stringify({content: inputValue, tweet: tweetId})
                 });
@@ -740,8 +701,9 @@ async function fetchRoomData(element) {
         conversationWrapper.classList.remove('no-chat-wrapper')
         let conversationComponent = new ConversationComponent(
             {
-                senderId: parseInt(localStorage.getItem("activeUserId")),
-                receiverId: room.second_user
+                senderId: localStorage.getItem("activeUserId"),
+                receiverId: room.second_user,
+                messages: response.messages
             },
             conversationWrapper);
         spinner.setState({isVisible: false});
