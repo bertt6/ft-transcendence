@@ -46,6 +46,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
+    'django_crontab',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig",
     "Apps.Tournament.apps.TournamentConfig",

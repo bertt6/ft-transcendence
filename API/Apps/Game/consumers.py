@@ -53,6 +53,7 @@ class MatchMakingConsumer(WebsocketConsumer):
         if len(players_in_que) == 2:
             threading.Thread(target=self.match_making).start()  # opening thread because socket time out while true
 
+
     def match_making(self):
         players = sorted(get_players_in_que(), key=lambda x: x['mmr'])
         while len(players) != 0:
@@ -132,6 +133,21 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.thread = threading.Thread(target=asyncio.run, args=(self.game_loop(),))
             self.thread.start()
             GameConsumer.game_states[self.game_id]['task'] = True
+        elif (get_player_count_in_game(self.game_id) != 2):
+            await asyncio.sleep(30)
+            if (get_player_count_in_game(self.game_id) == 1):
+                game = await self.get_game()
+                players = get_players_in_game(self.game_id)
+                await self.finish_game(players[0]["nickname"])
+                await self.channel_layer.group_send(
+                    self.game_group_name,
+                    {
+                        'type': 'send_finish_state',
+                        'game': GameConsumer.game_states[self.game_id],
+                        'winner': players[0],
+                        'tournament_id': str(game['tournament'])
+                    }
+                )
 
     async def receive(self, text_data):
         if self.error:

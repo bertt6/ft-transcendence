@@ -149,7 +149,7 @@ function printWinner(data,winner,socket){
         element.remove();
         }, 5000);
     console.log(data)
-    if(data.tournament_id)
+    if (data.tournament_id !== "None")
     {
         localStorage.setItem("tournament_id",data.tournament_id);
         setTimeout(() => {
