@@ -238,9 +238,7 @@ class Friends extends BaseComponent {
                   </pong-redirect>
                 </div>
                 <div class="friend-more">
-                  <div><img src="/static/public/image.svg" alt="" /></div>
-                  <div><img src="/static/public/chat-bubble.svg" alt=""/></div>
-                  <div><img src="/static/public/more.svg" alt="" /></div>
+                  <div><button class="friend-block-button">Block</button></div>
                 </div>
               </div>
             `).join('')}
@@ -311,13 +309,10 @@ class ProfileInfo extends BaseComponent {
                 <img
                   src="${BASE_URL}${profile_picture}"
                   alt=""
-                  class=""
                 />
               </div>
               <div>
-
-                <h1>${nickname ? escapeHTML(nickname) : "no nickname is set!"}</h1>
-                <span>${first_name ? escapeHTML(first_name) : "no first name is set"}</span>
+                <h1>${escapeHTML(nickname)}</h1>
               </div>
               <div>
                 <p>

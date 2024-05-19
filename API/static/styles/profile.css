@@ -57,6 +57,7 @@
   border-radius: 3rem;
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
   justify-content: space-between;
+    align-items: center;
 }
 .friend-image {
   aspect-ratio: 1/1;
@@ -380,4 +381,17 @@ input[type="radio"] + label:before {
 
 input[type="radio"]:checked + label:before {
   background-color: #ffffff
+}
+.friend-block-button{
+  background-color: #4CAF50;
+  color: rgb(255, 255, 255);
+    padding: 16px 32px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
