@@ -46,7 +46,6 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
-    'django_crontab',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
