@@ -199,6 +199,12 @@ async function connectToServer()
     const path = window.location.pathname;
     const id = path.split("/")[2];
     let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+
+    window.addEventListener('popstate', (event) => {
+            socket.close()
+        }
+    );
+
     socket.onopen = async function (event) {
         let connectedProfile = await getProfile()
         socket.send(JSON.stringify({
