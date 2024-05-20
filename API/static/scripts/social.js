@@ -184,6 +184,7 @@ class PostTweetFormComponent extends BaseComponent {
         if (previewCloseButton) {
             previewCloseButton.addEventListener('click', () => {
                 postTweetFormComponent.setState({imageUrl: undefined});
+                document.getElementById('image-add').value = '';
             });
         }
     }
@@ -230,7 +231,7 @@ class SelectedPostComponent extends BaseComponent {
                 <div>
                   <div class="post-text">
                     <p>
-                    ${escapeHTML(tweet.content)}
+                    ${tweet.content}
                     </p>
                   </div>
                   ${tweet.image ?
@@ -291,7 +292,6 @@ class SelectedPostComponent extends BaseComponent {
         super.render();
         let backButton = document.getElementById('comment-back-button');
         backButton.addEventListener('click', () => {
-
             history.pushState({}, '', '/social');
             renderAllPosts();
         });
@@ -462,6 +462,13 @@ async function assignEventListeners() {
     form.addEventListener('submit', submitTweet);
     let imageAdd = document.getElementById('image-add');
     imageAdd.addEventListener('change', (event) => {
+        if(event.target.files.length === 0)
+            return;
+        if(event.target.files[0].size > 1000000)
+        {
+            notify('Image size should be less than 1MB', 3, 'error');
+            return;
+        }
         let file = event.target.files[0];
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl: url});
@@ -736,7 +743,6 @@ function handleChatState() {
 }
 
 function handleChatEvents() {
-    console.log('Handling chat events')
     let elements = document.getElementsByClassName("user-wrapper");
     for (let element of elements) {
         element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
