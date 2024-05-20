@@ -2,7 +2,7 @@ import BaseComponent from "../components/Component.js";
 import {API_URL, assignRouting, BASE_URL, loadPage} from "./spa.js";
 import { notify } from "../components/Notification.js";
 import { request } from "./Request.js";
-import {calculateDate, escapeHTML, getActiveUserNickname} from "./utils.js";
+import {calculateDate, escapeHTML, getActiveUserNickname, parseErrorToNotify} from "./utils.js";
 
 class History extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -231,16 +231,14 @@ class Friends extends BaseComponent {
               <div class="friend-wrapper">
                 <div class="friend-info">
                   <div class="friend-image">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
+                    <img src="${friend.profile_picture}" alt="" />
                   </div>
                   <pong-redirect href="/profile/${friend.nickname}/" class="friend-data">
                     <span>${friend.nickname}</span>
                   </pong-redirect>
                 </div>
                 <div class="friend-more">
-                  <div><img src="/static/public/image.svg" alt="" /></div>
-                  <div><img src="/static/public/chat-bubble.svg" alt=""/></div>
-                  <div><img src="/static/public/more.svg" alt="" /></div>
+                  <div><button class="friend-block-button">Block</button></div>
                 </div>
               </div>
             `).join('')}
@@ -287,8 +285,7 @@ class ProfileInfo extends BaseComponent {
                 </div>
               </div>
               <div>
-                <input class="transparent-input" id="profile-nickname" value="${nickname ? nickname : "no nickname is set!"}"/>
-                <input class="transparent-input" id="profile-firstname"  value="${first_name ? first_name : "no first name is set"}">
+                <input class="transparent-input" id="profile-nickname" value="${nickname}"/>
               </div>
               <div>
                 <textarea id="profile-bio" cols="30" rows="5"  class="transparent-input">${bio ? bio : 'No bio available'}</textarea>  
@@ -311,28 +308,34 @@ class ProfileInfo extends BaseComponent {
                 <img
                   src="${BASE_URL}${profile_picture}"
                   alt=""
-                  class=""
                 />
               </div>
               <div>
-
-                <h1>${nickname ? escapeHTML(nickname) : "no nickname is set!"}</h1>
-                <span>${first_name ? escapeHTML(first_name) : "no first name is set"}</span>
+                <h1>${nickname}</h1>
               </div>
               <div>
                 <p>
-                ${bio ? escapeHTML(bio) : 'No bio available'}
+                ${bio ? bio : 'No bio available'}
                 </p>
               </div>`
     }
 
     updateProfile = async (formData) => {
-
         try {
             let response = await request(`profile/`, {
                 method: 'PUT',
-                body: formData
+                body: formData,
+                headers: {
+                    'Content-Type': '',
+                }
             });
+            console.log(response)
+            if(!response.ok)
+            {
+                let message = parseErrorToNotify(response)
+                notify(message, 3, 'error')
+                return
+            }
             notify('Profile updated', 3, 'success');
 
             this.setState({ ...this.state, profile: response });
@@ -358,8 +361,8 @@ class ProfileInfo extends BaseComponent {
                     formData.append('profile_picture', image.files[0]);
                     console.log(image.files[0])
                 }
-                formData.append('nickname', document.getElementById('profile-nickname').value)
-                formData.append('bio', document.getElementById('profile-bio').value)
+                formData.append('nickname', escapeHTML(document.getElementById('profile-nickname').value))
+                formData.append('bio',escapeHTML(document.getElementById('profile-bio').value))
                 await this.updateProfile(formData);
             });
 
@@ -433,6 +436,7 @@ async function assignDataRouting() {
 }
 
 async function fetchPaddleColor() {
+    //profile/ endpoint PUT Request to update paddle color
     const colors = [
         { color: "red", hex: "#FF0000" },
         { color: "green", hex: "#00FF00" },
@@ -514,25 +518,30 @@ async function handleRouting() {
         const history = new History({ histories: data }, parentElement);
         history.render();
     }
-    if (hash === '#friends') {
+    else if (hash === '#friends') {
         let data = await fetchFriends();
         const friends = new Friends({ friends: data }, parentElement);
         friends.render();
     }
-    if (hash === '#stats') {
+    else if (hash === '#stats') {
         let data = await fetchStats();
         const statsInfo = new Stats({ statsInfo: data }, parentElement);
         statsInfo.render();
     }
-    if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
+    else if (hash === '#blockedusers' && activeUserNickname === getUsernameFromURL()) {
         let data = await fetchBlockedUsers();
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
     }
-    if (hash === '#paddlecolor') {
+    else if (hash === '#paddlecolor') {
         const paddleColor = await fetchPaddleColor();
         const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
         paddleColorComponent.render();
+    }
+    else {
+        let data = await fetchHistory();
+        const history = new History({ histories: data }, parentElement);
+        history.render();
     }
 }
 function getUsernameFromURL() {

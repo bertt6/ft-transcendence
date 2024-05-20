@@ -30,11 +30,15 @@ export function getActiveUserNickname() {
 export function parseErrorToNotify(data) {
     let message = '';
     for (const [key, value] of Object.entries(data)) {
-        message += `${key}: ${value.join(', ')} `;
+        if (key === 'ok') continue;  // Skip 'ok' key
+        if (Array.isArray(value)) {
+            message += `${key}: ${value[0]}\n`;
+        } else {
+            message += `${key}: ${value}\n`;
+        }
     }
     return message;
 }
-
 export function calculateDate(date) {
     let tweetDate = new Date(date);
     let currentDate = new Date();

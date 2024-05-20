@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: "Retro Gaming";
-  src: url('../fonts/retro_gaming/Retro Gaming.ttf') format('truetype') /* TrueType font */
+  src: url('../fonts/retro_gaming/Retro Gaming.ttf') format('truetype')
 }
 
 html,
@@ -13,7 +13,7 @@ body {
   margin: 0 !important;
 }
 * {
-  font-family: "Retro Gaming", Arial, sans-serif;
+  font-family: "Retro Gaming", 'Pixelify Sans', sans-serif;
   box-sizing: border-box;
   color: white;
 }
@@ -239,7 +239,6 @@ pong-redirect{
   transform: scaleY(0);
   opacity: 0;
   list-style: none;
-  padding: 0;
   position: absolute;
   top: 3.3rem;
   right: 1rem;
@@ -247,10 +246,10 @@ pong-redirect{
   border-radius: 10px;
   margin: 0;
   z-index: 20;
-  display: flex;
   flex-direction: column;
   width: max-content;
   max-width: 20rem;
+  padding: .5rem 1rem;
 }
 .inbox-element > div:first-child {
   display: flex;
@@ -296,6 +295,13 @@ pong-redirect{
   border-radius: 5px;
   padding: 1rem;
   transition: all 1s ease-in-out;
+}
+.error-wrapper{
+  min-width: 16px;
+}
+.error-wrapper img{
+  width: 100%;
+  height: 100%;
 }
 .request-wrapper {
   display: flex;
