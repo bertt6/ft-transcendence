@@ -64,7 +64,7 @@ async function postVerificationCode(value) {
         localStorage.removeItem("timer")
     }
     catch (e) {
-        console.log(e.json())
+        console.error(e.json())
     }
 }
 
@@ -99,10 +99,8 @@ function startTimer()
             document.getElementById('timer').innerText = '00:00';
             loadPage("/auth/login/")
         }
-        if (seconds === 0) {
-            minutes--;
+        if (seconds === 0)
             seconds = 59;
-        }
         else
             seconds--;
         localStorage.setItem("timer", JSON.stringify({"minutes": minutes, "seconds": seconds}));

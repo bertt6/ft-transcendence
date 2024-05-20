@@ -5,7 +5,7 @@ let socket;
 
 export function getStatusSocket() {
     const nickname = getActiveUserNickname();
-    const url  = `ws://localhost:8000/ws/status/${nickname}`;
+    const url  = `/ws/status/${nickname}`;
     return new Promise((resolve, reject) => {
         if (socket) {
             if (socket.readyState === WebSocket.OPEN) {

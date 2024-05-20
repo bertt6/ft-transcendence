@@ -1,6 +1,10 @@
 # routing.py or asgi.py
 
 import os
+import django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "API.settings")
+django.setup()  
+
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
@@ -12,7 +16,6 @@ from Apps.Request.consumers import RequestConsumer
 from Apps.UserStatus.consumers import OnlineUsersConsumer
 from Apps.Tournament.consumers import TournamentConsumer
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "API.settings")
 
 django_asgi_app = get_asgi_application()
 

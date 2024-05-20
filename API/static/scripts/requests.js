@@ -40,7 +40,7 @@ export function getSocket() {
         const nickname = getActiveUserNickname();
         if (nickname === null || nickname === undefined)
             return null;
-        socket = new WebSocket(`ws://localhost:8000/ws/requests/${nickname}`);
+        socket = new WebSocket(`/ws/requests/${nickname}`);
     }
         return socket;
 }

@@ -15,8 +15,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 import datetime
 
-import Apps.Tournament.apps
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,19 +32,26 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "https://localhost:80",
+    "http://127.0.0.1:3000",
+    "https://127.0.0.1:80",
     "http://localhost:3030",
+    "https://165.22.77.100",
+    "https://165.22.77.100:80",
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://localhost:80",
     "http://127.0.0.1:3000",
+    "https://127.0.0.1:80",
     "http://localhost:3030",
+    "https://165.22.77.100",
+    "https://165.22.77.100:80",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
-    'django_crontab',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,7 +62,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-
     "Apps.Auth.apps.AuthConfig",
     "Apps.Profile.apps.ProfileConfig",
     "Apps.Tournament.apps.TournamentConfig",
@@ -104,7 +108,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
@@ -131,7 +135,7 @@ REST_FRAMEWORK = {
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = ""
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 

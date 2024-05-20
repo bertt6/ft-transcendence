@@ -133,9 +133,15 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.thread = threading.Thread(target=asyncio.run, args=(self.game_loop(),))
             self.thread.start()
             GameConsumer.game_states[self.game_id]['task'] = True
-        elif (get_player_count_in_game(self.game_id) != 2):
-            await asyncio.sleep(30)
-            if (get_player_count_in_game(self.game_id) == 1):
+        elif (get_player_count_in_game(self.game_id) != 2):  # if not come other players wait 30sec and finish game
+            i = 300
+            while i == 0:
+                if get_player_count_in_game(self.game_id) == 2:
+                    break
+                await asyncio.sleep(0.1)
+                i = i - 1
+
+            if i == 0 and (get_player_count_in_game(self.game_id) == 1):
                 game = await self.get_game()
                 players = get_players_in_game(self.game_id)
                 await self.finish_game(players[0]["nickname"])
@@ -246,6 +252,9 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             )
             await asyncio.sleep(0.016)
+            if self.stop_event.isSet() or get_player_count_in_game(self.game_id) == 0:
+                return
+
 
     async def send_state(self, event):
         await self.send(text_data=json.dumps({

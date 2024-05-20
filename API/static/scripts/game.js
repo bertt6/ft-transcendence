@@ -127,7 +127,6 @@ function setPlayerData(state)
 }
 function handleInitialState(state)
 {
-
   setCurrentPoints(state)
   setPlayerData(state);
   draw(state.game,"red","blue");
@@ -199,7 +198,7 @@ async function connectToServer()
 {
     const path = window.location.pathname;
     const id = path.split("/")[2];
-    let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    let socket = new WebSocket(`/ws/game/${id}`)
     socket.onopen = async function (event) {
         let connectedProfile = await getProfile()
         socket.send(JSON.stringify({
@@ -221,6 +220,7 @@ async function connectToServer()
         console.log(data)
       if(data.state_type === "initial_state")
       {
+
           try {
             const statusSocket = await getStatusSocket();
             statusSocket.send(JSON.stringify({
@@ -232,8 +232,11 @@ async function connectToServer()
           {
               console.error(e);
           }
-        handleInitialState(data);
-        handleMovement(socket,data);
+          if (data.game.ball.x == 0 && data.game.ball.y == 0) {
+              printCountdown();
+          }
+          handleInitialState(data);
+          handleMovement(socket, data);
       } else if (data.state_type === "score_state") {
         draw(data.game,"red","blue");
         setCurrentPoints(data);

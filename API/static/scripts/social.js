@@ -51,6 +51,9 @@ class ChatFriendsComponent extends BaseComponent {
         for (let i = 0; i < allUsers.length; i++) {
             allUsers[i].addEventListener("click", toggleChat);
         }
+        for (let element of allUsers) {
+            element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
+        }
     }
 
     setState(newState) {
@@ -86,14 +89,18 @@ class SocialPostsComponent extends BaseComponent {
                         <span>${calculateDate(tweet.date)}</span>
                       </div>
                     </pong-redirect>
+                    ${
+            tweet.from_user.id === userId ? `
                     <button class="post-delete-button" data-tweet-id="${tweet.id}">
                       <img  src="/static/public/trash.svg" alt="" style="width: 32px" />
                     </button>
+                    ` : ''
+        }
                   </div>
                   <div>
                     <div class="post-text">
                       <p>
-                        ${escapeHTML(tweet.content)}
+                        ${tweet.content}
                       </p>
                     </div>
                     ${tweet.image ? `
@@ -144,6 +151,8 @@ class SocialPostsComponent extends BaseComponent {
         this.parentElement.innerHTML = this.html;
         if (this.state.next !== null)
             this.addObserver();
+        else
+            document.getElementById('load-more').remove();
     }
 }
 
@@ -184,6 +193,7 @@ class PostTweetFormComponent extends BaseComponent {
         if (previewCloseButton) {
             previewCloseButton.addEventListener('click', () => {
                 postTweetFormComponent.setState({imageUrl: undefined});
+                document.getElementById('image-add').value = '';
             });
         }
     }
@@ -203,7 +213,7 @@ class SelectedPostComponent extends BaseComponent {
     }
 
     handleHTML() {
-        let {tweet, userId,comments} = this.state;
+        let {tweet, userId, comments} = this.state;
         return `
             <div class="selected-post">
               <div class="post-container">
@@ -211,7 +221,7 @@ class SelectedPostComponent extends BaseComponent {
                   <div class="post-info">
                     <div class="user-pic-wrapper">
                       <img
-                        src="https://picsum.photos/seed/picsum/200/300"
+                        src="${tweet.from_user.profile_picture}"
                         alt=""
                       />
                     </div>
@@ -230,7 +240,7 @@ class SelectedPostComponent extends BaseComponent {
                 <div>
                   <div class="post-text">
                     <p>
-                    ${escapeHTML(tweet.content)}
+                    ${tweet.content}
                     </p>
                   </div>
                   ${tweet.image ?
@@ -259,7 +269,7 @@ class SelectedPostComponent extends BaseComponent {
           <div class="post-comment">
                 <div class="user-pic-wrapper" style="height: 3rem">
                   <img
-                    src="https://picsum.photos/seed/picsum/200/300"
+                    src="${comment.from_user.profile_picture}"
                     alt=""
                   />
                 </div>
@@ -269,7 +279,7 @@ class SelectedPostComponent extends BaseComponent {
                 <span>${calculateDate(comment.date)}</span>
 </div>
                   <p>
-                    ${escapeHTML(comment.content)}
+                    ${comment.content}
                   </p>
                 </div>
               </div>
@@ -291,7 +301,6 @@ class SelectedPostComponent extends BaseComponent {
         super.render();
         let backButton = document.getElementById('comment-back-button');
         backButton.addEventListener('click', () => {
-
             history.pushState({}, '', '/social');
             renderAllPosts();
         });
@@ -378,13 +387,15 @@ const fetchChatFriends = async () => {
 const fetchSocialPosts = async () => {
     try {
         let response = await request(`tweets/`, {method: 'GET'})
-        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next});
+        let profile = await getProfile();
+        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next, userId: profile.id});
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching social posts', 3, 'error');
     }
 
 }
+
 async function submitTweet(event) {
     event.preventDefault();
     let inputValue = document.getElementById('social-text-input').value;
@@ -410,17 +421,22 @@ async function submitTweet(event) {
         notify('Error posting tweet', 3, 'error');
     }
 }
+
 async function assignLikeButtons() {
     let likeButtons = document.getElementsByClassName('like-button');
     for (let button of likeButtons) {
         let tweetId = button.getAttribute('data-tweet-id');
         button.addEventListener('click', async () => {
             try {
-                let data = await request(`like_tweet/${tweetId}/`, {
+                let data = await request(`like-tweet/${tweetId}/`, {
                     method: 'PATCH',
 
                 });
                 button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
+                if (!data.ok) {
+                    notify(data.message, 3, 'error');
+                    button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
+                }
             } catch (error) {
                 console.error('Error:', error);
                 notify('Error liking tweet', 3, 'error');
@@ -428,6 +444,7 @@ async function assignLikeButtons() {
         });
     }
 }
+
 async function assignCommentButtons() {
     let commentButtons = document.getElementsByClassName('comment-button');
     for (let button of commentButtons) {
@@ -438,6 +455,7 @@ async function assignCommentButtons() {
         });
     }
 }
+
 async function assignDeleteButtons() {
     let buttons = document.getElementsByClassName('post-delete-button');
     for (let button of buttons) {
@@ -447,6 +465,11 @@ async function assignDeleteButtons() {
                 let data = await request(`delete-tweet/${tweetId}/`, {
                     method: 'DELETE',
                 });
+                console.log(data)
+                if (!data.ok) {
+                    notify(data.error, 3, 'error');
+                    return;
+                }
                 notify('Tweet deleted successfully', 3, 'success');
                 let parentElement = button.parentElement.parentElement;
                 parentElement.remove();
@@ -457,15 +480,26 @@ async function assignDeleteButtons() {
         });
     }
 }
-async function assignEventListeners() {
+
+async function assignPostTweetForm() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
     let imageAdd = document.getElementById('image-add');
     imageAdd.addEventListener('change', (event) => {
+        if (event.target.files.length === 0)
+            return;
+        if (event.target.files[0].size > 1000000) {
+            notify('Image size should be less than 1MB', 3, 'error');
+            return;
+        }
         let file = event.target.files[0];
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl: url});
     });
+}
+
+async function assignEventListeners() {
+    await assignPostTweetForm();
     await assignLikeButtons();
     await assignCommentButtons();
     await assignDeleteButtons();
@@ -475,9 +509,14 @@ const renderIndividualPost = async (tweetId) => {
     let response = await request(`get-tweet-and-comments/${tweetId}/`, {
         method: 'GET',
     });
+    console.log(response)
     let data = await getProfile();
     let parentElement = document.getElementById('social-container');
-    let selectedPostComponent = new SelectedPostComponent({tweet: response.results.tweet, userId: data.id,comments:response.results.comments}, parentElement);
+    let selectedPostComponent = new SelectedPostComponent({
+        tweet: response.results.tweet,
+        userId: data.id,
+        comments: response.results.comments
+    }, parentElement);
     selectedPostComponent.render();
     await assignLikeButtons();
     await fetchChatFriends()
@@ -572,7 +611,6 @@ const renderAllPosts = async () => {
     postTweetFormComponent.parentElement = document.getElementById('social-send-form');
     await Promise.all([fetchChatFriends(), fetchSocialPosts(), getProfile()]);
     await assignEventListeners();
-
 }
 
 async function handleAddFriend(element) {
@@ -661,7 +699,7 @@ async function fetchMessages(roomId) {
 
 async function connectToRoom(room, conversationComponent) {
     const nickname = getActiveUserNickname()
-    const socket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
+    const socket = new WebSocket(`/ws/chat/${room.id}/${nickname}`);
     let chatSendForm = document.getElementById('chat-send');
     let chatInput = document.getElementById('chat-input');
     chatSendForm.addEventListener('submit', (event) => {
@@ -685,9 +723,13 @@ async function connectToRoom(room, conversationComponent) {
 
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
+    let profilePicture = element.children[0].children[0].src;
     let wrapper = document.getElementById('conversation-wrapper');
     let activeUserInfoWrapper = document.getElementById('active-user-info');
-    activeUserInfoWrapper.children[0].innerText = nickname;
+    let image = activeUserInfoWrapper.children[0].children[0]
+    let name = activeUserInfoWrapper.children[1].children[0]
+    name.innerText = nickname;
+    image.src = profilePicture;
     let spinner = new Spinner({isVisible: true}, wrapper);
     spinner.render();
     try {
@@ -735,19 +777,56 @@ function handleChatState() {
 
 }
 
-function handleChatEvents() {
-    console.log('Handling chat events')
-    let elements = document.getElementsByClassName("user-wrapper");
-    for (let element of elements) {
-        element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
+function debounce(func, delay) {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
+async function handleInput(event) {
+    let searchInput = document.getElementById('user-search-input');
+    event.preventDefault();
+    let searchValue = searchInput.value.trim(); // Trim to remove extra spaces
+    let parentElement = document.getElementById('user-data-wrapper');
+
+    if (searchValue) {
+        let params = new URLSearchParams();
+        params.append('search', searchValue);
+        let url = `profile-search/?${params.toString()}`;
+        let response = await request(url, {method: 'GET'});
+        let statusSocket = await getStatusSocket();
+        statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
+        statusSocket.addEventListener('message', (event) => {
+            let userStatus = JSON.parse(event.data);
+            let chatFriendsComponent = new ChatFriendsComponent({
+                friends: response,
+                status: userStatus
+            }, parentElement);
+            chatFriendsComponent.render();
+        });
     }
 }
 
+function handleChatEvents() {
+    let searchInput = document.getElementById('user-search-input');
+    searchInput.addEventListener('keyup', (e) => {
+        if (e.key.length === 1 || searchInput.value.length > 0) {
+            return;
+        }
+        fetchChatFriends()
+    });
+    searchInput.addEventListener('input', debounce(handleInput, 2000));
+}
+
 const App = async () => {
-    let regex = /\/tweet\/(\d+)/;
+    let regex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
     let match = window.location.pathname.match(regex);
     if (match)
-        await renderIndividualPost(match[1]);
+        await renderIndividualPost(match[0]);
     else
         await renderAllPosts();
     assignRouting();
@@ -765,7 +844,7 @@ window.addEventListener('popstate', async (event) => {
     if (window.location.pathname === '/social/')
         await renderAllPosts();
     else {
-        let regex = /\/tweet\/(\d+)/;
+        let regex = /\/tweet\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
         let match = window.location.pathname.match(regex);
         if (match) {
             await renderIndividualPost(match[1]);

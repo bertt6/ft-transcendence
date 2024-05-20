@@ -30,7 +30,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('nickname', models.CharField(blank=True, default=None, max_length=100, null=True, unique=True)),
-                ('profile_picture', models.ImageField(default='profile-pictures/default.svg', upload_to='profile-pictures/')),
+                ('profile_picture',
+                 models.ImageField(default='profile-pictures/default.jpeg', upload_to='profile-pictures/')),
                 ('is_online', models.BooleanField(default=False)),
                 ('is_verified', models.BooleanField(default=False)),
                 ('bio', models.TextField(blank=True, default=None, null=True)),
