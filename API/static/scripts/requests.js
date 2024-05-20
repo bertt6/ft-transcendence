@@ -1,6 +1,6 @@
 import {notify} from "../components/Notification.js";
 import {request} from "./Request.js";
-import {API_URL, checkIfAuthRequired, loadPage} from "./spa.js";
+import {checkIfAuthRequired, loadPage} from "./spa.js";
 import {getActiveUserNickname, getProfile} from "./utils.js";
 let socket = null;
 

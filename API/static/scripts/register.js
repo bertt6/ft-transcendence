@@ -1,4 +1,4 @@
-import {API_URL, loadPage} from "./spa.js";
+import {loadPage} from "./spa.js";
 import Spinner from "../components/spinner.js";
 import {notify} from "../components/Notification.js";
 import {parseErrorToNotify} from "./utils.js";
