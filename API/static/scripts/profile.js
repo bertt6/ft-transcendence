@@ -30,7 +30,7 @@ class History extends BaseComponent {
                   <h5>${calculateDate(history.date)}</h5>
                 </div>
               </div>
-            `)}
+            `).join('')}
             </div>
           </div>
 `
@@ -392,6 +392,12 @@ async function fetchProfile() {
         let data = await request(`profile-with-nickname/${nickname}/`, {
             method: 'GET',
         });
+        if(!data.ok)
+        {
+            notify('Error fetching profile', 3, 'error')
+            loadPage('/home/');
+            return
+            }
         const profileParentElement = document.getElementById('profile-info');
         const profile = new ProfileInfo({ profile: data, isEditing: false }, profileParentElement);
         profile.render();
