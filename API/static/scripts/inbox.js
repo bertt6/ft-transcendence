@@ -70,7 +70,6 @@ class Inbox extends BaseComponent {
     }
 
     parseMessage(request) {
-        console.log(request.type)
         switch (request.type) {
             case 'friend':
                 return `You have a friend request from ${request.sender.nickname}`;
@@ -140,7 +139,6 @@ function getRequests() {
 
 async function handleProfileImage() {
     const profile = await getProfile();
-    console.log(profile)
     let image = document.getElementById('profile-image');
     if (image) {
         image.src = `${BASE_URL}${profile.profile_picture}`;
