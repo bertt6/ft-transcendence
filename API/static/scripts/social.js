@@ -757,41 +757,54 @@ function handleChatState() {
 
 }
 
+function debounce(func, delay) {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
+async function handleInput(event) {
+    let searchInput = document.getElementById('user-search-input');
+    event.preventDefault();
+    let searchValue = searchInput.value.trim(); // Trim to remove extra spaces
+    let parentElement = document.getElementById('user-data-wrapper');
+
+    if (searchValue) {
+        let params = new URLSearchParams();
+        params.append('search', searchValue);
+        let url = `profile-search/?${params.toString()}`;
+        let response = await request(url, {method: 'GET'});
+        let statusSocket = await getStatusSocket();
+        statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
+        statusSocket.addEventListener('message', (event) => {
+            let userStatus = JSON.parse(event.data);
+            let chatFriendsComponent = new ChatFriendsComponent({
+                friends: response,
+                status: userStatus
+            }, parentElement);
+            chatFriendsComponent.render();
+        });
+    }
+}
+
 function handleChatEvents() {
     let elements = document.getElementsByClassName("user-wrapper");
     for (let element of elements) {
         element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
     }
     let searchInput = document.getElementById('user-search-input');
-    searchInput.addEventListener('keyup', () => {
-        if(searchInput.value.length > 0)
-    return
-    fetchChatFriends()
-    });
-    searchInput.addEventListener('input', async (event) => {
-        event.preventDefault();
-        let searchValue = searchInput.value;
-        let parentElement = document.getElementById('user-data-wrapper');
+    searchInput.addEventListener('keyup', (e) => {
+    if (e.key.length === 1 || searchInput.value.length > 0) {
+        return;
+    }
 
-        if (searchValue) {
-            let params = new URLSearchParams();
-            params.append('search', searchValue);
-            let url = `profile-search/?${params.toString()}`;
-            let response = await request(url, {method: 'GET'});
-            let statusSocket = await getStatusSocket();
-            statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
-            statusSocket.addEventListener('message', (event) => {
-                    let userStatus = JSON.parse(event.data);
-                    let parentElement = document.getElementById('user-data-wrapper');
-                    let chatFriendsComponent = new ChatFriendsComponent({
-                        friends: response,
-                        status: userStatus
-                    }, parentElement);
-                    chatFriendsComponent.render()
-                }
-            );
-        }
+        fetchChatFriends()
     });
+    searchInput.addEventListener('input', debounce(handleInput, 2000));
 }
 
 const App = async () => {
