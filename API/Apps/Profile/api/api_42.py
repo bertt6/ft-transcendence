@@ -36,7 +36,7 @@ def login_with_42(username, email, image):
             return Response(serializer.errors, status=400)
         serializer.save()
     user = User.objects.get(email=email)
-    if user.profile.profile_picture == 'profile-pictures/default.svg':
+    if user.profile.profile_picture == 'profile-pictures/default.jpeg':
         user.profile.save_image_from_url(image)
     user.profile.save()
     if user:
