@@ -457,7 +457,7 @@ async function assignDeleteButtons() {
         });
     }
 }
-async function assignEventListeners() {
+async function assignPostTweetForm() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
     let imageAdd = document.getElementById('image-add');
@@ -473,6 +473,9 @@ async function assignEventListeners() {
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl: url});
     });
+}
+async function assignEventListeners() {
+    await assignPostTweetForm();
     await assignLikeButtons();
     await assignCommentButtons();
     await assignDeleteButtons();
@@ -579,7 +582,6 @@ const renderAllPosts = async () => {
     postTweetFormComponent.parentElement = document.getElementById('social-send-form');
     await Promise.all([fetchChatFriends(), fetchSocialPosts(), getProfile()]);
     await assignEventListeners();
-
 }
 
 async function handleAddFriend(element) {
@@ -692,9 +694,13 @@ async function connectToRoom(room, conversationComponent) {
 
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
+    let profilePicture = element.children[0].children[0].src;
     let wrapper = document.getElementById('conversation-wrapper');
     let activeUserInfoWrapper = document.getElementById('active-user-info');
-    activeUserInfoWrapper.children[0].innerText = nickname;
+    let image = activeUserInfoWrapper.children[0].children[0]
+    let name = activeUserInfoWrapper.children[1].children[0]
+    name.innerText = nickname;
+    image.src = profilePicture;
     let spinner = new Spinner({isVisible: true}, wrapper);
     spinner.render();
     try {
