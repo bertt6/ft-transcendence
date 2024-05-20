@@ -415,13 +415,13 @@ const routes = new Map([
         class="container-fluid position-relative home-wrapper"
         style="padding: 0"
       >
-        <pong-redirect  class="home-element menu-element" id="single-menu" href="/play/">
+        <pong-redirect  class="home-element" id="single-menu" href="/play/">
           <h1>Singleplayer</h1>
         </pong-redirect >
-        <pong-redirect class="home-element menu-element" id="multi-menu" href="/matchmaking/">
+        <pong-redirect class="home-element" id="multi-menu" href="/matchmaking/">
           <h1>Multiplayer</h1>
         </pong-redirect>
-        <pong-redirect  class="home-element" id="tournament-menu" href="/tournaments/">
+        <pong-redirect  class="home-elemen" id="tournament-menu" href="/tournaments/">
           <h1>Tournament</h1>
         </pong-redirect >
         <pong-redirect  class="home-element" id="social-menu" href="/social/">
