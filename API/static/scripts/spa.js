@@ -16,6 +16,7 @@ export function setCookie(name, value, days) {
     }
     document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
+
 export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -26,6 +27,7 @@ export function getCookie(name) {
     }
     return null;
 }
+
 const routes = new Map([
     ['login', {
         auth_required: false,
@@ -610,10 +612,10 @@ const routes = new Map([
       </div>
         `
     }],
-    ['tournament',{
-        auth_required:true,
-        url:[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
-        html:`
+    ['tournament', {
+        auth_required: true,
+        url: [/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
+        html: `
       <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -720,6 +722,12 @@ const requiredScripts = [
     '/static/scripts/inbox.js',
     '/static/scripts/Status.js',
 ]
+const nonAuthScripts = [
+    '/static/scripts/requests.js',
+    '/static/components/Component.js',
+    '/static/components/spinner.js',
+    '/static/scripts/utils.js',
+    ]
 export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
     content.innerHTML = routes.get('error').html;
@@ -758,6 +766,21 @@ function findRouteKey(pathName) {
 }
 
 function loadRequiredScripts() {
+        let pathName = window.location.pathname;
+    let value = findRouteKey(pathName);
+    let route = routes.get(value);
+    if (route.auth_required === false) {
+        nonAuthScripts.forEach(script => {
+            if (!document.getElementById(script)) {
+                let newScript = document.createElement('script');
+                newScript.src = script;
+                newScript.id = script;
+                newScript.type = 'module';
+                document.body.appendChild(newScript);
+            }
+        });
+        return;
+    }
     requiredScripts.forEach(script => {
         if (!document.getElementById(script)) {
             let newScript = document.createElement('script');
@@ -846,7 +869,12 @@ async function checkForAuth() {
     const route = routes.get(value);
     if (route.auth_required === true)
         loadPage('/auth/login/');
-
+    else {
+        if (!localStorage.getItem('activeUserNickname')) {
+            let profile = await getProfile();
+            localStorage.setItem('activeUserNickname', profile.nickname);
+        }
+    }
 }
 
 export function assignRouting() {
@@ -867,8 +895,8 @@ export function assignRouting() {
 function loadSpecificScript() {
     let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    if (!value){
-    loadError(404, 'Page not found', 'The page you are looking for does not exist')
+    if (!value) {
+        loadError(404, 'Page not found', 'The page you are looking for does not exist')
         return;
     }
     if (document.getElementById('script'))
@@ -882,11 +910,12 @@ function loadSpecificScript() {
 }
 
 async function assignLocalStorage() {
-    if(!checkIfAuthRequired())
+    if (!checkIfAuthRequired())
         return;
     let profile = await getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
 }
+
 export function checkIfAuthRequired() {
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
@@ -895,15 +924,18 @@ export function checkIfAuthRequired() {
     const route = routes.get(value);
     return route.auth_required;
 }
+
 async function renderPage() {
+    loadRequiredScripts()
     loadSpecificScript();
     await checkForAuth();
     assignRouting()
 }
+
 const App = async () => {
-    loadRequiredScripts();
     await checkForAuth();
     loadSpecificScript();
+    loadRequiredScripts();
     assignRouting()
     await assignLocalStorage();
 }
