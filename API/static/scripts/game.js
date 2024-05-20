@@ -127,7 +127,6 @@ function setPlayerData(state)
 }
 function handleInitialState(state)
 {
-
   setCurrentPoints(state)
   setPlayerData(state);
   draw(state.game,"red","blue");
@@ -233,7 +232,9 @@ async function connectToServer()
           {
               console.error(e);
           }
-          printCountdown();
+          if (data.game.ball.x == 0 && data.game.ball.y == 0) {
+              printCountdown();
+          }
           handleInitialState(data);
           handleMovement(socket, data);
       } else if (data.state_type === "score_state") {
