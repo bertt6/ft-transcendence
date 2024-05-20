@@ -144,6 +144,8 @@ class SocialPostsComponent extends BaseComponent {
         this.parentElement.innerHTML = this.html;
         if (this.state.next !== null)
             this.addObserver();
+        else
+            document.getElementById('load-more').remove();
     }
 }
 
@@ -457,6 +459,12 @@ async function assignDeleteButtons() {
                 let data = await request(`delete-tweet/${tweetId}/`, {
                     method: 'DELETE',
                 });
+                console.log(data)
+                if(!data.ok)
+                {
+                    notify(data.error, 3, 'error');
+                    return;
+                }
                 notify('Tweet deleted successfully', 3, 'success');
                 let parentElement = button.parentElement.parentElement;
                 parentElement.remove();
@@ -493,6 +501,7 @@ async function assignEventListeners() {
 }
 
 const renderIndividualPost = async (tweetId) => {
+    console.log(tweetId)
     let response = await request(`get-tweet-and-comments/${tweetId}/`, {
         method: 'GET',
     });
@@ -814,10 +823,10 @@ function handleChatEvents() {
 }
 
 const App = async () => {
-    let regex = /\/tweet\/(\d+)/;
+let regex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
     let match = window.location.pathname.match(regex);
     if (match)
-        await renderIndividualPost(match[1]);
+        await renderIndividualPost(match[0]);
     else
         await renderAllPosts();
     assignRouting();
@@ -835,7 +844,7 @@ window.addEventListener('popstate', async (event) => {
     if (window.location.pathname === '/social/')
         await renderAllPosts();
     else {
-        let regex = /\/tweet\/(\d+)/;
+let regex = /\/tweet\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
         let match = window.location.pathname.match(regex);
         if (match) {
             await renderIndividualPost(match[1]);
