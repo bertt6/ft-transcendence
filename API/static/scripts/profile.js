@@ -77,7 +77,7 @@ class BlockedUsers extends BaseComponent {
                             <h6>${user.nickname}</h6>
                         </div>
                     </div>
-                    <button id="${index}-button" class="unblock-button" >Unblock</button>
+                    <button id="${index}-button" class="friends-button" >Unblock</button>
                 </div>
             `).join('')}
         </div>
@@ -194,21 +194,10 @@ class Stats extends BaseComponent {
             <h3>Total Losses</h3>
             <p class="stats-value">${this.state.statsInfo.total_losses}</p>
         </div>
-        <div class="stats-item">
-            <h3>Points</h3>
-            <p class="stats-value">${this.state.statsInfo.points}</p>
-        </div>
-    </div>
-    <div class="stats-row">
-        <div class="stats-item">
+         <div class="stats-item">
             <h3>Win Rate</h3>
             <p class="stats-value">%${calculateWinRate(parseInt((this.state.statsInfo.total_wins)), parseInt(this.state.statsInfo.total_losses))}</p>
-            
-        </div>
-        <div class="stats-item">
-            <h3 href="leaderboard" class="stats-value">Rank</>
-            <p class="stats-value">#3</p>
-        </div>
+        </div> 
     </div>
 </div>
     `;
@@ -224,11 +213,31 @@ class Friends extends BaseComponent {
         this.html = this.handleHTML()
     }
 
+
+    async removeFriend(id, index) {
+        try {
+            let data = await request('profile/friends/', {
+                method: "DELETE",
+                body: JSON.stringify({
+                    friend_id: id
+                })
+            });
+            let wrapper = document.getElementById(`${index}-friend-wrapper`)
+
+            wrapper.remove()
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+            notify('Error fetching friends', 3, 'error');
+        }
+    }
+    
+
     handleHTML() {
         return `
             <div class="friends-wrapper">
-            ${this.state.friends.map(friend => `
-              <div class="friend-wrapper">
+            ${this.state.friends.map((friend, index) => `
+              <div id="${index}-friend-wrapper" class="friend-wrapper">
                 <div class="friend-info">
                   <div class="friend-image">
                     <img src="${friend.profile_picture}" alt="" />
@@ -238,7 +247,7 @@ class Friends extends BaseComponent {
                   </pong-redirect>
                 </div>
                 <div class="friend-more">
-                  <div><button class="friend-block-button">Block</button></div>
+                  <div><button id="${index}-button" class="friends-button">Unfriend</button></div>
                 </div>
               </div>
             `).join('')}
@@ -253,6 +262,12 @@ class Friends extends BaseComponent {
     render() {
         super.render();
         assignRouting();
+        for (let i = 0; this.state.friends.length > i; i++) {
+            console.log(this.state.friends[i].id)
+            document.getElementById(`${i}-button`).addEventListener("click", () =>
+                this.removeFriend(this.state.friends[i].id, i)
+            )
+        }
     }
 }
 class ProfileInfo extends BaseComponent {

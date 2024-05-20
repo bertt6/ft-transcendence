@@ -62,8 +62,8 @@
 .friend-image {
   aspect-ratio: 1/1;
   border-radius: 50%;
-  height: 5rem;
-  width: 5rem;
+    height: 4rem;
+    width: 4rem;
 }
 .friend-image > img {
   width: 100%;
@@ -71,11 +71,12 @@
   border-radius: 50%;
   object-fit: cover;
 }
+
 .friend-info {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+    gap: 1.5rem;
 }
 .friend-more {
   display: flex;
@@ -248,9 +249,8 @@
   right: 0;
 }
 
-.unblock-button {
-  background-color: #4CAF50;
-  color: rgb(255, 255, 255);
+.friends-button button {
+    background: none;
   padding: 4px 8px;
   border: none;
   border-radius: 5px;
@@ -279,8 +279,8 @@
 .blocked-user-image {
   aspect-ratio: 1/1;
   border-radius: 50%;
-  height: 3rem;
-  width: 3rem;
+    height: 4rem;
+    width: 4rem;
 }
 .blocked-user-image > img {
   width: 100%;
@@ -292,7 +292,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+    gap: 1.5rem;
 }
 .blocked-user-more {
   display: flex;

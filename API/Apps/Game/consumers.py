@@ -8,6 +8,7 @@ from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
 from Apps.Game.api.serializers import GameSerializer
+from Apps.Game.api.views import finish_game
 from Apps.Game.cache import get_players_in_que, add_player_in_que, remove_player_in_que, get_players_in_game, \
     add_player_in_game, clear_player_in_game, set_cache, get_player_count_in_game
 from Apps.Game.models import Game
@@ -61,8 +62,13 @@ class MatchMakingConsumer(WebsocketConsumer):
             while True and len(players) > 1:
                 matched_players = match(players, ideal_mmr)
                 if len(matched_players) == 2:
-                    game = Game.objects.create(player1=Profile.objects.get(id=matched_players[0]['id']),
-                                               player2=Profile.objects.get(id=matched_players[1]['id']))
+                    player1 = Profile.objects.get(id=matched_players[0]['id'])
+                    player2 = Profile.objects.get(id=matched_players[1]['id'])
+                    game = Game.objects.create(player1=player1, player2=player2)
+                    player1.stats.total_games += 1
+                    player2.stats.total_games += 1
+                    player1.stats.save()
+                    player2.stats.save()
                     self.send(text_data=json.dumps({
                         'message': f'Match found! Ready for playing!',
                         'game_id': GameSerializer(game).data['id'],
@@ -109,6 +115,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'dx': random.choice([-5, 5]),
                 'dy': random.choice([-5, 5]),
             })
+            GameConsumer.game_states[self.game_id]['task'] = False
         await self.send_initial_state()
 
     async def disconnect(self, close_code):
@@ -127,13 +134,13 @@ class GameConsumer(AsyncWebsocketConsumer):
             add_player_in_game(self.game_id, 'player_two', data, self.channel_name)
         else:
             add_player_in_game(self.game_id, 'spectator', data, self.channel_name)
-        if ('task' not in GameConsumer.game_states[self.game_id]
+        if (GameConsumer.game_states[self.game_id]['task'] == False
                 and get_player_count_in_game(self.game_id) == 2):
             await asyncio.sleep(3)
             self.thread = threading.Thread(target=asyncio.run, args=(self.game_loop(),))
             self.thread.start()
-            GameConsumer.game_states[self.game_id]['task'] = True
-        elif (get_player_count_in_game(self.game_id) != 2):  # if not come other players wait 30sec and finish game
+            GameConsumer.game_states[self.game_id]["task"] = True
+        elif (get_player_count_in_game(self.game_id) == 1):  # if not come other players wait 30sec and finish game
             i = 300
             while i == 0:
                 if get_player_count_in_game(self.game_id) == 2:
@@ -144,7 +151,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             if i == 0 and (get_player_count_in_game(self.game_id) == 1):
                 game = await self.get_game()
                 players = get_players_in_game(self.game_id)
-                await self.finish_game(players[0]["nickname"])
+                await finish_game(self.game_id, players[0]["nickname"])
                 await self.channel_layer.group_send(
                     self.game_group_name,
                     {
@@ -231,14 +238,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         serializer = GameSerializer(game)
         return serializer.data
 
-    @database_sync_to_async
-    def finish_game(self, winner):
-        game = Game.objects.get(id=self.game_id)
-        winner = Profile.objects.get(nickname=winner)
-        game.winner = winner
-        game.is_finished = True
-        game.save()
-
     async def game_loop(self):
         while True:
             data = get_players_in_game(self.game_id)
@@ -267,7 +266,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         paddle_height = 200
         ball_speed = 1.0006
 
-        winner_ball_count = 20
+        winner_ball_count = 1
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']
         player2_score = GameConsumer.game_states[self.game_id]['player_two']['score']
@@ -323,7 +322,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             })
             if GameConsumer.game_states[self.game_id]['player_two']['score'] >= winner_ball_count:
                 game = await self.get_game()
-                await self.finish_game(self.player2['nickname'])
+                await finish_game(self.game_id, self.player2['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,
                     {
@@ -355,7 +354,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             })
             if GameConsumer.game_states[self.game_id]['player_one']['score'] >= winner_ball_count:
                 game = await self.get_game()
-                await self.finish_game(self.player1['nickname'])
+                await finish_game(self.game_id, self.player1['nickname'])
                 await self.channel_layer.group_send(
                     self.game_group_name,
                     {

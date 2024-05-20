@@ -1,3 +1,4 @@
+from asgiref.sync import sync_to_async
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -23,6 +24,11 @@ def create_game(request):
     except Profile.DoesNotExist:
         return Response({'message': 'One of the players does not exist!'}, status=400)
 
+    player1.stats.total_games += 1
+    player2.stats.total_games += 1
+    player1.save()
+    player2.save()
+
     if 'tournament' in request.data:
         try:
             tournament = Tournament.objects.get(id=request.data['tournament'])
@@ -35,24 +41,24 @@ def create_game(request):
     return Response({'message': 'Game Created!', 'game_id': game.id}, status=201)
 
 
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated])
-def finish_game(request):
+@sync_to_async
+def finish_game(game_id, winner_nickname):
     try:
-        game = Game.objects.get(id=request.data['game'])
+        game = Game.objects.get(id=game_id)
     except Game.DoesNotExist:
-        return Response({'message': 'Game does not exist!'}, status=400)
+        return
 
-    if 'winner' in request.data:
-        winner = request.data['winner']
-        if game.player1 != request.user.profile.id and game.player2 != request.user.profile.id:
-            return Response({'message': 'Unauthorized access!'}, status=400)
-        if game.player1.id == winner or game.player2.id == winner:
-            winner_user = Profile.objects.get(id=winner)
-            game.winner = winner_user
-            game.is_finished = True
-            game.save()
+    winner = Profile.objects.get(nickname=winner_nickname)
+    if game.player1.id == winner.id or game.player2.id == winner.id:
+        winner.stats.total_wins += 1
+        winner.stats.save()
+        game.winner = winner
+        game.is_finished = True
+        game.save()
+        print("GIRDIM")
+        if game.player1.nickname != winner_nickname:
+            game.player1.stats.total_losses += 1
+            game.player1.stats.save()
         else:
-            return Response({'message': 'User not in the this game!'}, status=400)
-
-    return Response({'message': 'Game Finished!'}, status=201)
+            game.player2.stats.total_losses += 1
+            game.player2.stats.save()
