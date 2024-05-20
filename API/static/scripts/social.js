@@ -51,9 +51,9 @@ class ChatFriendsComponent extends BaseComponent {
         for (let i = 0; i < allUsers.length; i++) {
             allUsers[i].addEventListener("click", toggleChat);
         }
-    for (let element of allUsers) {
-        element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
-    }
+        for (let element of allUsers) {
+            element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
+        }
     }
 
     setState(newState) {
@@ -217,7 +217,7 @@ class SelectedPostComponent extends BaseComponent {
                   <div class="post-info">
                     <div class="user-pic-wrapper">
                       <img
-                        src="https://picsum.photos/seed/picsum/200/300"
+                        src="${tweet.from_user.profile_picture}"
                         alt=""
                       />
                     </div>
@@ -265,7 +265,7 @@ class SelectedPostComponent extends BaseComponent {
           <div class="post-comment">
                 <div class="user-pic-wrapper" style="height: 3rem">
                   <img
-                    src="https://picsum.photos/seed/picsum/200/300"
+                    src="${comment.from_user.profile_picture}"
                     alt=""
                   />
                 </div>
@@ -275,7 +275,7 @@ class SelectedPostComponent extends BaseComponent {
                 <span>${calculateDate(comment.date)}</span>
 </div>
                   <p>
-                    ${escapeHTML(comment.content)}
+                    ${comment.content}
                   </p>
                 </div>
               </div>
@@ -429,8 +429,7 @@ async function assignLikeButtons() {
 
                 });
                 button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
-                if(!data.ok)
-                {
+                if (!data.ok) {
                     notify(data.message, 3, 'error');
                     button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
                 }
@@ -463,8 +462,7 @@ async function assignDeleteButtons() {
                     method: 'DELETE',
                 });
                 console.log(data)
-                if(!data.ok)
-                {
+                if (!data.ok) {
                     notify(data.error, 3, 'error');
                     return;
                 }
@@ -504,10 +502,10 @@ async function assignEventListeners() {
 }
 
 const renderIndividualPost = async (tweetId) => {
-    console.log(tweetId)
     let response = await request(`get-tweet-and-comments/${tweetId}/`, {
         method: 'GET',
     });
+    console.log(response)
     let data = await getProfile();
     let parentElement = document.getElementById('social-container');
     let selectedPostComponent = new SelectedPostComponent({
@@ -812,16 +810,16 @@ async function handleInput(event) {
 function handleChatEvents() {
     let searchInput = document.getElementById('user-search-input');
     searchInput.addEventListener('keyup', (e) => {
-    if (e.key.length === 1 || searchInput.value.length > 0) {
-        return;
-    }
+        if (e.key.length === 1 || searchInput.value.length > 0) {
+            return;
+        }
         fetchChatFriends()
     });
     searchInput.addEventListener('input', debounce(handleInput, 2000));
 }
 
 const App = async () => {
-let regex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
+    let regex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
     let match = window.location.pathname.match(regex);
     if (match)
         await renderIndividualPost(match[0]);
@@ -842,7 +840,7 @@ window.addEventListener('popstate', async (event) => {
     if (window.location.pathname === '/social/')
         await renderAllPosts();
     else {
-let regex = /\/tweet\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
+        let regex = /\/tweet\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
         let match = window.location.pathname.match(regex);
         if (match) {
             await renderIndividualPost(match[1]);
