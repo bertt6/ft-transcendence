@@ -359,14 +359,16 @@ class ConversationComponent extends BaseComponent {
     }
     addObserver() {
     let loading = document.getElementById('chat-loading');
+        console.log(loading)
         if (!loading)
             return;
         let observer = new IntersectionObserver(async (entries) => {
             if (entries[0].isIntersecting) {
+                console.log(this.state.next)
                 let response = await request(this.state.next, {method: 'GET'});
                 this.setState({messages: [...this.state.messages, ...response.results.messages], next: response.next});
             }
-        }, {threshold: 1});
+        }, {threshold: 0.9});
         observer.observe(loading);
     }
 }
