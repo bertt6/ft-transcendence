@@ -204,7 +204,7 @@ class SelectedPostComponent extends BaseComponent {
     }
 
     handleHTML() {
-        let {tweet, userId,comments} = this.state;
+        let {tweet, userId, comments} = this.state;
         return `
             <div class="selected-post">
               <div class="post-container">
@@ -385,6 +385,7 @@ const fetchSocialPosts = async () => {
     }
 
 }
+
 async function submitTweet(event) {
     event.preventDefault();
     let inputValue = document.getElementById('social-text-input').value;
@@ -410,6 +411,7 @@ async function submitTweet(event) {
         notify('Error posting tweet', 3, 'error');
     }
 }
+
 async function assignLikeButtons() {
     let likeButtons = document.getElementsByClassName('like-button');
     for (let button of likeButtons) {
@@ -428,6 +430,7 @@ async function assignLikeButtons() {
         });
     }
 }
+
 async function assignCommentButtons() {
     let commentButtons = document.getElementsByClassName('comment-button');
     for (let button of commentButtons) {
@@ -438,6 +441,7 @@ async function assignCommentButtons() {
         });
     }
 }
+
 async function assignDeleteButtons() {
     let buttons = document.getElementsByClassName('post-delete-button');
     for (let button of buttons) {
@@ -457,15 +461,15 @@ async function assignDeleteButtons() {
         });
     }
 }
+
 async function assignPostTweetForm() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
     let imageAdd = document.getElementById('image-add');
     imageAdd.addEventListener('change', (event) => {
-        if(event.target.files.length === 0)
+        if (event.target.files.length === 0)
             return;
-        if(event.target.files[0].size > 1000000)
-        {
+        if (event.target.files[0].size > 1000000) {
             notify('Image size should be less than 1MB', 3, 'error');
             return;
         }
@@ -474,6 +478,7 @@ async function assignPostTweetForm() {
         postTweetFormComponent.setState({imageUrl: url});
     });
 }
+
 async function assignEventListeners() {
     await assignPostTweetForm();
     await assignLikeButtons();
@@ -487,7 +492,11 @@ const renderIndividualPost = async (tweetId) => {
     });
     let data = await getProfile();
     let parentElement = document.getElementById('social-container');
-    let selectedPostComponent = new SelectedPostComponent({tweet: response.results.tweet, userId: data.id,comments:response.results.comments}, parentElement);
+    let selectedPostComponent = new SelectedPostComponent({
+        tweet: response.results.tweet,
+        userId: data.id,
+        comments: response.results.comments
+    }, parentElement);
     selectedPostComponent.render();
     await assignLikeButtons();
     await fetchChatFriends()
@@ -753,6 +762,36 @@ function handleChatEvents() {
     for (let element of elements) {
         element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
     }
+    let searchInput = document.getElementById('user-search-input');
+    searchInput.addEventListener('keyup', () => {
+        if(searchInput.value.length > 0)
+    return
+    fetchChatFriends()
+    });
+    searchInput.addEventListener('input', async (event) => {
+        event.preventDefault();
+        let searchValue = searchInput.value;
+        let parentElement = document.getElementById('user-data-wrapper');
+
+        if (searchValue) {
+            let params = new URLSearchParams();
+            params.append('search', searchValue);
+            let url = `profile-search/?${params.toString()}`;
+            let response = await request(url, {method: 'GET'});
+            let statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
+            statusSocket.addEventListener('message', (event) => {
+                    let userStatus = JSON.parse(event.data);
+                    let parentElement = document.getElementById('user-data-wrapper');
+                    let chatFriendsComponent = new ChatFriendsComponent({
+                        friends: response,
+                        status: userStatus
+                    }, parentElement);
+                    chatFriendsComponent.render()
+                }
+            );
+        }
+    });
 }
 
 const App = async () => {

@@ -308,10 +308,10 @@ const routes = new Map([
             <div id="user-chat-friends">
                 <div class="users-wrapper">
                 <div>
-                  <div class="chat-send-wrapper">
+                  <form class="chat-send-wrapper">
                     <h2>SEARCH...</h2>
-                    <input type="text" placeholder="SEARCH A NAME" id="friend-search-input" />
-                </div>
+                    <input type="text" placeholder="SEARCH A NAME" id="user-search-input" />
+                </form>
               </div>
               <div class="user-data-wrapper loading" id="user-data-wrapper">
               <div class="lds-ring">
