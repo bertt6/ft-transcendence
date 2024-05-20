@@ -89,9 +89,13 @@ class SocialPostsComponent extends BaseComponent {
                         <span>${calculateDate(tweet.date)}</span>
                       </div>
                     </pong-redirect>
+                    ${
+            tweet.from_user.id === userId ? `
                     <button class="post-delete-button" data-tweet-id="${tweet.id}">
                       <img  src="/static/public/trash.svg" alt="" style="width: 32px" />
                     </button>
+                    ` : ''
+        }
                   </div>
                   <div>
                     <div class="post-text">
