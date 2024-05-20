@@ -51,6 +51,9 @@ class ChatFriendsComponent extends BaseComponent {
         for (let i = 0; i < allUsers.length; i++) {
             allUsers[i].addEventListener("click", toggleChat);
         }
+    for (let element of allUsers) {
+        element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
+    }
     }
 
     setState(newState) {
@@ -807,16 +810,11 @@ async function handleInput(event) {
 }
 
 function handleChatEvents() {
-    let elements = document.getElementsByClassName("user-wrapper");
-    for (let element of elements) {
-        element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
-    }
     let searchInput = document.getElementById('user-search-input');
     searchInput.addEventListener('keyup', (e) => {
     if (e.key.length === 1 || searchInput.value.length > 0) {
         return;
     }
-
         fetchChatFriends()
     });
     searchInput.addEventListener('input', debounce(handleInput, 2000));
