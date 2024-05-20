@@ -24,7 +24,10 @@ export async function request(url, options = {}) {
     if (mergedOptions.headers['Content-Type'] === '') {
         delete mergedOptions.headers['Content-Type'];
     }
-    const fullUrl = `/api/v1/${url}`
+
+    const isFullUrl = url.startsWith('http://') || url.startsWith('https://');
+    const fullUrl = isFullUrl ? url : `/api/v1/${url}`;
+
     if (mergedOptions.method === 'GET' && responses.has(fullUrl)) {
         return responses.get(fullUrl)
     }

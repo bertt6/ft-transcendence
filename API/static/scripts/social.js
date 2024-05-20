@@ -316,15 +316,15 @@ class ConversationComponent extends BaseComponent {
         let username = getActiveUserNickname();
         return `
         ${
-            this.state.messages.map(message => `
-             ${message.user.id === this.state.senderId ? `
+            this.state.messages.toReversed().map(message => `
+             ${message.user.nickname === username ? `
               <div class="sent-message-container">
                   <div class="message-data-wrapper">
                     <span class="sent-message-date">${calculateDate(message.created_date)}</span>
                     <span class="sent-message-name">${message.user.nickname}</span>
                 </div>
                   <p>
-                    ${escapeHTML(message.content)}
+                    ${message.content}
                   </p>
                 </div>
                 ` : `
@@ -334,23 +334,40 @@ class ConversationComponent extends BaseComponent {
                   <span class="received-message-date">${calculateDate(message.created_date)}</span>
                 </div>
                   <p>
-                    ${escapeHTML(message.content)}
+                    ${message.content}
                   </p>
                 </div>
                 `}
             `).join('')
         }
+        <div id="chat-loading">Please wait...</div>
         `
     }
 
     render() {
         this.html = this.handleHtml();
         this.parentElement.innerHTML = this.html;
+        if(this.state.next !== null)
+            this.addObserver();
+        else
+            document.getElementById('chat-loading').remove();
     }
 
     setState(newState) {
         this.state = {...this.state, ...newState};
         this.render();
+    }
+    addObserver() {
+    let loading = document.getElementById('chat-loading');
+        if (!loading)
+            return;
+        let observer = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting) {
+                let response = await request(this.state.next, {method: 'GET'});
+                this.setState({messages: [...this.state.messages, ...response.results.messages], next: response.next});
+            }
+        }, {threshold: 1});
+        observer.observe(loading);
     }
 }
 
@@ -509,13 +526,13 @@ const renderIndividualPost = async (tweetId) => {
     let response = await request(`get-tweet-and-comments/${tweetId}/`, {
         method: 'GET',
     });
-    console.log(response)
     let data = await getProfile();
     let parentElement = document.getElementById('social-container');
     let selectedPostComponent = new SelectedPostComponent({
         tweet: response.results.tweet,
         userId: data.id,
-        comments: response.results.comments
+        comments: response.results.comments,
+        next: response.next
     }, parentElement);
     selectedPostComponent.render();
     await assignLikeButtons();
@@ -562,6 +579,7 @@ async function getProfile2() {
 
 const renderAllPosts = async () => {
     let profile_picture_url = await getProfile2();
+    const nickname = getActiveUserNickname();
     let container = document.getElementById('social-container');
     container.innerHTML = `
                   <div
@@ -576,7 +594,7 @@ const renderAllPosts = async () => {
                      alt=""
                     />
                   </div>
-                  <h6 id="username">Test12</h6>
+                  <h6 id="username"></h6>
                 </div>
                 <form class="social-send" id="social-send-form">
                   <input
@@ -605,8 +623,8 @@ const renderAllPosts = async () => {
                 </div>
               </div>
             </div>
-
     `
+    document.getElementById('username').innerText = nickname;
     socialPostsComponent.parentElement = document.getElementById('posts-wrapper');
     postTweetFormComponent.parentElement = document.getElementById('social-send-form');
     await Promise.all([fetchChatFriends(), fetchSocialPosts(), getProfile()]);
@@ -614,7 +632,7 @@ const renderAllPosts = async () => {
 }
 
 async function handleAddFriend(element) {
-    const socket = getSocket();
+    const socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
     let friendRequestButton = document.getElementById('options-add-friend');
     try {
@@ -636,8 +654,8 @@ async function handleAddFriend(element) {
     }
 }
 
-function handleInviteToPong(element) {
-    let socket = getSocket();
+async function handleInviteToPong(element) {
+    let socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
     let sendBody = {
         request_type: "game",
@@ -690,7 +708,7 @@ async function fetchMessages(roomId) {
         let response = await request(`chat/get-messages/${roomId}/`, {
             method: 'GET'
         });
-        return response.results;
+        return response
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching messages', 3, 'error');
@@ -717,7 +735,7 @@ async function connectToRoom(room, conversationComponent) {
             user: {nickname: data.user, id: data.id},
             created_date: new Date()
         }
-        conversationComponent.setState({messages: [message, ...conversationComponent.state.messages]});
+        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
     }
 }
 
@@ -745,7 +763,8 @@ async function fetchRoomData(element) {
             {
                 senderId: localStorage.getItem("activeUserId"),
                 receiverId: room.second_user,
-                messages: response.messages
+                messages: response.results.messages,
+                next: response.next
             },
             conversationWrapper);
         spinner.setState({isVisible: false});
