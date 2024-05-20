@@ -93,7 +93,7 @@ class SocialPostsComponent extends BaseComponent {
                   <div>
                     <div class="post-text">
                       <p>
-                        ${escapeHTML(tweet.content)}
+                        ${tweet.content}
                       </p>
                     </div>
                     ${tweet.image ? `
@@ -378,7 +378,8 @@ const fetchChatFriends = async () => {
 const fetchSocialPosts = async () => {
     try {
         let response = await request(`tweets/`, {method: 'GET'})
-        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next});
+        let profile = await getProfile();
+        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next, userId: profile.id});
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching social posts', 3, 'error');
@@ -418,11 +419,16 @@ async function assignLikeButtons() {
         let tweetId = button.getAttribute('data-tweet-id');
         button.addEventListener('click', async () => {
             try {
-                let data = await request(`like_tweet/${tweetId}/`, {
+                let data = await request(`like-tweet/${tweetId}/`, {
                     method: 'PATCH',
 
                 });
                 button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
+                if(!data.ok)
+                {
+                    notify(data.message, 3, 'error');
+                    button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
+                }
             } catch (error) {
                 console.error('Error:', error);
                 notify('Error liking tweet', 3, 'error');
