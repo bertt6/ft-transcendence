@@ -6,8 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from ..models import Profile
 from rest_framework.response import Response
 
-from .Serializers import ProfileGetSerializer, ProfilePostSerializer, ProfileFriendsSerializer, ProfileStatsSerializer, \
-    ProfileGameSerializer
+from .Serializers import *
 from ...Game.models import Game
 from ...Request.models import Request
 
@@ -29,19 +28,20 @@ class ProfileView(APIView):
             return Response({"error": "Profile not found"}, status=404)
 
 
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class ProfileSearchView(APIView):
     def get(self, request):
         try:
             profile = request.user.profile
-            search = request.data.get('search')
+            search = request.query_params.get('search')
             blocked_users_ids = profile.blocked_users.values_list('id', flat=True)
-            filter = Q(nickname__icontains=search) & ~Q(id__in=blocked_users_ids) & ~Q(blocked_users=profile)
-            profiles = Profile.objects.filter(filter)
-            profile_serializer = ProfileGetSerializer(profiles, many=True)
+            filtered_data = Q(nickname__icontains=search) & ~Q(id__in=blocked_users_ids) & ~Q(blocked_users=profile)
+            profiles = Profile.objects.filter(filtered_data)
+            profile_serializer = ProfileSearchSerializer(profiles, many=True)
             return Response(profile_serializer.data, status=200)
         except Profile.DoesNotExist:
             return Response({"error": "Profile not found"}, status=404)
-
 
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

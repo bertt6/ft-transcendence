@@ -16,6 +16,7 @@ export function setCookie(name, value, days) {
     }
     document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
+
 export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -26,6 +27,7 @@ export function getCookie(name) {
     }
     return null;
 }
+
 const routes = new Map([
     ['login', {
         auth_required: false,
@@ -308,10 +310,10 @@ const routes = new Map([
             <div id="user-chat-friends">
                 <div class="users-wrapper">
                 <div>
-                  <div class="chat-send-wrapper">
+                  <form class="chat-send-wrapper">
                     <h2>SEARCH...</h2>
-                    <input type="text" placeholder="SEARCH A NAME" id="friend-search-input" />
-                </div>
+                    <input type="text" placeholder="SEARCH A NAME" id="user-search-input" />
+                </form>
               </div>
               <div class="user-data-wrapper loading" id="user-data-wrapper">
               <div class="lds-ring">
@@ -324,21 +326,15 @@ const routes = new Map([
             </div>
             </div>
             <div class="chat-container" id="chat-container">
-                           <div class="active-user-wrapper">
-                <div class="user-info">
+               <div class="active-user-wrapper">
+                <div class="user-info" id="active-user-info">
                   <div class="user-pic-wrapper">
                     <img
                       src="https://picsum.photos/seed/picsum/200/300"
                       alt=""
                     />
                   </div>
-                  <div class="active-user-info-wrapper" id="active-user-info">
-                    <h6>test1</h6>
-                    <span>active now</span>
-                    <div class="spotify-info">
-                      <img src="/static/public/music.svg" alt="" style="width: 20px" />
-                      <span>Currently listening test123</span>
-                    </div>
+                  <div class="active-user-info-wrapper">
                   </div>
                 </div>
                 <div class="d-flex">
@@ -616,10 +612,10 @@ const routes = new Map([
       </div>
         `
     }],
-    ['tournament',{
-        auth_required:true,
-        url:[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
-        html:`
+    ['tournament', {
+        auth_required: true,
+        url: [/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
+        html: `
       <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -726,6 +722,12 @@ const requiredScripts = [
     '/static/scripts/inbox.js',
     '/static/scripts/Status.js',
 ]
+const nonAuthScripts = [
+    '/static/scripts/requests.js',
+    '/static/components/Component.js',
+    '/static/components/spinner.js',
+    '/static/scripts/utils.js',
+    ]
 export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
     content.innerHTML = routes.get('error').html;
@@ -764,6 +766,21 @@ function findRouteKey(pathName) {
 }
 
 function loadRequiredScripts() {
+        let pathName = window.location.pathname;
+    let value = findRouteKey(pathName);
+    let route = routes.get(value);
+    if (route.auth_required === false) {
+        nonAuthScripts.forEach(script => {
+            if (!document.getElementById(script)) {
+                let newScript = document.createElement('script');
+                newScript.src = script;
+                newScript.id = script;
+                newScript.type = 'module';
+                document.body.appendChild(newScript);
+            }
+        });
+        return;
+    }
     requiredScripts.forEach(script => {
         if (!document.getElementById(script)) {
             let newScript = document.createElement('script');
@@ -833,7 +850,6 @@ async function tryRefreshToken() {
             }),
         });
         setCookie('access_token', data.access, 1);
-        setCookie('refresh_token', data.refresh, 1);
         return true;
     } catch (error) {
         notify('Please login again', 3, 'error')
@@ -853,7 +869,12 @@ async function checkForAuth() {
     const route = routes.get(value);
     if (route.auth_required === true)
         loadPage('/auth/login/');
-
+    else {
+        if (!localStorage.getItem('activeUserNickname')) {
+            let profile = await getProfile();
+            localStorage.setItem('activeUserNickname', profile.nickname);
+        }
+    }
 }
 
 export function assignRouting() {
@@ -874,8 +895,8 @@ export function assignRouting() {
 function loadSpecificScript() {
     let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    if (!value){
-    loadError(404, 'Page not found', 'The page you are looking for does not exist')
+    if (!value) {
+        loadError(404, 'Page not found', 'The page you are looking for does not exist')
         return;
     }
     if (document.getElementById('script'))
@@ -889,11 +910,12 @@ function loadSpecificScript() {
 }
 
 async function assignLocalStorage() {
-    if(!checkIfAuthRequired())
+    if (!checkIfAuthRequired())
         return;
     let profile = await getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
 }
+
 export function checkIfAuthRequired() {
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
@@ -902,15 +924,18 @@ export function checkIfAuthRequired() {
     const route = routes.get(value);
     return route.auth_required;
 }
+
 async function renderPage() {
+    loadRequiredScripts()
     loadSpecificScript();
     await checkForAuth();
     assignRouting()
 }
+
 const App = async () => {
-    loadRequiredScripts();
     await checkForAuth();
     loadSpecificScript();
+    loadRequiredScripts();
     assignRouting()
     await assignLocalStorage();
 }

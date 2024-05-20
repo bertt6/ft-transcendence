@@ -7,6 +7,7 @@
   flex-direction: column;
   padding: 2rem;
   overflow: hidden;
+  min-width: 230px;
 }
 .chat-send-wrapper {
   width: 100%;
@@ -76,7 +77,7 @@ input {
   flex-direction: column;
   flex-basis: calc(400px + 10%);
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
-  padding-right: 2rem;
+  padding: 0 1rem;
   gap: 1rem;
   max-width: 400px;
   overflow: hidden;
@@ -116,7 +117,6 @@ input {
 }
 
 .active-user-info-wrapper {
-  margin-top: 1rem;
   overflow: hidden;
   text-wrap: nowrap;
   flex: 1;
