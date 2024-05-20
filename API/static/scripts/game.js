@@ -221,6 +221,7 @@ async function connectToServer()
         console.log(data)
       if(data.state_type === "initial_state")
       {
+
           try {
             const statusSocket = await getStatusSocket();
             statusSocket.send(JSON.stringify({
@@ -232,8 +233,9 @@ async function connectToServer()
           {
               console.error(e);
           }
-        handleInitialState(data);
-        handleMovement(socket,data);
+          printCountdown();
+          handleInitialState(data);
+          handleMovement(socket, data);
       } else if (data.state_type === "score_state") {
         draw(data.game,"red","blue");
         setCurrentPoints(data);

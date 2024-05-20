@@ -27,6 +27,7 @@ try{
     if (data.ok)
     {
         notify("Registration successful. You will be redirected to the login page", 3, "success");
+        await new Promise(r => setTimeout(r, 3000));
         loadPage('/auth/login/');
     } else {
         spinner.setState({isVisible: false});
