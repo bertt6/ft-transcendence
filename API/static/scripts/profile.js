@@ -112,10 +112,10 @@ class PaddleColor extends BaseComponent {
                 <input type="radio" id="red1" name="color_row1" value="red1">
                 <label for="red1">
                     <div>
-                        <p>Red</p>
+                        <p>White</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/whitepaddle.png" alt="">
                     </div>
                 </label>
             </div>
@@ -123,10 +123,10 @@ class PaddleColor extends BaseComponent {
                 <input type="radio" id="red2" name="color_row1" value="red2">
                 <label for="red2">
                     <div>
-                        <p>Red</p>
+                        <p>Blue</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/bluepaddle.png" alt="">
                     </div>
                 </label>
             </div>
@@ -139,7 +139,7 @@ class PaddleColor extends BaseComponent {
                         <p>Red</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/redpaddle.png" alt="">
                     </div>
                 </label>
             </div>
@@ -147,10 +147,10 @@ class PaddleColor extends BaseComponent {
                 <input type="radio" id="red4" name="color_row1" value="red4">
                 <label for="red4">
                     <div>
-                        <p>Red</p>
+                        <p>Green</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/greenpaddle.png" alt="">
                     </div>
                 </label>
             </div>
