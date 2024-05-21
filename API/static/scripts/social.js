@@ -780,7 +780,6 @@ async function fetchRoomData(element) {
     let profilePicture = element.children[0].children[0].src;
     let wrapper = document.getElementById('conversation-wrapper');
     let activeUserInfoWrapper = document.getElementById('active-user-info');
-    console.log(activeUserInfoWrapper)
     let image = activeUserInfoWrapper.children[0].children[0]
     let name = activeUserInfoWrapper.children[1].children[0]
     name.innerText = nickname;

@@ -193,95 +193,6 @@ const routes = new Map([
               <button class="header-wrapper" id="paddle-color-button"><span>PADDLE COLOR</span></button>
             </div>
           <div id="data-wrapper">
-                <div class="friends-wrapper" style="display: none">
-              <div class="friend-wrapper">
-                <div class="friend-info">
-                  <div class="friend-image">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
-                  </div>
-                  <div class="friend-data">
-                    <h6>NAME</h6>
-                    <span>First Last name</span>
-                  </div>
-                </div>
-                <div class="friend-more">
-                  <div><img src="/public/image.svg" alt="" /></div>
-                  <div><img src="/public/chat-bubble.svg" alt="" /></div>
-                  <div><img src="/public/more.svg" alt="" /></div>
-                </div>
-              </div>
-              <div class="friend-wrapper">
-                <div class="friend-info">
-                  <div class="friend-image">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
-                  </div>
-                  <div class="friend-data">
-                    <h6>NAME</h6>
-                    <span>First Last name</span>
-                  </div>
-                </div>
-                <div class="friend-more">
-                  <div><img src="/public/image.svg" alt="" /></div>
-                  <div><img src="/public/chat-bubble.svg" alt="" /></div>
-                  <div><img src="/public/more.svg" alt="" /></div>
-                </div>
-              </div>
-            </div>
-            <div class="histories-wrapper">
-              <div class="history-wrapper">
-                <div class="friend-info">
-                  <div class="history-type"><h5>1v1</h5></div>
-                </div>
-                <div class="history-data">
-                  <h5>BSAMLI</h5>
-                  <h5>VS</h5>
-                  <h5>OFIRAT</h5>
-                </div>
-                <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
-                </div>
-                <div>
-                  <h5>1 DAY AGO</h5>
-                </div>
-              </div>
-              <div class="history-wrapper">
-                <div class="friend-info">
-                  <div class="history-type"><h5>1v1</h5></div>
-                </div>
-                <div class="history-data">
-                  <h5>BSAMLI</h5>
-                  <h5>VS</h5>
-                  <h5>OFIRAT</h5>
-                </div>
-                <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
-                </div>
-                <div>
-                  <h5>1 DAY AGO</h5>
-                </div>
-              </div>
-              <div class="history-wrapper">
-                <div>
-                  <h5>Tournament</h5>
-                </div>
-                <div class="history-data">
-                  <h5>BSAMLI</h5>
-                  <h5>VS</h5>
-                  <h5>OFIRAT</h5>
-                </div>
-                <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
-                </div>
-                <div>
-                  <h5>1 DAY AGO</h5>
-                </div>
-              </div>
             </div>
           </div>
           </div>
@@ -880,6 +791,8 @@ async function checkForAuth() {
 }
 
 export function assignRouting() {
+     const returnButton = `  <pong-redirect class="return-to-home" href="/home/"><h1>HOME</h1></pong-redirect>`
+    document.body.insertAdjacentHTML('beforebegin', returnButton);
     let elements = document.querySelectorAll("pong-redirect");
     for (let element of elements) {
         if (element.getAttribute(('listener')) === 'true')
@@ -892,6 +805,7 @@ export function assignRouting() {
         });
         element.setAttribute('listener', 'true');
     }
+
 }
 
 function loadSpecificScript() {
