@@ -79,7 +79,7 @@ input {
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
   padding: 0 1rem;
   gap: 1rem;
-  max-width: 400px;
+  width: 350px;
   overflow: hidden;
   transition: all 1s ease;
 }
@@ -317,6 +317,7 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: 100%;
 }
 .post-info {
   display: flex;
@@ -398,6 +399,7 @@ input[type="file"] {
   overflow-y: auto;
   overflow-x: hidden;
   margin-top: 20px;
+  height: 100%;
 }
 .post-comment {
   display: flex;

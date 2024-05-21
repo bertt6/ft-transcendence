@@ -46,6 +46,7 @@ class ChatFriendsComponent extends BaseComponent {
     }
 
     render() {
+        this.parentElement.innerHTML = this.html;
         super.render();
         let allUsers = document.getElementsByClassName("user-wrapper");
         for (let i = 0; i < allUsers.length; i++) {
@@ -230,9 +231,7 @@ class SelectedPostComponent extends BaseComponent {
                       <span>${calculateDate(tweet.date)}</span>
                     </div>
                   </div>
-                  <div>
-                    <img src="/static/public/more.svg" alt="" style="width: 50px" />
-                  </div>
+
                   <div id="comment-back-button" style="cursor: pointer">
                     <img src="/static/public/go-back.svg" alt="Load Failed" />
                   </div>
@@ -264,33 +263,12 @@ class SelectedPostComponent extends BaseComponent {
                     />
                   </form>
                 </div>
-                <div class="post-comments">
-            ${comments.map(comment => `
-          <div class="post-comment">
-                <div class="user-pic-wrapper" style="height: 3rem">
-                  <img
-                    src="${comment.from_user.profile_picture}"
-                    alt=""
-                  />
-                </div>
-                <div style="flex: 1">
-                <div style="display: flex;justify-content: space-between">          
-              <h6>${comment.from_user.nickname}</h6>
-                <span>${calculateDate(comment.date)}</span>
-</div>
-                  <p>
-                    ${comment.content}
-                  </p>
-                </div>
-              </div>
-        `).join('')}
-        
+                <div class="post-comments" id="post-comments">
                 </div>
               </div>
             </div>
         `
     }
-
     setState(newState) {
         this.state = {...this.state, ...newState};
         this.html = this.handleHTML();
@@ -306,6 +284,61 @@ class SelectedPostComponent extends BaseComponent {
         });
     }
 }
+class CommentsComponent extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+    }
+    handleHtml()
+    {
+        const {comments} = this.state;
+        return `
+       ${comments.map(comment => `
+          <div class="post-comment">
+                <div class="user-pic-wrapper" style="height: 3rem">
+                  <img
+                    src="${comment.from_user.profile_picture}"
+                    alt=""
+                  />
+                </div>
+                <div style="flex: 1">
+                <div style="display: flex;justify-content: space-between">          
+              <h6>${comment.from_user.nickname}</h6>
+                <span>${calculateDate(comment.date)}</span>
+            </div>
+                  <p>
+                    ${comment.content}
+                  </p>
+                </div>
+              </div>
+        `).join('')}
+        <div id="comment-loading">Please wait...</div>
+        `
+    }
+    render() {
+        this.html = this.handleHtml();
+        super.render();
+        if(this.state.next !== null)
+            this.addObserver();
+        else
+            document.getElementById('comment-loading').remove();
+    }
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.render();
+    }
+    addObserver() {
+        let loading = document.getElementById('comment-loading');
+        if (!loading)
+            return;
+        let observer = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting) {
+                let response = await request(this.state.next, {method: 'GET'});
+                this.setState({comments: [...this.state.comments, ...response.results.comments], next: response.next});
+            }
+        }, {threshold: 0.9});
+        observer.observe(loading);
+    }
+}
 
 class ConversationComponent extends BaseComponent {
     constructor(state, parentElement = null) {
@@ -316,15 +349,15 @@ class ConversationComponent extends BaseComponent {
         let username = getActiveUserNickname();
         return `
         ${
-            this.state.messages.map(message => `
-             ${message.user.id === this.state.senderId ? `
+            this.state.messages.toReversed().map(message => `
+             ${message.user.nickname === username ? `
               <div class="sent-message-container">
                   <div class="message-data-wrapper">
                     <span class="sent-message-date">${calculateDate(message.created_date)}</span>
                     <span class="sent-message-name">${message.user.nickname}</span>
                 </div>
                   <p>
-                    ${escapeHTML(message.content)}
+                    ${message.content}
                   </p>
                 </div>
                 ` : `
@@ -334,23 +367,40 @@ class ConversationComponent extends BaseComponent {
                   <span class="received-message-date">${calculateDate(message.created_date)}</span>
                 </div>
                   <p>
-                    ${escapeHTML(message.content)}
+                    ${message.content}
                   </p>
                 </div>
                 `}
             `).join('')
         }
+        <div id="chat-loading">Please wait...</div>
         `
     }
-
     render() {
         this.html = this.handleHtml();
         this.parentElement.innerHTML = this.html;
+        if(this.state.next !== null)
+            this.addObserver();
+        else
+            document.getElementById('chat-loading').remove();
     }
 
     setState(newState) {
         this.state = {...this.state, ...newState};
         this.render();
+    }
+    addObserver() {
+    let loading = document.getElementById('chat-loading');
+        if (!loading)
+            return;
+        let observer = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting) {
+                console.log(this.state.next)
+                let response = await request(this.state.next, {method: 'GET'});
+                this.setState({messages: [...this.state.messages, ...response.results.messages], next: response.next});
+            }
+        }, {threshold: 0.9});
+        observer.observe(loading);
     }
 }
 
@@ -504,47 +554,50 @@ async function assignEventListeners() {
     await assignCommentButtons();
     await assignDeleteButtons();
 }
-
-const renderIndividualPost = async (tweetId) => {
-    let response = await request(`get-tweet-and-comments/${tweetId}/`, {
-        method: 'GET',
-    });
-    console.log(response)
-    let data = await getProfile();
-    let parentElement = document.getElementById('social-container');
-    let selectedPostComponent = new SelectedPostComponent({
-        tweet: response.results.tweet,
-        userId: data.id,
-        comments: response.results.comments
-    }, parentElement);
-    selectedPostComponent.render();
-    await assignLikeButtons();
-    await fetchChatFriends()
-    let form = document.getElementById('comment-send-form');
-    form.addEventListener('submit', async (event) => {
-            event.preventDefault();
+async function commentSubmit(e,commentsComponent,tweetId)
+{
+            e.preventDefault();
             let inputValue = document.getElementById('comment-input').value;
             try {
                 let data = await request(`post-comment/`, {
                     method: 'POST',
                     body: JSON.stringify({content: inputValue, tweet: tweetId})
                 });
+                if(!data.ok)
+                {
+                    notify(data.error, 3, 'error');
+                    return;
+                }
                 notify('Comment posted successfully', 3, 'success');
-                let newComments = [data, ...selectedPostComponent.state.tweet.results.comments];
-                selectedPostComponent.setState({
-                    tweet: {
-                        results: {
-                            tweet: selectedPostComponent.state.tweet.results.tweet,
-                            comments: newComments
-                        }
-                    }
+                let newComments = [data, ...commentsComponent.state.comments];
+                commentsComponent.setState({
+                    comments: newComments
                 });
             } catch (error) {
                 console.error('Error:', error);
                 notify('Error posting comment', 3, 'error');
             }
-        }
-    );
+}
+const renderIndividualPost = async (tweetId) => {
+    let response = await request(`get-tweet-and-comments/${tweetId}/`, {
+        method: 'GET',
+    });
+    let data = await getProfile();
+    let parentElement = document.getElementById('social-container');
+    let selectedPostComponent = new SelectedPostComponent({
+        tweet: response.results.tweet,
+        userId: data.id,
+    }, parentElement);
+    selectedPostComponent.render();
+    let commentsComponent = new CommentsComponent({
+        comments: response.results.comments,
+        next: response.next
+    },document.getElementById('post-comments'));
+    commentsComponent.render();
+    await assignLikeButtons();
+    await fetchChatFriends()
+    let form = document.getElementById('comment-send-form');
+    form.addEventListener('submit', (e) => commentSubmit(e,commentsComponent,tweetId));
 }
 
 async function getProfile2() {
@@ -562,6 +615,7 @@ async function getProfile2() {
 
 const renderAllPosts = async () => {
     let profile_picture_url = await getProfile2();
+    const nickname = getActiveUserNickname();
     let container = document.getElementById('social-container');
     container.innerHTML = `
                   <div
@@ -576,7 +630,7 @@ const renderAllPosts = async () => {
                      alt=""
                     />
                   </div>
-                  <h6 id="username">Test12</h6>
+                  <h6 id="username"></h6>
                 </div>
                 <form class="social-send" id="social-send-form">
                   <input
@@ -605,8 +659,8 @@ const renderAllPosts = async () => {
                 </div>
               </div>
             </div>
-
     `
+    document.getElementById('username').innerText = nickname;
     socialPostsComponent.parentElement = document.getElementById('posts-wrapper');
     postTweetFormComponent.parentElement = document.getElementById('social-send-form');
     await Promise.all([fetchChatFriends(), fetchSocialPosts(), getProfile()]);
@@ -614,7 +668,7 @@ const renderAllPosts = async () => {
 }
 
 async function handleAddFriend(element) {
-    const socket = getSocket();
+    const socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
     let friendRequestButton = document.getElementById('options-add-friend');
     try {
@@ -636,8 +690,8 @@ async function handleAddFriend(element) {
     }
 }
 
-function handleInviteToPong(element) {
-    let socket = getSocket();
+async function handleInviteToPong(element) {
+    let socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
     let sendBody = {
         request_type: "game",
@@ -690,7 +744,7 @@ async function fetchMessages(roomId) {
         let response = await request(`chat/get-messages/${roomId}/`, {
             method: 'GET'
         });
-        return response.results;
+        return response
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching messages', 3, 'error');
@@ -717,7 +771,7 @@ async function connectToRoom(room, conversationComponent) {
             user: {nickname: data.user, id: data.id},
             created_date: new Date()
         }
-        conversationComponent.setState({messages: [message, ...conversationComponent.state.messages]});
+        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
     }
 }
 
@@ -745,7 +799,8 @@ async function fetchRoomData(element) {
             {
                 senderId: localStorage.getItem("activeUserId"),
                 receiverId: room.second_user,
-                messages: response.messages
+                messages: response.results.messages,
+                next: response.next
             },
             conversationWrapper);
         spinner.setState({isVisible: false});
@@ -761,6 +816,7 @@ async function fetchRoomData(element) {
 async function toggleChat() {
     let chatContainer = document.getElementById("chat-container");
     let socialWrapper = document.getElementById("social-container");
+    console.log(this)
     await fetchRoomData(this);
     if (chatContainer.classList.contains("chat-closed")) {
         chatContainer.classList.add("chat-transition");
@@ -773,9 +829,6 @@ async function toggleChat() {
     }
 }
 
-function handleChatState() {
-
-}
 
 function debounce(func, delay) {
     let timeoutId;
@@ -810,7 +863,19 @@ async function handleInput(event) {
         });
     }
 }
-
+function handleChatState() {
+    let chatContainer = document.getElementById("chat-container");
+  let socialWrapper = document.getElementById("social-container");
+  let chatCloseButton = document.getElementById("chat-close-button");
+  chatCloseButton.addEventListener("click", () => {
+    chatContainer.classList.add("chat-transition");
+    setTimeout(() => {
+      chatContainer.classList.remove("chat-transition");
+      socialWrapper.classList.add("social-wrapper-chat-closed");
+    }, 1000);
+    chatContainer.classList.add("chat-closed");
+  });
+}
 function handleChatEvents() {
     let searchInput = document.getElementById('user-search-input');
     searchInput.addEventListener('keyup', (e) => {
@@ -832,6 +897,7 @@ const App = async () => {
     assignRouting();
     handleChatState();
     handleChatEvents();
+
     //I don't know if this make sense but, I added this to prevent the form from submitting when
     //there is no chat active
     document.querySelectorAll('form').forEach(form => {

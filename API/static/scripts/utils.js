@@ -7,7 +7,7 @@ export function escapeHTML(str) {
 export async function getProfile(nickname = null) {
     if (nickname) {
         try {
-            return await request(`/profile-with-nickname/${nickname}`, {method: 'GET'});
+            return await request(`profile-with-nickname/${nickname}`, {method: 'GET'});
         } catch (error) {
             console.error(error)
             return null;
