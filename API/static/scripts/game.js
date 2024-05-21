@@ -238,7 +238,7 @@ async function connectToServer()
           {
               console.error(e);
           }
-          if (data.game.ball.x == 0 && data.game.ball.y == 0) {
+          if (data.game.ball.x === 0 && data.game.ball.y === 0) {
               printCountdown();
           }
           handleInitialState(data);

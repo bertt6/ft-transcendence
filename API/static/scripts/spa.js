@@ -489,7 +489,6 @@ const routes = new Map([
                 </div>
                 <div class="player-description" id="player-one-details">
                     <span class="player-name">Player 1</span>
-                    <span class="player-points">Points?</span>
                 </div>
             </div>
             <div class="game-points">

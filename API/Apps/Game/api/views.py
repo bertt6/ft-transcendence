@@ -55,7 +55,6 @@ def finish_game(game_id, winner_nickname):
         game.winner = winner
         game.is_finished = True
         game.save()
-        print("GIRDIM")
         if game.player1.nickname != winner_nickname:
             game.player1.stats.total_losses += 1
             game.player1.stats.save()
