@@ -101,8 +101,10 @@ function renderTournamentInfo(response, socket) {
 function handleGameRedirection(response) {
     for (let game of response.data) {
         if (game.players.includes(getActiveUserNickname())) {
-            console.log("redirecting to game")
-            loadPage(`/game/${game.game_id}`)
+            notify("Game is starting", 2, "success")
+            setTimeout(() => {
+                loadPage(`/game/${game.game_id}`)
+            }, 2000);
         }
     }
 }

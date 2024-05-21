@@ -1,4 +1,4 @@
-import {loadError} from "./spa.js";
+import {notify} from "../components/Notification.js";
 
 async function handleRouting()
 {
@@ -6,6 +6,8 @@ async function handleRouting()
 }
 async function App()
 {
+
+    console.log("App started")
     await handleRouting();
 }
 
