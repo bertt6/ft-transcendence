@@ -199,6 +199,12 @@ async function connectToServer()
     const path = window.location.pathname;
     const id = path.split("/")[2];
     let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+
+    window.addEventListener('popstate', (event) => {
+            socket.close()
+        }
+    );
+
     socket.onopen = async function (event) {
         let connectedProfile = await getProfile()
         socket.send(JSON.stringify({
@@ -232,7 +238,7 @@ async function connectToServer()
           {
               console.error(e);
           }
-          if (data.game.ball.x == 0 && data.game.ball.y == 0) {
+          if (data.game.ball.x === 0 && data.game.ball.y === 0) {
               printCountdown();
           }
           handleInitialState(data);
@@ -266,21 +272,33 @@ function handleMovement(socket,data)
     paddle: "spectator",
     dy: 0
   }
-  if (data.details.player1.nickname === localStorage.getItem("username"))
+    const nickname = getActiveUserNickname()
+    if (data.details.player1.nickname === nickname)
     currentPaddle.paddle = "player_one";
-  else if (data.details.player2.nickname === localStorage.getItem("username"))
+    else if (data.details.player2.nickname === nickname)
         currentPaddle.paddle = "player_two";
   document.addEventListener("keydown", (event) => {
     if (event.key === "w" || event.key === "s")
         {
+
+            console.log(currentPaddle)
           currentPaddle.dy = event.key === "w" ? -10: 10;
-            socket.send(JSON.stringify(currentPaddle));
+            const body = {
+                ...currentPaddle,
+                "send_type": "null"
+            }
+            socket.send(JSON.stringify(body));
         }
     });
   document.addEventListener("keyup", (event) => {
   if (event.key === "w" || event.key === "s") {
+
     currentPaddle.dy = 0;
-    socket.send(JSON.stringify(currentPaddle));
+      const body = {
+          ...currentPaddle,
+          "send_type": "null"
+      }
+      socket.send(JSON.stringify(body));
   }
 });
 }

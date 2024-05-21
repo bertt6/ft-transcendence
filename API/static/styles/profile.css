@@ -25,7 +25,21 @@
   max-width: 300px;
   position: relative;
   gap: 1rem;
+
+
 }
+
+.profile-info-wrapper h1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-nickname {
+    align-self: flex-start;
+
+    width: 120%;
+}
+
 .profile-data {
   flex: 1;
   display: flex;
@@ -62,8 +76,8 @@
 .friend-image {
   aspect-ratio: 1/1;
   border-radius: 50%;
-  height: 5rem;
-  width: 5rem;
+    height: 4rem;
+    width: 4rem;
 }
 .friend-image > img {
   width: 100%;
@@ -71,11 +85,12 @@
   border-radius: 50%;
   object-fit: cover;
 }
+
 .friend-info {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+    gap: 1.5rem;
 }
 .friend-more {
   display: flex;
@@ -113,10 +128,24 @@
   gap: 4rem;
   align-items: center;
 }
+
+.history-data h5,
+.history-score h5 {
+    width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .history-score {
+    overflow: hidden;
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.history-score h4 {
+    width: 120px;
+    text-overflow: ellipsis;
 }
 
 .profile-edit{
@@ -248,9 +277,8 @@
   right: 0;
 }
 
-.unblock-button {
-  background-color: #4CAF50;
-  color: rgb(255, 255, 255);
+.friends-button button {
+    background: none;
   padding: 4px 8px;
   border: none;
   border-radius: 5px;
@@ -279,8 +307,8 @@
 .blocked-user-image {
   aspect-ratio: 1/1;
   border-radius: 50%;
-  height: 3rem;
-  width: 3rem;
+    height: 4rem;
+    width: 4rem;
 }
 .blocked-user-image > img {
   width: 100%;
@@ -292,7 +320,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+    gap: 1.5rem;
 }
 .blocked-user-more {
   display: flex;

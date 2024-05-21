@@ -55,9 +55,7 @@ async function connectToSocket() {
     loadPage('/home/')
   })
   window.addEventListener('popstate', (event) => {
-        socket.send(JSON.stringify({
-          request_type: "disconnect",
-        }))
+    socket.close()
       }
   );
 }
