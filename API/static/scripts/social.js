@@ -264,33 +264,12 @@ class SelectedPostComponent extends BaseComponent {
                     />
                   </form>
                 </div>
-                <div class="post-comments">
-            ${comments.map(comment => `
-          <div class="post-comment">
-                <div class="user-pic-wrapper" style="height: 3rem">
-                  <img
-                    src="${comment.from_user.profile_picture}"
-                    alt=""
-                  />
-                </div>
-                <div style="flex: 1">
-                <div style="display: flex;justify-content: space-between">          
-              <h6>${comment.from_user.nickname}</h6>
-                <span>${calculateDate(comment.date)}</span>
-</div>
-                  <p>
-                    ${comment.content}
-                  </p>
-                </div>
-              </div>
-        `).join('')}
-        
+                <div class="post-comments" id="post-comments">
                 </div>
               </div>
             </div>
         `
     }
-
     setState(newState) {
         this.state = {...this.state, ...newState};
         this.html = this.handleHTML();
@@ -304,6 +283,61 @@ class SelectedPostComponent extends BaseComponent {
             history.pushState({}, '', '/social');
             renderAllPosts();
         });
+    }
+}
+class CommentsComponent extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+    }
+    handleHtml()
+    {
+        const {comments} = this.state;
+        return `
+       ${comments.map(comment => `
+          <div class="post-comment">
+                <div class="user-pic-wrapper" style="height: 3rem">
+                  <img
+                    src="${comment.from_user.profile_picture}"
+                    alt=""
+                  />
+                </div>
+                <div style="flex: 1">
+                <div style="display: flex;justify-content: space-between">          
+              <h6>${comment.from_user.nickname}</h6>
+                <span>${calculateDate(comment.date)}</span>
+            </div>
+                  <p>
+                    ${comment.content}
+                  </p>
+                </div>
+              </div>
+        `).join('')}
+        <div id="comment-loading">Please wait...</div>
+        `
+    }
+    render() {
+        this.html = this.handleHtml();
+        super.render();
+        if(this.state.next !== null)
+            this.addObserver();
+        else
+            document.getElementById('comment-loading').remove();
+    }
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.render();
+    }
+    addObserver() {
+        let loading = document.getElementById('comment-loading');
+        if (!loading)
+            return;
+        let observer = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting) {
+                let response = await request(this.state.next, {method: 'GET'});
+                this.setState({comments: [...this.state.comments, ...response.results.comments], next: response.next});
+            }
+        }, {threshold: 0.9});
+        observer.observe(loading);
     }
 }
 
@@ -343,7 +377,6 @@ class ConversationComponent extends BaseComponent {
         <div id="chat-loading">Please wait...</div>
         `
     }
-
     render() {
         this.html = this.handleHtml();
         this.parentElement.innerHTML = this.html;
@@ -523,7 +556,30 @@ async function assignEventListeners() {
     await assignCommentButtons();
     await assignDeleteButtons();
 }
-
+async function commentSubmit(e,commentsComponent,tweetId)
+{
+            e.preventDefault();
+            let inputValue = document.getElementById('comment-input').value;
+            try {
+                let data = await request(`post-comment/`, {
+                    method: 'POST',
+                    body: JSON.stringify({content: inputValue, tweet: tweetId})
+                });
+                if(!data.ok)
+                {
+                    notify(data.error, 3, 'error');
+                    return;
+                }
+                notify('Comment posted successfully', 3, 'success');
+                let newComments = [data, ...commentsComponent.state.comments];
+                commentsComponent.setState({
+                    comments: newComments
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                notify('Error posting comment', 3, 'error');
+            }
+}
 const renderIndividualPost = async (tweetId) => {
     let response = await request(`get-tweet-and-comments/${tweetId}/`, {
         method: 'GET',
@@ -533,37 +589,17 @@ const renderIndividualPost = async (tweetId) => {
     let selectedPostComponent = new SelectedPostComponent({
         tweet: response.results.tweet,
         userId: data.id,
-        comments: response.results.comments,
-        next: response.next
     }, parentElement);
     selectedPostComponent.render();
+    let commentsComponent = new CommentsComponent({
+        comments: response.results.comments,
+        next: response.next
+    },document.getElementById('post-comments'));
+    commentsComponent.render();
     await assignLikeButtons();
     await fetchChatFriends()
     let form = document.getElementById('comment-send-form');
-    form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            let inputValue = document.getElementById('comment-input').value;
-            try {
-                let data = await request(`post-comment/`, {
-                    method: 'POST',
-                    body: JSON.stringify({content: inputValue, tweet: tweetId})
-                });
-                notify('Comment posted successfully', 3, 'success');
-                let newComments = [data, ...selectedPostComponent.state.tweet.results.comments];
-                selectedPostComponent.setState({
-                    tweet: {
-                        results: {
-                            tweet: selectedPostComponent.state.tweet.results.tweet,
-                            comments: newComments
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('Error:', error);
-                notify('Error posting comment', 3, 'error');
-            }
-        }
-    );
+    form.addEventListener('submit', (e) => commentSubmit(e,commentsComponent,tweetId));
 }
 
 async function getProfile2() {

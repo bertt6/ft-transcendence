@@ -54,9 +54,11 @@ function handleButtons(players, socket) {
     }
 }
 
-function handleErrorStates(data) {
+function handleErrorStates(data,socket) {
+    socket.close();
     notify(data.message, 3, 'error')
     setTimeout(() => {
+        console.log("redirecting")
         loadPage("/home/")
     }, 3000);
 }
@@ -121,23 +123,23 @@ function connectToSocket() {
             }
         }
         socket.onmessage = (event) => {
+            debugger
             const response = JSON.parse(event.data);
-            console.log("socket sent data", response)
-            if (errorStates.includes(response.send_type)) {
-                handleErrorStates(response);
-            }
-            if (response.send_type === "tournament_info") {
+            if (errorStates.includes(response.send_type))
+                handleErrorStates(response,socket);
+            if (response.send_type === "tournament_info")
                 renderTournamentInfo(response, socket);
-            } else if (response.send_type === "game_info") {
+            else if (response.send_type === "game_info")
                 handleGameRedirection(response);
-            } else if (response.send_type === "tournament_finished") {
+             else if (response.send_type === "tournament_finished")
                 handleFinishedTournament(response);
-            }
         }
         socket.onclose = () => {
             console.log("disconnected from the server");
         }
-
+        socket.onerror = (error) => {
+            console.error(error);
+        }
     } catch (e) {
         console.error(e);
     }

@@ -34,9 +34,9 @@ class TournamentConsumer(WebsocketConsumer):
     def check_params(self):
         if self.tournament_id is None or self.nickname is None:
             return False
-        if Profile.objects.filter(nickname=self.nickname).exists():
+        if not Profile.objects.filter(nickname=self.nickname).exists():
             return False
-        if Tournament.objects.filter(id=self.tournament_id).exists():
+        if not Tournament.objects.filter(id=self.tournament_id).exists():
             return False
         return True
 
@@ -51,11 +51,11 @@ class TournamentConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        if self.check_params():
+        self.accept()
+        if not self.check_params():
             self.send_error("invalid_params")
             self.close(code=1000)
             return
-        self.accept()
         instance = Profile.objects.get(nickname=self.nickname)
         serializer = TournamentProfileSerializer(instance)
         cache_key = f"user_{self.tournament_id}"
@@ -100,19 +100,39 @@ class TournamentConsumer(WebsocketConsumer):
             return
 
     def send_error(self, error_type):
-        if error_type == "invalid_profile":
-            self.send(text_data=json.dumps(
-                {"error": 'invalid_profile', "message": "Only the creator can start the tournament"}))
-        elif error_type == "invalid_tournament":
-            self.send(text_data=json.dumps({"error": "invalid_tournament", "message": "Not enough players"}))
-        elif error_type == "tournament_started":
-            self.send(text_data=json.dumps({"error": "tournament_started", "message": "Tournament Already Started"}))
-        elif error_type == "players_not_ready":
-            self.send(text_data=json.dumps({"error": "players_not_ready", "message": "All players must be ready"}))
-        elif error_type == "invalid_params":
-            self.send(text_data=json.dumps({"error": "invalid_params", "message": "Something went wrong"}))
-        elif error_type == "tournament_finished":
-            self.send(text_data=json.dumps({"error": "tournament_finished", "message": "Tournament is finished"}))
+        all_errors = [
+            {
+                "error": 'invalid_profile',
+                "message": "Only the creator can start the tournament"
+            },
+            {
+                "error": "invalid_tournament",
+                "message": "Not enough players"
+            },
+            {
+                "error": "tournament_started",
+                "message": "Tournament Already Started"
+            },
+            {
+                "error": "players_not_ready",
+                "message": "All players must be ready"
+            },
+            {
+                "error": "invalid_params",
+                "message": "Something went wrong"
+            },
+            {
+                "error": "tournament_finished",
+                "message": "Tournament is finished"
+            }
+        ]
+        error = next((item for item in all_errors if item["error"] == error_type), None)
+        if error is None:
+            return
+        self.send(text_data=json.dumps({
+            "send_type": error["error"],
+            "message": error["message"]
+        }))
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,

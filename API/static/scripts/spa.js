@@ -421,7 +421,7 @@ const routes = new Map([
         <pong-redirect class="home-element" id="multi-menu" href="/matchmaking/">
           <h1>Multiplayer</h1>
         </pong-redirect>
-        <pong-redirect  class="home-elemen" id="tournament-menu" href="/tournaments/">
+        <pong-redirect  class="home-element" id="tournament-menu" href="/tournaments/">
           <h1>Tournament</h1>
         </pong-redirect >
         <pong-redirect  class="home-element" id="social-menu" href="/social/">
@@ -596,10 +596,12 @@ const routes = new Map([
               <div class="range-wrapper">
                 <input
                   type="range"
-                  id="max_participants"
+                  id="range-input"
                   min="4"
                   max="16"
                   value="2"
+                   name="max_participants"
+
                 />
                 <span id="range-value">4</span>
               </div>
