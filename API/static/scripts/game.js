@@ -272,21 +272,33 @@ function handleMovement(socket,data)
     paddle: "spectator",
     dy: 0
   }
-  if (data.details.player1.nickname === localStorage.getItem("username"))
+    const nickname = getActiveUserNickname()
+    if (data.details.player1.nickname === nickname)
     currentPaddle.paddle = "player_one";
-  else if (data.details.player2.nickname === localStorage.getItem("username"))
+    else if (data.details.player2.nickname === nickname)
         currentPaddle.paddle = "player_two";
   document.addEventListener("keydown", (event) => {
     if (event.key === "w" || event.key === "s")
         {
+
+            console.log(currentPaddle)
           currentPaddle.dy = event.key === "w" ? -10: 10;
-            socket.send(JSON.stringify(currentPaddle));
+            const body = {
+                ...currentPaddle,
+                "send_type": "null"
+            }
+            socket.send(JSON.stringify(body));
         }
     });
   document.addEventListener("keyup", (event) => {
   if (event.key === "w" || event.key === "s") {
+
     currentPaddle.dy = 0;
-    socket.send(JSON.stringify(currentPaddle));
+      const body = {
+          ...currentPaddle,
+          "send_type": "null"
+      }
+      socket.send(JSON.stringify(body));
   }
 });
 }

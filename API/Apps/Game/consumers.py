@@ -119,6 +119,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send_initial_state()
 
     async def disconnect(self, close_code):
+        print("DISCONNECT!")
         clear_player_in_game(self.game_id, self.channel_name)
         await self.channel_layer.group_discard(
             self.game_group_name,
@@ -134,6 +135,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             add_player_in_game(self.game_id, 'player_two', data, self.channel_name)
         else:
             add_player_in_game(self.game_id, 'spectator', data, self.channel_name)
+            return
         if (GameConsumer.game_states[self.game_id]['task'] == False
                 and get_player_count_in_game(self.game_id) == 2):
             await asyncio.sleep(3)
@@ -163,20 +165,20 @@ class GameConsumer(AsyncWebsocketConsumer):
                 )
 
     async def receive(self, text_data):
+
         if self.error:
             return
         text_data_json = json.loads(text_data)
-        try:
-            if text_data_json['send_type'] == 'join':
-                await self.handle_join(text_data_json)
+        print(text_data_json)
+        if text_data_json['send_type'] == 'join':
+            await self.handle_join(text_data_json)
             return
-        except KeyError:
-            pass
-        paddle = text_data_json['paddle']
-        if paddle == 'player_one':
-            GameConsumer.game_states[self.game_id]['player_one']['dy'] = text_data_json['dy']
-        elif paddle == 'player_two':
-            GameConsumer.game_states[self.game_id]['player_two']['dy'] = text_data_json['dy']
+        elif text_data_json["send_type"] == "null":
+            paddle = text_data_json['paddle']
+            if paddle == 'player_one':
+                GameConsumer.game_states[self.game_id]['player_one']['dy'] = text_data_json['dy']
+            elif paddle == 'player_two':
+                GameConsumer.game_states[self.game_id]['player_two']['dy'] = text_data_json['dy']
 
     async def send_initial_state(self):
         data = await self.get_game()
@@ -266,7 +268,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         paddle_height = 200
         ball_speed = 1.0006
 
-        winner_ball_count = 1
+        winner_ball_count = 20
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']
         player2_score = GameConsumer.game_states[self.game_id]['player_two']['score']

@@ -20,17 +20,17 @@ class History extends BaseComponent {
                 </div>
                 <div class="history-data">
                   <h5>${history.player1.nickname}</h5>
-                  <h5>VS</h5>
+                  <h4>VS</h4>
                   <h5>${history.player2.nickname}</h5>
                 </div>
                 <div class="history-score">
-                 ${history.winner.nickname}
+                 <h5>${history.winner.nickname}</h5>
                 </div>
                 <div>
                   <h5>${calculateDate(history.date)}</h5>
                 </div>
               </div>
-            `)}
+            `).join(``)}
             </div>
           </div>
 `
@@ -325,7 +325,7 @@ class ProfileInfo extends BaseComponent {
                   alt=""
                 />
               </div>
-              <div>
+              <div class='${nickname.length > 10 ? "profile-nickname" : ''}'>
                 <h1>${nickname}</h1>
               </div>
               <div>

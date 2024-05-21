@@ -25,7 +25,21 @@
   max-width: 300px;
   position: relative;
   gap: 1rem;
+
+
 }
+
+.profile-info-wrapper h1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-nickname {
+    align-self: flex-start;
+
+    width: 120%;
+}
+
 .profile-data {
   flex: 1;
   display: flex;
@@ -114,10 +128,24 @@
   gap: 4rem;
   align-items: center;
 }
+
+.history-data h5,
+.history-score h5 {
+    width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .history-score {
+    overflow: hidden;
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.history-score h4 {
+    width: 120px;
+    text-overflow: ellipsis;
 }
 
 .profile-edit{

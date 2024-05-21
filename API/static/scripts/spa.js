@@ -174,7 +174,7 @@ const routes = new Map([
                 </div>
               <div class="profile-photo skeleton"></div>
               <div class="skeleton profile-data">
-                <h1></h1>
+                <h1 class="profile-nickname"></h1>
                 <span></span>
               </div>
               <div class="profile-bio skeleton">
@@ -502,7 +502,6 @@ const routes = new Map([
                 </div>
                 <div class="player-description" id="player-two-details">
                     <span class="player-name">Player 2</span>
-                    <span class="player-name">Points?</span>
                 </div>
             </div>
 
