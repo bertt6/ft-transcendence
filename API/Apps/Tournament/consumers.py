@@ -65,6 +65,9 @@ class TournamentConsumer(WebsocketConsumer):
             self.send_error("tournament_finished")
             self.close(code=1000)
             return
+        if tournament.rounds.exists():
+            self.send_error("tournament_started")
+            self.close(code=1000)
         if tournament.created_by == instance:
             created_by = True
         data = add_player_to_cache(serializer.data, cache_key, created_by)
@@ -73,6 +76,7 @@ class TournamentConsumer(WebsocketConsumer):
             self.channel_name,
         )
         tournament.current_participants.add(instance)
+        self.send_current_matchups()
         tournament.save()
         tournament_info = {
             "tournament_name": tournament.name,
@@ -124,7 +128,12 @@ class TournamentConsumer(WebsocketConsumer):
             {
                 "error": "tournament_finished",
                 "message": "Tournament is finished"
+            },
+            {
+                "error": "tournament_started",
+                "message": "Tournament is already started"
             }
+
         ]
         error = next((item for item in all_errors if item["error"] == error_type), None)
         if error is None:
@@ -133,6 +142,7 @@ class TournamentConsumer(WebsocketConsumer):
             "send_type": error["error"],
             "message": error["message"]
         }))
+
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
@@ -151,6 +161,20 @@ class TournamentConsumer(WebsocketConsumer):
                 tournament.created_by = participants.first()
             else:
                 tournament.delete()
+
+    def send_current_matchups(self):
+        tournament = Tournament.objects.get(id=self.tournament_id)
+        cache_data = get_players_from_cache(f"user_{self.tournament_id}")
+        all_games = []
+        for i in range(0, len(cache_data), 2):
+            if i + 1 < len(cache_data):
+                game = {
+                    "game_id": i,
+                    "players": [cache_data[i]["nickname"], cache_data[i + 1]["nickname"]]
+                }
+                all_games.append(game)
+
+        self.send_to_group(all_games, "current_matchups")
 
     def StartTournament(self, data):
         tournament = Tournament.objects.get(id=self.tournament_id)

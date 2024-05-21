@@ -32,7 +32,30 @@ class TournamentPlayers extends BaseComponent {
 
     }
 }
+class CurrentMatchups extends BaseComponent {
+    constructor(state, parentElement) {
+        super(state, parentElement);
+    }
 
+    handleHTML() {
+        return `
+            ${this.state.matchUps.map(matchUp => `
+                <div class="matchup">
+                    <div class="matchup-player">
+                        <span>${matchUp.players[0]}</span>
+                    </div>
+                    <div class="matchup-player">
+                        <span>${matchUp.players[1]}</span>
+                    </div>
+                </div>
+            `).join("")}
+            `
+    }
+    render() {
+        this.html = this.handleHTML();
+        super.render();
+    }
+}
 function handleButtons(players, socket) {
     const nickname = getActiveUserNickname();
     const buttonWrapper = document.getElementById("button-wrapper");
@@ -62,7 +85,11 @@ function handleErrorStates(data,socket) {
         loadPage("/home/")
     }, 3000);
 }
-
+function handleMatchups(data) {
+    let parentElement = document.getElementById("matchups");
+    const currentMatchups = new CurrentMatchups({matchUps: data}, parentElement);
+    currentMatchups.render();
+}
 function renderTournamentInfo(response, socket) {
     let parentElement = document.getElementById("tournament-participants");
     const tournamentPlayers = new TournamentPlayers({players: response.data.players}, parentElement);
@@ -108,7 +135,8 @@ function connectToSocket() {
         "tournament_started",
         "players_not_ready",
         "invalid_params",
-        "tournament_finished"
+        "tournament_finished",
+        "tournament_started",
     ]
     try {
         const nickname = getActiveUserNickname();
@@ -123,7 +151,6 @@ function connectToSocket() {
             }
         }
         socket.onmessage = (event) => {
-            debugger
             const response = JSON.parse(event.data);
             if (errorStates.includes(response.send_type))
                 handleErrorStates(response,socket);
@@ -133,6 +160,8 @@ function connectToSocket() {
                 handleGameRedirection(response);
              else if (response.send_type === "tournament_finished")
                 handleFinishedTournament(response);
+             else if(response.send_type === "current_matchups")
+                handleMatchups(response.data);
         }
         socket.onclose = () => {
             console.log("disconnected from the server");
@@ -140,6 +169,9 @@ function connectToSocket() {
         socket.onerror = (error) => {
             console.error(error);
         }
+            window.addEventListener("popstate", () => {
+            socket.close();
+    });
     } catch (e) {
         console.error(e);
     }
