@@ -13,7 +13,7 @@ Icon
 
 media/images/*
 !media/images/profile-pictures/
-!media/images/profile-pictures/default.svg
+!media/images/profile-pictures/default.jpeg
 # Thumbnails
 ._*
 /psql
