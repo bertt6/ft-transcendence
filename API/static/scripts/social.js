@@ -46,6 +46,7 @@ class ChatFriendsComponent extends BaseComponent {
     }
 
     render() {
+        this.parentElement.innerHTML = this.html;
         super.render();
         let allUsers = document.getElementsByClassName("user-wrapper");
         for (let i = 0; i < allUsers.length; i++) {
@@ -779,6 +780,7 @@ async function fetchRoomData(element) {
     let profilePicture = element.children[0].children[0].src;
     let wrapper = document.getElementById('conversation-wrapper');
     let activeUserInfoWrapper = document.getElementById('active-user-info');
+    console.log(activeUserInfoWrapper)
     let image = activeUserInfoWrapper.children[0].children[0]
     let name = activeUserInfoWrapper.children[1].children[0]
     name.innerText = nickname;
@@ -815,6 +817,7 @@ async function fetchRoomData(element) {
 async function toggleChat() {
     let chatContainer = document.getElementById("chat-container");
     let socialWrapper = document.getElementById("social-container");
+    console.log(this)
     await fetchRoomData(this);
     if (chatContainer.classList.contains("chat-closed")) {
         chatContainer.classList.add("chat-transition");
@@ -873,10 +876,6 @@ function handleChatState() {
     }, 1000);
     chatContainer.classList.add("chat-closed");
   });
-  let allUsers = document.getElementsByClassName("user-wrapper");
-  for (let i = 0; i < allUsers.length; i++) {
-    allUsers[i].addEventListener("click", toggleChat);
-  }
 }
 function handleChatEvents() {
     let searchInput = document.getElementById('user-search-input');

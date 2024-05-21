@@ -335,6 +335,7 @@ const routes = new Map([
                     />
                   </div>
                   <div class="active-user-info-wrapper">
+                    <h6></h6>
                   </div>
                 </div>
                 <div class="d-flex">
