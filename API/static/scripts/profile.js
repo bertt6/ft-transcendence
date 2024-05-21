@@ -46,18 +46,22 @@ class BlockedUsers extends BaseComponent {
         this.html = this.handleHTML();
     }
 
-    async removeBlockedUser(id, index) {
+    async removeBlockedUser(nickname, index) {
         try {
-            let data = await request('profile/block-users/', {
+            let data = await request('profile/block/', {
                 method: "POST",
                 body: JSON.stringify({
-                    profile_id: id
+                    nickname: nickname
                 })
             });
+            if(!data.ok)
+            {
+                notify('Error removing blocked user',3,'error');
+                return
+            }
             let wrapper = document.getElementById(`${index}-blocked-user-wrapper`)
-
             wrapper.remove()
-            return data;
+            notify('User unblocked', 3, 'success');
         } catch (error) {
             console.error('Error:', error);
             notify('Error fetching friends', 3, 'error');
@@ -89,7 +93,7 @@ class BlockedUsers extends BaseComponent {
         for (let i = 0; this.state.blockedUsers.length > i; i++) {
             console.log(this.state.blockedUsers[i].id)
             document.getElementById(`${i}-button`).addEventListener("click", () =>
-                this.removeBlockedUser(this.state.blockedUsers[i].id, i)
+                this.removeBlockedUser(this.state.blockedUsers[i].nickname, i)
             )
         }
 
@@ -495,7 +499,7 @@ async function fetchFriends() {
 
 async function fetchBlockedUsers() {
     try {
-        let data = await request('profile/block-users/', {
+        let data = await request('profile/block/', {
             method: "GET"
         })
         console.log(data)

@@ -205,10 +205,10 @@ const routes = new Map([
         url: ['/social/', '/social/\\w+/g'],
         html: `
       <ul class="chat-options" id="chat-options">
-        <li>Invite to Pong</li>
+        <li id="options-invite-to-pong">Invite to Pong</li>
         <pong-redirect id="profile-redirect">Go To Profile</pong-redirect>
-          <li>Block</li>
-          <li>Add Friend</li>
+          <li id="options-block-user">Block</li>
+          <li id="options-add-friend">Add Friend</li>
       </ul>
 
       
