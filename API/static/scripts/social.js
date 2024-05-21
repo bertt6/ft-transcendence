@@ -230,9 +230,7 @@ class SelectedPostComponent extends BaseComponent {
                       <span>${calculateDate(tweet.date)}</span>
                     </div>
                   </div>
-                  <div>
-                    <img src="/static/public/more.svg" alt="" style="width: 50px" />
-                  </div>
+
                   <div id="comment-back-button" style="cursor: pointer">
                     <img src="/static/public/go-back.svg" alt="Load Failed" />
                   </div>
