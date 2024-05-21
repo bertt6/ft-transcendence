@@ -547,8 +547,8 @@ const routes = new Map([
                   <div class="joined-ready">(NOT READY)</div>
                 </div>
                 <hr />
-                <div class="joined-remaining">
-                  <h1>25 Seconds Remaining</h1>
+                <div class="tournament-matchups" id="matchups">
+
                 </div>
               </div>
             </div>

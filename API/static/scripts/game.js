@@ -149,7 +149,6 @@ function printWinner(data, winner, socket) {
     setTimeout(() => {
         element.remove();
         }, 5000);
-    console.log(data)
     if (data.tournament_id !== "None")
     {
         localStorage.setItem("tournament_id",data.tournament_id);
@@ -211,7 +210,6 @@ async function connectToServer() {
             send_type: "join",
         }));
     };
-
     socket.onerror = () => {
         loadError(500, "Server error", "redirecting to home page");
         setTimeout(() => {
@@ -275,10 +273,11 @@ function handleMovement(socket,data)
     else if (data.details.player2.nickname === nickname)
         currentPaddle.paddle = "player_two";
   document.addEventListener("keydown", (event) => {
-    if (event.key === "w" || event.key === "s")
+    if(socket.CLOSED || socket.CLOSING)
+        return;
+      if (event.key === "w" || event.key === "s")
         {
 
-            console.log(currentPaddle)
           currentPaddle.dy = event.key === "w" ? -10: 10;
             const body = {
                 ...currentPaddle,
@@ -288,8 +287,9 @@ function handleMovement(socket,data)
         }
     });
   document.addEventListener("keyup", (event) => {
+      if(socket.CLOSED || socket.CLOSING)
+        return;
   if (event.key === "w" || event.key === "s") {
-
     currentPaddle.dy = 0;
       const body = {
           ...currentPaddle,

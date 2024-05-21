@@ -268,7 +268,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         paddle_height = 200
         ball_speed = 1.0006
 
-        winner_ball_count = 20
+        winner_ball_count = 2
 
         player1_score = GameConsumer.game_states[self.game_id]['player_one']['score']
         player2_score = GameConsumer.game_states[self.game_id]['player_two']['score']

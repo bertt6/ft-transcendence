@@ -111,7 +111,6 @@ function handleGameRedirection(response) {
 
 function handleFinishedTournament(response) {
     let winner = response.data.winner;
-    console.log("winner", winner)
     let winnerHTML = `
           <div class="winner-wrapper">
           <div class="winner-image-wrapper">
@@ -120,7 +119,6 @@ function handleFinishedTournament(response) {
           <h1>Winner is ${winner.nickname}</h1>
         </div>
   `
-
     let element = document.createElement("div");
     element.id = "game-message-wrapper";
     element.innerHTML = winnerHTML;
@@ -137,7 +135,6 @@ function connectToSocket() {
         "tournament_started",
         "players_not_ready",
         "invalid_params",
-        "tournament_finished",
         "tournament_started",
     ]
     try {
@@ -154,16 +151,19 @@ function connectToSocket() {
         }
         socket.onmessage = (event) => {
             const response = JSON.parse(event.data);
+            console.log(response)
             if (errorStates.includes(response.send_type))
                 handleErrorStates(response,socket);
             if (response.send_type === "tournament_info")
                 renderTournamentInfo(response, socket);
             else if (response.send_type === "game_info")
                 handleGameRedirection(response);
-             else if (response.send_type === "tournament_finished")
+             else if (response.send_type === "tournament_winner")
                 handleFinishedTournament(response);
              else if(response.send_type === "current_matchups")
                 handleMatchups(response.data);
+             else
+                console.log("unknown message type", response)
         }
         socket.onclose = () => {
             console.log("disconnected from the server");

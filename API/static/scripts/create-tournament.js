@@ -29,7 +29,6 @@ formData.forEach((value, key) => {
         method: 'POST',
         body: JSON.stringify(data)
       });
-        console.log(response.ok)
       if(!response.ok)
         {
             let message = parseErrorToNotify(response);

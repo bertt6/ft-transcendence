@@ -62,12 +62,17 @@ class TournamentConsumer(WebsocketConsumer):
         created_by = False
         tournament = Tournament.objects.get(id=self.tournament_id)
         if tournament.is_finished:
-            self.send_error("tournament_finished")
+            self.send_to_group(
+                {"winner": tournament.winner.nickname, "profile_picture": tournament.winner.profile_picture.url},
+                "tournament_winner")
             self.close(code=1000)
             return
         if tournament.rounds.exists():
-            self.send_error("tournament_started")
-            self.close(code=1000)
+            if tournament.current_participants.get(nickname=self.nickname) is None:
+                self.send_error("tournament_started")
+                self.close(code=1000)
+                return
+
         if tournament.created_by == instance:
             created_by = True
         data = add_player_to_cache(serializer.data, cache_key, created_by)
@@ -127,7 +132,7 @@ class TournamentConsumer(WebsocketConsumer):
             },
             {
                 "error": "tournament_finished",
-                "message": "Tournament is finished"
+                "message": "Tournament is already finished"
             },
             {
                 "error": "tournament_started",
@@ -223,8 +228,10 @@ class TournamentConsumer(WebsocketConsumer):
             print("Turnuva Yok")
             return
         print(last_round)
-        if tournament.is_finished == True:
-            print("Turnuva Bitti")
+        if tournament.is_finished:
+            self.send_to_group(
+                {"winner": tournament.winner.nickname, "profile_picture": tournament.winner.profile_picture.url},
+                "tournament_winner")
             return
         if last_round:
             all_matches_have_winner = all(Game.winner is not None for match in last_round.matches.all())
@@ -243,7 +250,7 @@ class TournamentConsumer(WebsocketConsumer):
                 tournament.is_finished = True
                 tournament.save()
                 self.send_to_group({"winner": game.winner.nickname, "profile_picture": game.winner.profile_picture.url},
-                                   "tournament_finished")
+                                   "tournament_winner")
             if not player_participated:
                 print("Player Maclarda Yok")
                 return
