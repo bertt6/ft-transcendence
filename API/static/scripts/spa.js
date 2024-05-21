@@ -206,7 +206,7 @@ const routes = new Map([
         html: `
       <ul class="chat-options" id="chat-options">
         <li>Invite to Pong</li>
-        <pong-redirect id="options-profile">Go To Profile</pong-redirect>
+        <pong-redirect id="profile-redirect">Go To Profile</pong-redirect>
           <li>Block</li>
           <li>Add Friend</li>
       </ul>

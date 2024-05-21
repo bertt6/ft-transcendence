@@ -8,5 +8,5 @@ urlpatterns = [
     path('profile/stats/', ProfileStatsView.as_view(), name='profile_stats'),
     path('profile/history/', ProfileGameHistoryView.as_view(), name='profile_game_history'),
     path('profile/friends/', ProfileFriendsView.as_view(), name='profile_friends'),
-    path('profile/block-users/', ProfileBlockedUsersView.as_view(), name='profile_blocked_users'),
+    path('profile/block/', ProfileBlockedUsersView.as_view(), name='profile_blocked_users'),
 ]

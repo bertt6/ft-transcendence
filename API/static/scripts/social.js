@@ -7,6 +7,57 @@ import {getSocket} from "./requests.js";
 import {calculateDate, escapeHTML, getActiveUserNickname, getProfile} from "./utils.js";
 import {getStatusSocket} from "./Status.js";
 
+class SearchUsersComponent extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+        this.html = this.handleHTML();
+    }
+
+    handleHTML() {
+        return `
+        ${this.state.users.map(user => `
+        <div class="user-wrapper" data-is-friend="false">
+          <div class="user-pic-wrapper">
+            <img
+              src="${BASE_URL}${user.profile_picture}"
+              alt=""
+            />
+          </div>
+          <div class="user-info-wrapper">
+            <div class="d-flex align-items-center justify-content-center gap-2">
+              <h6>${user.nickname}</h6>
+              ${user.is_friend ? `<div class="friend-icon"></div>` : ''}
+            </div>
+             <span>${this.checkStatus(user.nickname) ? this.getStatus(user.nickname) : 'Offline'}</span>
+          </div>
+        </div>
+        `).join('')}
+        `
+    }
+
+    render() {
+        this.parentElement.innerHTML = this.html;
+        super.render();
+        let allUsers = document.getElementsByClassName("user-wrapper");
+        for (let i = 0; i < allUsers.length; i++) {
+            allUsers[i].addEventListener("click", toggleChat);
+        }
+        for (let element of allUsers) {
+            element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
+        }
+    }
+    getStatus(nickname) {
+        return this.state.status.online_users.find(user => user.nickname === nickname).status;
+    }
+    checkStatus(nickname) {
+        return this.state.status.online_users.some(user => user.nickname === nickname);
+    }
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.html = this.handleHTML();
+        this.render();
+    }
+}
 class ChatFriendsComponent extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -16,7 +67,7 @@ class ChatFriendsComponent extends BaseComponent {
     handleHTML() {
         return `
               ${this.state.friends.map(friend => `
-                <div class="user-wrapper">
+                <div class="user-wrapper" data-is-friend="true">
                   <div class="user-pic-wrapper">
                     <img
                       src="${friend.profile_picture}"
@@ -701,13 +752,52 @@ async function handleInviteToPong(element) {
     socket.send(JSON.stringify(sendBody));
     notify('Invite sent', 3, 'success');
 }
-
+async function handleRemoveFriend(element)
+{
+    let nickname = element.children[1].children[0].innerText;
+    let params = new URLSearchParams()
+    params.append('nickname', nickname)
+    try {
+        let response = await request(`profile/friends/?${params.toString()}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            notify(response.error, 3, 'error');
+            return;
+        }
+        notify('Friend removed', 3, 'success');
+    } catch (error) {
+        console.error('Error:', error);
+        notify('Error removing friend', 3, 'error');
+    }
+}
+async function handleBlockUser(element) {
+    let nickname = element.children[1].children[0].innerText;
+    try {
+        let response = await request(`profile/block/`, {
+            method: 'POST',
+            body: JSON.stringify({nickname: nickname})
+        });
+        if (!response.ok) {
+            notify(response.error, 3, 'error');
+            return;
+        }
+        notify('User blocked', 3, 'success');
+    } catch (error) {
+        console.error('Error:', error);
+        notify('Error blocking user', 3, 'error');
+    }
+}
 function addContextListeners(element) {
     let addFriendButton = document.getElementById('options-add-friend');
+    if (addFriendButton.innerText === 'Add Friend')
+        addFriendButton.addEventListener('click', () => handleAddFriend(element));
+    else
+        addFriendButton.addEventListener('click', () => handleRemoveFriend(element));
     let blockUserButton = document.getElementById('options-block-user');
     let inviteToPongButton = document.getElementById('options-invite-to-pong');
-    addFriendButton.addEventListener('click', () => handleAddFriend(element));
     inviteToPongButton.addEventListener('click', () => handleInviteToPong(element));
+    blockUserButton.addEventListener('click', () =>handleBlockUser(element));
 }
 
 function handleRightClick(event, element) {
@@ -718,15 +808,20 @@ function handleRightClick(event, element) {
     chatOptions.style.top = `${mouseY}px`;
     chatOptions.style.left = `${mouseX}px`;
     chatOptions.classList.add("chat-options-open");
+    const isFriend = element.getAttribute('data-is-friend');
+    if(isFriend === 'true')
+    {
+        document.getElementById('options-add-friend').innerText = 'Remove Friend';
+    }
     chatOptions.addEventListener("click", (event) => {
         event.stopPropagation();
     });
+    let inviteToPong = document.getElementById('options-invite-to-pong');
 
     function handleChatContext() {
         let redirect = document.getElementById('profile-redirect');
         redirect.setAttribute('href', `/profile/${element.children[1].children[0].innerText}`)
     }
-
     handleChatContext()
     addContextListeners(element)
     document.addEventListener(
@@ -845,7 +940,6 @@ async function handleInput(event) {
     event.preventDefault();
     let searchValue = searchInput.value.trim(); // Trim to remove extra spaces
     let parentElement = document.getElementById('user-data-wrapper');
-
     if (searchValue) {
         let params = new URLSearchParams();
         params.append('search', searchValue);
@@ -855,8 +949,8 @@ async function handleInput(event) {
         statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
         statusSocket.addEventListener('message', (event) => {
             let userStatus = JSON.parse(event.data);
-            let chatFriendsComponent = new ChatFriendsComponent({
-                friends: response,
+            let chatFriendsComponent = new SearchUsersComponent({
+                users: response,
                 status: userStatus
             }, parentElement);
             chatFriendsComponent.render();

@@ -156,21 +156,21 @@ class ProfileFriendsView(APIView):
             return Response({"error": "Friend not found"}, status=404)
         profile.friends.add(friend)
         profile.save()
-        return Response(status=201)
+        return Response(status=201, data={"message": "Friend added"})
 
     def delete(self, request):
         profile = request.user.profile
         try:
-            friend = Profile.objects.get(id=request.data.get('friend_id'))
+            friend = Profile.objects.get(nickname=request.query_params.get('nickname'))
         except Profile.DoesNotExist:
             return Response({"error": "Friend not found"}, status=404)
-
-        if (profile.friends.filter(id=friend.id).exists()):
-            profile.friends.remove(friend)
-            profile.save()
-        else:
-            return Response({"error": "Friend not found"}, status=404)
-        return Response(status=204)
+        if not profile or not friend:
+            return Response({"error": "Profile not found"}, status=404)
+        profile.friends.remove(friend)
+        profile.save()
+        friend.friends.remove(profile)
+        friend.save()
+        return Response({"message": "Friend removed"}, status=200)
 
 
 @authentication_classes([JWTAuthentication])
@@ -183,21 +183,21 @@ class ProfileBlockedUsersView(APIView):
 
     def post(self, request):
         from_profile = request.user.profile
-        to_profile_id = request.data.get('profile_id')
-        to_profile = Profile.objects.get(id=request.data.get('profile_id'))
+        nickname = request.data.get('nickname')
+        to_profile = Profile.objects.get(nickname=nickname)
 
-        if not Profile.objects.filter(id=to_profile_id).exists():
+        if not Profile.objects.filter(nickname=nickname).exists():
             return Response({"error": "Profile not found"}, status=404)
 
-        if not from_profile.blocked_users.filter(id=to_profile_id).exists():
+        if not from_profile.blocked_users.filter(nickname=nickname).exists():
             from_profile.blocked_users.add(to_profile)
             if from_profile.friends.filter(id=to_profile.id).exists():
                 from_profile.friends.remove(to_profile)
                 to_profile.friends.remove(from_profile)
             from_profile.save()
-            return Response({"error": "Profile blocked"}, status=201)
+            return Response({"message": "Profile blocked"}, status=201)
 
         else:
             from_profile.blocked_users.remove(to_profile)
             from_profile.save()
-            return Response({"error": "Profile block removed"}, status=201)
+            return Response({"message": "Profile block removed"}, status=201)
