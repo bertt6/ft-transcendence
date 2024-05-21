@@ -338,7 +338,6 @@ const routes = new Map([
                   </div>
                 </div>
                 <div class="d-flex">
-                  <img src="/static/public/more.svg" alt="" style="width: 50px" />
                   <div id="chat-close-button"  style="cursor: pointer">
                     <img  src="/static/public/go-back.svg" alt="" />
                   </div>
