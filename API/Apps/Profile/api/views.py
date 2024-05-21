@@ -158,6 +158,20 @@ class ProfileFriendsView(APIView):
         profile.save()
         return Response(status=201)
 
+    def delete(self, request):
+        profile = request.user.profile
+        try:
+            friend = Profile.objects.get(id=request.data.get('friend_id'))
+        except Profile.DoesNotExist:
+            return Response({"error": "Friend not found"}, status=404)
+
+        if (profile.friends.filter(id=friend.id).exists()):
+            profile.friends.remove(friend)
+            profile.save()
+        else:
+            return Response({"error": "Friend not found"}, status=404)
+        return Response(status=204)
+
 
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

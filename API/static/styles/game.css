@@ -37,6 +37,13 @@
     height: 3rem;
     border-radius: 50%;
 }
+
+.game-points {
+    position: fixed;
+    top: 11%;
+    right: 46.6%;
+}
+
 .game-points h1{
     font-size: 3rem;
 }
@@ -128,9 +135,10 @@
     border-radius: 50%;
 }
 .spectators-wrapper{
+    width: 100px;
     position: absolute;
-    right: 50%;
-    top: 3rem;
+    right: 47.5%;
+    top: 2rem;
     display: flex;
     justify-content: center;
 }
@@ -154,6 +162,7 @@ margin-right: -1rem; /* Half of the width */
 }
 
 .popup-container {
+    width: 180px;
     background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
     list-style: none;
     z-index: 10;

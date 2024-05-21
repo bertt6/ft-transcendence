@@ -127,14 +127,12 @@ function setPlayerData(state) {
     name = detailsWrapper.querySelector(".player-name");
     name.innerText = details.player2.nickname;
 }
-
 function handleInitialState(state) {
 
     setCurrentPoints(state)
     setPlayerData(state);
-    draw(state.game, "red", "blue");
-}
 
+}
 function printWinner(data, winner, socket) {
     let winnerHTML = `
           <div class="winner-wrapper">
@@ -150,9 +148,11 @@ function printWinner(data, winner, socket) {
     document.body.appendChild(element);
     setTimeout(() => {
         element.remove();
-    }, 5000);
-    if (data.tournament_id) {
-        localStorage.setItem("tournament_id", data.tournament_id);
+        }, 5000);
+    console.log(data)
+    if (data.tournament_id !== "None")
+    {
+        localStorage.setItem("tournament_id",data.tournament_id);
         setTimeout(() => {
             loadPage(`/tournament/${data.tournament_id}/`);
         }, 5000);
@@ -197,6 +197,12 @@ async function connectToServer() {
     const path = window.location.pathname;
     const id = path.split("/")[2];
     let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+
+    window.addEventListener('popstate', (event) => {
+            socket.close()
+        }
+    );
+
     socket.onopen = async function (event) {
         let connectedProfile = await getProfile()
         socket.send(JSON.stringify({
@@ -215,61 +221,83 @@ async function connectToServer() {
 
     socket.onmessage = async (event) => {
         const data = JSON.parse(event.data);
-        console.log(data)
-        if (data.state_type === "initial_state") {
-            try {
-                const statusSocket = await getStatusSocket();
-                statusSocket.send(JSON.stringify({
-                    request_type: "set_status",
-                    status: "in_game",
-                    nickname: getActiveUserNickname()
-                }));
-            } catch (e) {
-                console.error(e);
-            }
-            handleInitialState(data);
-            handleMovement(socket, data);
-        } else if (data.state_type === "score_state") {
-            draw(data.game, "red", "blue");
-            setCurrentPoints(data);
-            printCountdown();
-        } else if (data.state_type === 'finish_state') {
-            draw(data.game, "red", "blue");
-            setCurrentPoints(data);
-            printWinner(data, data.winner);
-        } else if (data.state_type === "game_state") {
-            draw(data.game, "red", "blue");
-            setCurrentPoints(data);
-            handleParticipants(data);
-        } else if (data.state_type === "error_state") {
-            loadError(data.status, data.title, data.message);
-            socket.close()
-        }
+      if(data.state_type === "initial_state")
+      {
+
+          try {
+            const statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({
+                request_type: "set_status",
+                status: "in_game",
+                nickname: getActiveUserNickname()
+            }));
+          }catch(e)
+          {
+              console.error(e);
+          }
+          if (data.game.ball.x === 0 && data.game.ball.y === 0) {
+              printCountdown();
+          }
+          handleInitialState(data);
+          handleMovement(socket, data);
+      } else if (data.state_type === "score_state") {
+        draw(data.game,"red","blue");
+        setCurrentPoints(data);
+        printCountdown();
+      } else if (data.state_type === 'finish_state') {
+        draw(data.game,"red","blue");
+        setCurrentPoints(data);
+        printWinner(data,data.winner);
+      }
+      else if(data.state_type === "game_state")
+      {
+        draw(data.game,"red","blue");
+        setCurrentPoints(data);
+        handleParticipants(data);
+      }
+      else if(data.state_type === "error_state")
+      {
+          loadError(data.status,data.title, data.message);
+          socket.close()
+      }
     };
     return socket;
 }
-
-function handleMovement(socket, data) {
-    let currentPaddle = {
-        paddle: "spectator",
-        dy: 0
-    }
-    if (data.details.player1.nickname === localStorage.getItem("username"))
-        currentPaddle.paddle = "player_one";
-    else if (data.details.player2.nickname === localStorage.getItem("username"))
+function handleMovement(socket,data)
+{
+  let currentPaddle = {
+    paddle: "spectator",
+    dy: 0
+  }
+    const nickname = getActiveUserNickname()
+    if (data.details.player1.nickname === nickname)
+    currentPaddle.paddle = "player_one";
+    else if (data.details.player2.nickname === nickname)
         currentPaddle.paddle = "player_two";
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "w" || event.key === "s") {
-            currentPaddle.dy = event.key === "w" ? -10 : 10;
-            socket.send(JSON.stringify(currentPaddle));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "w" || event.key === "s")
+        {
+
+            console.log(currentPaddle)
+          currentPaddle.dy = event.key === "w" ? -10: 10;
+            const body = {
+                ...currentPaddle,
+                "send_type": "null"
+            }
+            socket.send(JSON.stringify(body));
         }
     });
-    document.addEventListener("keyup", (event) => {
-        if (event.key === "w" || event.key === "s") {
-            currentPaddle.dy = 0;
-            socket.send(JSON.stringify(currentPaddle));
-        }
-    });
+  document.addEventListener("keyup", (event) => {
+  if (event.key === "w" || event.key === "s") {
+
+    currentPaddle.dy = 0;
+      const body = {
+          ...currentPaddle,
+          "send_type": "null"
+      }
+      socket.send(JSON.stringify(body));
+  }
+});
 }
 
 async function App() {
