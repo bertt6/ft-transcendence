@@ -31,7 +31,6 @@ class History extends BaseComponent {
                 </div>
               </div>
             `).join('')}
-            `).join(``)}
             </div>
           </div>
 `
@@ -514,8 +513,6 @@ async function fetchHistory()
         let data = await request(`profile/history/`,{
             method:'GET',
         });
-        console.log(data)
-
         if(!data.ok)
         {
             notify('Error fetching history',3,'error');
