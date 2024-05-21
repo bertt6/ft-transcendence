@@ -390,7 +390,6 @@ class ConversationComponent extends BaseComponent {
     }
     addObserver() {
     let loading = document.getElementById('chat-loading');
-        console.log(loading)
         if (!loading)
             return;
         let observer = new IntersectionObserver(async (entries) => {
@@ -828,9 +827,6 @@ async function toggleChat() {
     }
 }
 
-function handleChatState() {
-
-}
 
 function debounce(func, delay) {
     let timeoutId;
@@ -865,7 +861,23 @@ async function handleInput(event) {
         });
     }
 }
-
+function handleChatState() {
+    let chatContainer = document.getElementById("chat-container");
+  let socialWrapper = document.getElementById("social-container");
+  let chatCloseButton = document.getElementById("chat-close-button");
+  chatCloseButton.addEventListener("click", () => {
+    chatContainer.classList.add("chat-transition");
+    setTimeout(() => {
+      chatContainer.classList.remove("chat-transition");
+      socialWrapper.classList.add("social-wrapper-chat-closed");
+    }, 1000);
+    chatContainer.classList.add("chat-closed");
+  });
+  let allUsers = document.getElementsByClassName("user-wrapper");
+  for (let i = 0; i < allUsers.length; i++) {
+    allUsers[i].addEventListener("click", toggleChat);
+  }
+}
 function handleChatEvents() {
     let searchInput = document.getElementById('user-search-input');
     searchInput.addEventListener('keyup', (e) => {
@@ -887,6 +899,7 @@ const App = async () => {
     assignRouting();
     handleChatState();
     handleChatEvents();
+
     //I don't know if this make sense but, I added this to prevent the form from submitting when
     //there is no chat active
     document.querySelectorAll('form').forEach(form => {
