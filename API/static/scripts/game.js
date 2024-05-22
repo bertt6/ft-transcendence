@@ -10,7 +10,8 @@ const canvasHeight = canvas.height;
 const paddleWidth = 10;
 const paddleHeight = 200;
 const ballSize = 20;
-
+let handleKeyDown;
+let handleKeyUp;
 
 class Participants extends BaseComponent {
     constructor(state, parentElement) {
@@ -257,9 +258,46 @@ async function connectToServer() {
       {
           loadError(data.status,data.title, data.message);
           socket.close()
+          removeKeyboardEventListeners();
       }
     };
+    socket.onclose = () => {
+        removeKeyboardEventListeners();
+
+    }
     return socket;
+}
+function addKeyboardEventListeners(socket, currentPaddle) {
+    handleKeyDown = (event) => {
+        if (socket.CLOSED || socket.CLOSING) return;
+        if (event.key === "w" || event.key === "s") {
+            currentPaddle.dy = event.key === "w" ? -10 : 10;
+            const body = {
+                ...currentPaddle,
+                "send_type": "null"
+            };
+            socket.send(JSON.stringify(body));
+        }
+    };
+
+    handleKeyUp = (event) => {
+        if (socket.CLOSED || socket.CLOSING) return;
+        if (event.key === "w" || event.key === "s") {
+            currentPaddle.dy = 0;
+            const body = {
+                ...currentPaddle,
+                "send_type": "null"
+            };
+            socket.send(JSON.stringify(body));
+        }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+}
+function removeKeyboardEventListeners() {
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("keyup", handleKeyUp);
 }
 function handleMovement(socket,data)
 {
@@ -272,32 +310,7 @@ function handleMovement(socket,data)
     currentPaddle.paddle = "player_one";
     else if (data.details.player2.nickname === nickname)
         currentPaddle.paddle = "player_two";
-  document.addEventListener("keydown", (event) => {
-    if(socket.CLOSED || socket.CLOSING)
-        return;
-      if (event.key === "w" || event.key === "s")
-        {
-
-          currentPaddle.dy = event.key === "w" ? -10: 10;
-            const body = {
-                ...currentPaddle,
-                "send_type": "null"
-            }
-            socket.send(JSON.stringify(body));
-        }
-    });
-  document.addEventListener("keyup", (event) => {
-      if(socket.CLOSED || socket.CLOSING)
-        return;
-  if (event.key === "w" || event.key === "s") {
-    currentPaddle.dy = 0;
-      const body = {
-          ...currentPaddle,
-          "send_type": "null"
-      }
-      socket.send(JSON.stringify(body));
-  }
-});
+    addKeyboardEventListeners(socket, currentPaddle);
 }
 
 async function App() {
