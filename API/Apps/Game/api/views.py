@@ -50,14 +50,10 @@ def finish_game(game_id, winner_nickname):
 
     winner = Profile.objects.get(nickname=winner_nickname)
     if game.player1.id == winner.id or game.player2.id == winner.id:
-        winner.stats.total_wins += 1
-        winner.stats.save()
         game.winner = winner
         game.is_finished = True
         game.save()
         if game.player1.nickname != winner_nickname:
-            game.player1.stats.total_losses += 1
-            game.player1.stats.save()
+            game.player2.win_games(game.player1.mmr)
         else:
-            game.player2.stats.total_losses += 1
-            game.player2.stats.save()
+            game.player1.win_games(game.player2.mmr)

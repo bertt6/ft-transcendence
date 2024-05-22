@@ -106,7 +106,8 @@ class ProfileGameHistoryView(APIView):
         profile = request.user.profile
         if not profile:
             return Response({"error": "Profile not found"}, status=404)
-        games = Game.objects.filter(Q(player1=profile) | Q(player2=profile)).exclude(winner=None)
+        games = Game.objects.filter(Q(player1=profile) | Q(player2=profile)).exclude(winner=None).order_by(
+            'date').reverse()
         serializer = ProfileGameSerializer(games, many=True)
         return Response(serializer.data, status=200)
 
