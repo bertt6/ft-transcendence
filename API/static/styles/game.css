@@ -142,6 +142,11 @@
     display: flex;
     justify-content: center;
 }
+
+.spectators-container {
+    display: flex;
+}
+
 .spectator-image{
     aspect-ratio: 1/1;
     width: 2rem;

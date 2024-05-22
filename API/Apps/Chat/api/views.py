@@ -33,7 +33,7 @@ def start_chat(request):
 @permission_classes([IsAuthenticated])
 def get_messages(request, room_id):
     try:
-        messages = Message.objects.filter(room=room_id)
+        messages = Message.objects.filter(room=room_id).order_by('created_date').reverse()
         paginator = PageNumberPagination()
         paginator.page_size = 10
         paginated_data = paginator.paginate_queryset(messages, request)

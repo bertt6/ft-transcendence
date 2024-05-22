@@ -47,11 +47,19 @@ class Profile(models.Model):
         k_factor = 32
         expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
         self.mmr += k_factor * (1 - expected_score)
+        self.stats.total_games += 1
+        self.stats.total_wins += 1
+        self.stats.save()
+        self.save()
 
     def lose_games(self, opponent_mmr):
         k_factor = 32
         expected_score = 1 / (1 + 10 ** ((opponent_mmr - self.mmr) / 400))
         self.mmr += k_factor * (0 - expected_score)
+        self.stats.total_games += 1
+        self.stats.total_losses += 1
+        self.stats.save()
+        self.save()
 
     def save_image_from_url(self, url):
         img_temp = NamedTemporaryFile()
