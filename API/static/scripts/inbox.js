@@ -41,7 +41,7 @@ class ProfileData extends BaseComponent {
             const refresh_token = getCookie('refresh_token')
             if (refresh_token === 'null')
                 return
-            await request(`token/blacklist`, {
+            await request(`auth/token/blacklist/`, {
                 method: 'POST',
                 body: JSON.stringify({
                     refresh: refresh_token
@@ -152,8 +152,10 @@ function checkInboxRequired() {
 
 }
 
-async function App() {
+export async function createInbox() {
     if (getActiveUserNickname() === null || !checkIfAuthRequired(window.location.pathname) && checkInboxRequired(window.location.pathname))
+        return;
+    if(document.getElementById('inbox-data-wrapper'))
         return;
     let profile = new ProfileData({}, document.getElementById('profile-data'));
     profile.render();
@@ -177,4 +179,4 @@ window.addEventListener('popstate', () => {
         document.getElementById('data-wrapper').remove();
     }
 })
-App().catch(console.error)
+createInbox().catch(console.error)

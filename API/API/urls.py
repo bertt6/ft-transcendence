@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.views.generic import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('API.api_urls')),
@@ -28,7 +28,8 @@ urlpatterns = [
     path('social/', include('Apps.SocialMedia.urls')),
     path('', include('Apps.Game.urls')),
     path('matchmaking/', include('Apps.Matchmaking.urls')),
-    path('', include('Apps.Tournament.urls'))
+    path('', include('Apps.Tournament.urls')),
+    path('favicon.ico', RedirectView.as_view(url='/static/public/default.png')),
 ]
 
 if settings.DEBUG:

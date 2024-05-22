@@ -78,6 +78,8 @@ const App = async () => {
         await handle42APICallback(code)
     }
     localStorage.removeItem("timer")
+    if(document.getElementById('inbox-data-wrapper'))
+        document.getElementById('inbox-data-wrapper').remove();
 }
 
 App().catch((error) => {

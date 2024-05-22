@@ -56,6 +56,17 @@ class CurrentMatchups extends BaseComponent {
         super.render();
     }
 }
+let handleMessage;
+(function() {
+
+  function destroy() {
+    clearSocketOnMessage()
+  }
+
+  // Expose init and destroy to the global scope
+  window.tournament = {destroy };
+})();
+
 function handleButtons(players, socket) {
     const nickname = getActiveUserNickname();
     const buttonWrapper = document.getElementById("button-wrapper");
@@ -135,7 +146,8 @@ function connectToSocket() {
         "players_not_ready",
         "invalid_params",
         "tournament_started",
-    ]
+    ];
+
     try {
         const nickname = getActiveUserNickname();
         const tournamentId = window.location.pathname.split("/").filter(Boolean)[1];
@@ -145,34 +157,48 @@ function connectToSocket() {
         socket.onopen = () => {
             if (localStorage.getItem("tournament_id")) {
                 localStorage.removeItem("tournament_id");
-                socket.send(JSON.stringify({send_type: "checkMatch"}));
+                socket.send(JSON.stringify({ send_type: "checkMatch" }));
             }
-        }
-        socket.onmessage = (event) => {
-            const response = SON.parse(event.data);
-            if (errorStates.includes(response.send_type))
-                handleErrorStates(response,socket);
-            if (response.send_type === "tournament_info")
+        };
+
+        handleMessage = (event) => {
+            const response = JSON.parse(event.data);
+            if (errorStates.includes(response.send_type)) {
+                handleErrorStates(response, socket);
+            }
+            if (response.send_type === "tournament_info") {
                 renderTournamentInfo(response, socket);
-            else if (response.send_type === "game_info")
+            } else if (response.send_type === "game_info") {
                 handleGameRedirection(response);
-             else if (response.send_type === "tournament_winner")
+            } else if (response.send_type === "tournament_winner") {
                 handleFinishedTournament(response);
-             else if(response.send_type === "current_matchups")
+            } else if (response.send_type === "current_matchups") {
                 handleMatchups(response.data);
-             else
-                 loadError(404, "Page not found")
-        }
-        socket.onclose = () => {
-        }
+            } else {
+                loadError(404, "Page not found");
+            }
+        };
+
+        socket.onmessage = handleMessage;
+
+        socket.onclose = () => {};
+
         socket.onerror = (error) => {
             console.error(error);
-        }
-            window.addEventListener("popstate", () => {
+        };
+
+        window.addEventListener("popstate", () => {
             socket.close();
-    });
+        });
     } catch (e) {
         console.error(e);
+    }
+}
+
+// Function to clear the socket.onmessage event listener
+function clearSocketOnMessage() {
+    if (handleMessage) {
+        socket.removeEventListener("message", handleMessage);
     }
 }
 

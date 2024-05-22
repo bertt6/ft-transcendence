@@ -1,6 +1,7 @@
 import {request} from "./Request.js";
 import {notify} from "../components/Notification.js";
 import {getProfile} from "./utils.js";
+import {createInbox} from "./inbox.js";
 
 export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
@@ -792,7 +793,11 @@ async function checkForAuth() {
         }
     }
 }
+function checkInboxRequired() {
+    let nonRequiredPaths = ['/login/', '/register/', '/auth/verification/'];
+    return !nonRequiredPaths.includes(window.location.pathname);
 
+}
 export function assignRouting() {
      const returnButton = `  <pong-redirect class="return-to-home" id="redirect-to-home" href="/home/"><h1>HOME</h1></pong-redirect>`
     if(!document.getElementById('redirect-to-home'))
@@ -809,6 +814,8 @@ export function assignRouting() {
         });
         element.setAttribute('listener', 'true');
     }
+    if(checkInboxRequired())
+        createInbox();
 
 }
 
