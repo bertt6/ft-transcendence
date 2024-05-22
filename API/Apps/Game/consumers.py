@@ -144,7 +144,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             GameConsumer.game_states[self.game_id]["task"] = True
         elif (get_player_count_in_game(self.game_id) == 1):  # if not come other players wait 30sec and finish game
             i = 300
-            while i == 0:
+            while i != 0:
                 if get_player_count_in_game(self.game_id) == 2:
                     break
                 await asyncio.sleep(0.1)
