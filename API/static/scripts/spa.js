@@ -1,40 +1,42 @@
-import {request} from "./Request.js";
-import {notify} from "../components/Notification.js";
-import {getProfile} from "./utils.js";
-import {createInbox} from "./inbox.js";
+import { request } from "./Request.js";
+import { notify } from "../components/Notification.js";
+import { getProfile } from "./utils.js";
+import { createInbox } from "./inbox.js";
 
-export const API_URL = 'http://localhost:8000/api/v1';
-export const BASE_URL = 'http://localhost:8000';
-export const API_42_URL = 'https://api.intra.42.fr'
-export const WEBSOCKET_URL = 'ws://localhost:8000/ws'
+export const API_URL = "http://localhost:8000/api/v1";
+export const BASE_URL = "http://localhost:8000";
+export const API_42_URL = "https://api.intra.42.fr";
+export const WEBSOCKET_URL = "ws://localhost:8000/ws";
 let currentScript = null;
 
 export function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  let expires = "";
+  if (days) {
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
 
 export function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(";");
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === " ") c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
 }
 
 const routes = new Map([
-    ['login', {
-        auth_required: false,
-        url: ["/auth/login/"],
-        html: `
+  [
+    "login",
+    {
+      auth_required: false,
+      url: ["/auth/login/"],
+      html: `
     <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
             <form class="login-wrapper p-5 gap-2" id="login-form">
@@ -78,12 +80,15 @@ const routes = new Map([
             </form>
         </div>
     </div>
-`
-    }],
-    ['register', {
-        auth_required: false,
-        url: ["/auth/register/"],
-        html: `
+`,
+    },
+  ],
+  [
+    "register",
+    {
+      auth_required: false,
+      url: ["/auth/register/"],
+      html: `
               <div class="background container-fluid">
             <div class="d-flex align-items-center justify-content-center h-100">
               <form class="register-wrapper p-5 gap-2" id="register-form">
@@ -157,12 +162,15 @@ const routes = new Map([
               </form>
             </div>
           </div>
-    `
-    }],
-    ['profile', {
-        auth_required: true,
-        url: [/profile\/[A-Za-z]+/],
-        html: `
+    `,
+    },
+  ],
+  [
+    "profile",
+    {
+      auth_required: true,
+      url: [/profile\/[A-Za-z]+/],
+      html: `
 
 
               <div
@@ -200,12 +208,15 @@ const routes = new Map([
           </div>
         </div>
       </div>
-`
-    }],
-    ['social', {
-        auth_required: true,
-        url: ['/social/', '/social/\\w+/g'],
-        html: `
+`,
+    },
+  ],
+  [
+    "social",
+    {
+      auth_required: true,
+      url: ["/social/", "/social/\\w+/g"],
+      html: `
       <ul class="chat-options" id="chat-options">
         <li id="options-invite-to-pong">Invite to Pong</li>
         <pong-redirect id="profile-redirect">Go To Profile</pong-redirect>
@@ -318,12 +329,15 @@ const routes = new Map([
         </div>
         </div>
       </div>
-`
-    }],
-    ['home', {
-        auth_required: true,
-        url: ['/home/'],
-        html: `
+`,
+    },
+  ],
+  [
+    "home",
+    {
+      auth_required: true,
+      url: ["/home/"],
+      html: `
       <div
         class="container-fluid position-relative home-wrapper"
         style="padding: 0"
@@ -341,12 +355,15 @@ const routes = new Map([
           <h1>Social</h1>
         </pong-redirect >
       </div>
-              `
-    }],
-    ['verification', {
-        auth_required: false,
-        url: ['/verification/'],
-        html: `
+              `,
+    },
+  ],
+  [
+    "verification",
+    {
+      auth_required: false,
+      url: ["/verification/"],
+      html: `
              <div class="background container-fluid">
         <div class="d-flex align-items-center justify-content-center h-100">
             <div class="verification-wrapper">
@@ -376,12 +393,17 @@ const routes = new Map([
         </div>
         <audio id="player" src='../../static/public/withoutdrum.mp3'></audio>
     </div>
-        `
-    }],
-    ['game', {
-        auth_required: true,
-        url: [/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
-        html: `
+        `,
+    },
+  ],
+  [
+    "game",
+    {
+      auth_required: true,
+      url: [
+        /game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/,
+      ],
+      html: `
 
      <div
         class="background container-fluid social-background"
@@ -425,12 +447,15 @@ const routes = new Map([
         </div>
     </div>
         </div>
-            `
-    }],
-    ['error', {
-        auth_required: false,
-        url: ['/error/'],
-        html: `
+            `,
+    },
+  ],
+  [
+    "error",
+    {
+      auth_required: false,
+      url: ["/error/"],
+      html: `
       <div class="background container-fluid social-background">
         <div class="error-container">
           <div>
@@ -440,12 +465,15 @@ const routes = new Map([
           </div>
         </div>
       </div>
-            `
-    }],
-    ['matchmaking', {
-        auth_required: true,
-        url: ['/matchmaking/'],
-        html: `
+            `,
+    },
+  ],
+  [
+    "matchmaking",
+    {
+      auth_required: true,
+      url: ["/matchmaking/"],
+      html: `
               <div
         class="container-fluid position-relative matchmaking-wrapper"
         style="padding: 0"
@@ -458,13 +486,15 @@ const routes = new Map([
           <div><h1 id="matchmaking-timer">00:00</h1></div>
         </div>
       </div>
-        `
-
-    }],
-    ['tournaments', {
-        auth_required: true,
-        url: ['/tournaments/'],
-        html: `
+        `,
+    },
+  ],
+  [
+    "tournaments",
+    {
+      auth_required: true,
+      url: ["/tournaments/"],
+      html: `
       <div class="background social-background">
         <div class="tournament-container">
           <div class="tournament-header">
@@ -478,12 +508,15 @@ const routes = new Map([
           <div class="tooltip" id="tooltip"></div>
         </div>
       </div>
-`
-    }],
-    ['create-tournament', {
-        auth_required: true,
-        url: ['/create-tournament/'],
-        html: `
+`,
+    },
+  ],
+  [
+    "create-tournament",
+    {
+      auth_required: true,
+      url: ["/create-tournament/"],
+      html: `
               <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -523,12 +556,17 @@ const routes = new Map([
           </form>
         </div>
       </div>
-        `
-    }],
-    ['tournament', {
-        auth_required: true,
-        url: [/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
-        html: `
+        `,
+    },
+  ],
+  [
+    "tournament",
+    {
+      auth_required: true,
+      url: [
+        /tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/,
+      ],
+      html: `
       <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -559,13 +597,15 @@ const routes = new Map([
           </div>
         </div>
       </div>
-        `
-
-    }],
-    ['offline-game', {
-        auth_required: true,
-        url: ['/play/'],
-        html: `
+        `,
+    },
+  ],
+  [
+    "offline-game",
+    {
+      auth_required: true,
+      url: ["/play/"],
+      html: `
       <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -608,270 +648,270 @@ const routes = new Map([
         </div>
     </div>
         </div>
-        `
-    }]
+        `,
+    },
+  ],
 ]);
 const routeToFile = [
-    [["/auth/login/"], 'login'],
-    [["/auth/register/"], 'register'],
-    [[/profile\/[A-Za-z]+/], 'profile'],
-    [['/social/', '/social/\\w+/g'], 'social'],
-    [['/home/'], 'home'],
-    [['/verification/'], 'verification'],
-    [[/game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'game'],
-    [['/matchmaking/'], 'matchmaking'],
-    [['/tournaments/'], 'tournaments'],
-    [['/create-tournament/'], 'create-tournament'],
-    [[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/], 'tournament'],
-    [['/play/'], 'offline-game'],
-]
+  [["/auth/login/"], "login"],
+  [["/auth/register/"], "register"],
+  [[/profile\/[A-Za-z]+/], "profile"],
+  [["/social/", "/social/\\w+/g"], "social"],
+  [["/home/"], "home"],
+  [["/verification/"], "verification"],
+  [
+    [
+      /game\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/,
+    ],
+    "game",
+  ],
+  [["/matchmaking/"], "matchmaking"],
+  [["/tournaments/"], "tournaments"],
+  [["/create-tournament/"], "create-tournament"],
+  [
+    [
+      /tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/,
+    ],
+    "tournament",
+  ],
+  [["/play/"], "offline-game"],
+];
 const requiredScripts = [
-    '/static/components/Notification.js',
-    '/static/scripts/Request.js',
-    '/static/scripts/requests.js',
-    '/static/components/Component.js',
-    '/static/components/spinner.js',
-    '/static/scripts/utils.js',
-    '/static/scripts/inbox.js',
-    '/static/scripts/Status.js',
-]
+  "/static/components/Notification.js",
+  "/static/scripts/Request.js",
+  "/static/scripts/requests.js",
+  "/static/components/Component.js",
+  "/static/components/spinner.js",
+  "/static/scripts/utils.js",
+  "/static/scripts/inbox.js",
+  "/static/scripts/Status.js",
+];
 const nonAuthScripts = [
-    '/static/scripts/requests.js',
-    '/static/components/Component.js',
-    '/static/components/spinner.js',
-    '/static/scripts/utils.js',
-    ]
+  "/static/scripts/requests.js",
+  "/static/components/Component.js",
+  "/static/components/spinner.js",
+  "/static/scripts/utils.js",
+];
 export function loadError(statusCode, title, message) {
-    let content = document.getElementById('main');
-    content.innerHTML = routes.get('error').html;
-    history.pushState({}, '', '/error/');
-    let errorNumber = document.getElementById('error-number');
-    let errorMessage = document.getElementById('error-message');
-    errorNumber.innerText = `${statusCode} ${title}`;
-    errorMessage.innerText = message;
-    App();
+  let content = document.getElementById("main");
+  content.innerHTML = routes.get("error").html;
+  history.pushState({}, "", "/error/");
+  let errorNumber = document.getElementById("error-number");
+  let errorMessage = document.getElementById("error-message");
+  errorNumber.innerText = `${statusCode} ${title}`;
+  errorMessage.innerText = message;
+  App();
 }
 
 function handleStyles(value) {
-    let style = document.getElementById('style');
-    if (style)
-        style.remove();
-    let newStyle = document.createElement('link');
-    newStyle.rel = 'stylesheet';
-    newStyle.href = '/static/styles/' + value + '.css';
-    newStyle.id = 'style';
-    document.head.appendChild(newStyle);
+  let style = document.getElementById("style");
+  if (style) style.remove();
+  let newStyle = document.createElement("link");
+  newStyle.rel = "stylesheet";
+  newStyle.href = "/static/styles/" + value + ".css";
+  newStyle.id = "style";
+  document.head.appendChild(newStyle);
 }
 
 function findRouteKey(pathName) {
-    for (let [key, value] of routes) {
-        for (let url of value.url) {
-            if (url instanceof RegExp) {
-                if (url.test(pathName)) {
-                    return key;
-                }
-
-            } else if (pathName.includes(url))
-                return key;
+  for (let [key, value] of routes) {
+    for (let url of value.url) {
+      if (url instanceof RegExp) {
+        if (url.test(pathName)) {
+          return key;
         }
+      } else if (pathName.includes(url)) return key;
     }
-    return null;
+  }
+  return null;
 }
 
 function loadRequiredScripts() {
-        let pathName = window.location.pathname;
-    let value = findRouteKey(pathName);
-    let route = routes.get(value);
-    if (route.auth_required === false) {
-        nonAuthScripts.forEach(script => {
-            if (!document.getElementById(script)) {
-                let newScript = document.createElement('script');
-                newScript.src = script;
-                newScript.id = script;
-                newScript.type = 'module';
-                document.body.appendChild(newScript);
-            }
-        });
-        return;
-    }
-    requiredScripts.forEach(script => {
-        if (!document.getElementById(script)) {
-            let newScript = document.createElement('script');
-            newScript.src = script;
-            newScript.id = script;
-            newScript.type = 'module';
-            document.body.appendChild(newScript);
-        }
+  let pathName = window.location.pathname;
+  let value = findRouteKey(pathName);
+  let route = routes.get(value);
+  if (route.auth_required === false) {
+    nonAuthScripts.forEach((script) => {
+      if (!document.getElementById(script)) {
+        let newScript = document.createElement("script");
+        newScript.src = script;
+        newScript.id = script;
+        newScript.type = "module";
+        document.body.appendChild(newScript);
+      }
     });
+    return;
+  }
+  requiredScripts.forEach((script) => {
+    if (!document.getElementById(script)) {
+      let newScript = document.createElement("script");
+      newScript.src = script;
+      newScript.id = script;
+      newScript.type = "module";
+      document.body.appendChild(newScript);
+    }
+  });
 }
 
 function findRouteFile(pathName) {
-    const route = routeToFile.find(route => route[0].some(url => {
-        if (url instanceof RegExp) {
-            return url.test(pathName);
-        } else {
-            return pathName.includes(url);
-        }
-    }));
-    return route ? route[1] : null;
+  const route = routeToFile.find((route) =>
+    route[0].some((url) => {
+      if (url instanceof RegExp) {
+        return url.test(pathName);
+      } else {
+        return pathName.includes(url);
+      }
+    })
+  );
+  return route ? route[1] : null;
 }
 
 export function loadPage(fileName) {
-    let data = findRouteFile(fileName);
-    if (!data) {
-        console.error("No route found for", fileName);
-        return;
-    }
-    const route = routes.get(data);
-    let isMatch = false;
-    if (Array.isArray(route.url)) {
-        isMatch = route.url.some(url => {
-            if (url instanceof RegExp) {
-                return url.test(window.location.pathname);
-            } else {
-                return window.location.pathname.includes(url);
-            }
-        });
-    } else if (route.url instanceof RegExp) {
-        isMatch = route.url.test(window.location.pathname);
-    } else {
-        isMatch = window.location.pathname.includes(route.url);
-    }
-    let split = fileName.split('/').filter(Boolean);
-    if (!isMatch) {
-        if (split.length > 1)
-            history.pushState({}, '', window.location.origin + `/${split[0]}/${split[1]}/`);
-        else
-            history.pushState({}, '', window.location.origin + route.url);
-
-    }
-    let content = document.getElementById('main');
-    content.innerHTML = route.html
-    if(currentScript && window[currentScript] && window[currentScript].destroy)
-        window[currentScript].destroy();
-    renderPage().catch(console.error);
-    currentScript = data;
-
+  let data = findRouteFile(fileName);
+  if (!data) {
+    console.error("No route found for", fileName);
+    return;
+  }
+  const route = routes.get(data);
+  let isMatch = false;
+  if (Array.isArray(route.url)) {
+    isMatch = route.url.some((url) => {
+      if (url instanceof RegExp) {
+        return url.test(window.location.pathname);
+      } else {
+        return window.location.pathname.includes(url);
+      }
+    });
+  } else if (route.url instanceof RegExp) {
+    isMatch = route.url.test(window.location.pathname);
+  } else {
+    isMatch = window.location.pathname.includes(route.url);
+  }
+  let split = fileName.split("/").filter(Boolean);
+  if (!isMatch) {
+    if (split.length > 1)
+      history.pushState(
+        {},
+        "",
+        window.location.origin + `/${split[0]}/${split[1]}/`
+      );
+    else history.pushState({}, "", window.location.origin + route.url);
+  }
+  let content = document.getElementById("main");
+  content.innerHTML = route.html;
+  if (currentScript === "offline-game") currentScript = "offlineGame";
+  if (currentScript && window[currentScript] && window[currentScript].destroy)
+    window[currentScript].destroy();
+  renderPage().catch(console.error);
+  currentScript = data;
 }
 
 async function tryRefreshToken() {
-    let refresh_token = getCookie('refresh_token');
-    if (!refresh_token)
-        return;
-    try {
-
-        let data = await request(`auth/token/refresh/`, {
-            method: 'POST',
-            body: JSON.stringify({
-                refresh: refresh_token
-            }),
-        });
-        setCookie('access_token', data.access, 1);
-        return true;
-    } catch (error) {
-        notify('Please login again', 3, 'error')
-        return false
-    }
+  let refresh_token = getCookie("refresh_token");
+  if (!refresh_token) return;
+  try {
+    let data = await request(`auth/token/refresh/`, {
+      method: "POST",
+      body: JSON.stringify({
+        refresh: refresh_token,
+      }),
+    });
+    setCookie("access_token", data.access, 1);
+    return true;
+  } catch (error) {
+    notify("Please login again", 3, "error");
+    return false;
+  }
 }
 
 async function checkForAuth() {
-    if (getCookie('access_token'))
-        return;
-    if (await tryRefreshToken() === true)
-        return;
-    const pathName = window.location.pathname;
-    let value = findRouteKey(pathName);
-    if (!value)
-        return;
-    const route = routes.get(value);
-    if (route.auth_required === true)
-        loadPage('/auth/login/');
-    else {
-        if (!localStorage.getItem('activeUserNickname')) {
-            let profile = await getProfile();
-            localStorage.setItem('activeUserNickname', profile.nickname);
-        }
-    }
+  if (getCookie("access_token")) return;
+  if ((await tryRefreshToken()) === true) return;
+  const pathName = window.location.pathname;
+  let value = findRouteKey(pathName);
+  if (!value) return;
+  const route = routes.get(value);
+  if (route.auth_required === true) loadPage("/auth/login/");
 }
 function checkInboxRequired() {
-    let nonRequiredPaths = ['/login/', '/register/', '/auth/verification/'];
-    return !nonRequiredPaths.includes(window.location.pathname);
-
+  let nonRequiredPaths = ["/login/", "/register/", "/auth/verification/"];
+  return !nonRequiredPaths.includes(window.location.pathname);
 }
 export function assignRouting() {
-     const returnButton = `  <pong-redirect class="return-to-home" id="redirect-to-home" href="/home/"><h1>HOME</h1></pong-redirect>`
-    if(!document.getElementById('redirect-to-home'))
-        document.body.insertAdjacentHTML('beforebegin', returnButton);
-    let elements = document.querySelectorAll("pong-redirect");
-    for (let element of elements) {
-        if (element.getAttribute(('listener')) === 'true')
-            continue;
-        element.addEventListener('click', function (event) {
-            event.preventDefault();
-            let fileName = element.getAttribute('href');
-            history.pushState({to: fileName}, '', window.location.origin + fileName);
-            loadPage(fileName);
-        });
-        element.setAttribute('listener', 'true');
-    }
-    if(checkInboxRequired())
-        createInbox();
-
+  const returnButton = `  <pong-redirect class="return-to-home" id="redirect-to-home" href="/home/"><h1>HOME</h1></pong-redirect>`;
+  if (!document.getElementById("redirect-to-home"))
+    document.body.insertAdjacentHTML("beforebegin", returnButton);
+  let elements = document.querySelectorAll("pong-redirect");
+  for (let element of elements) {
+    if (element.getAttribute("listener") === "true") continue;
+    element.addEventListener("click", function (event) {
+      event.preventDefault();
+      let fileName = element.getAttribute("href");
+      history.pushState(
+        { to: fileName },
+        "",
+        window.location.origin + fileName
+      );
+      loadPage(fileName);
+    });
+    element.setAttribute("listener", "true");
+  }
+  if (checkInboxRequired()) createInbox();
 }
 
 function loadSpecificScript() {
-    let pathName = window.location.pathname;
-    let value = findRouteKey(pathName);
-    if (!value) {
-        loadError(404, 'Page not found', 'The page you are looking for does not exist')
-        return;
-    }
-    if (document.getElementById('script'))
-        document.getElementById('script').remove();
-    let script = document.createElement('script');
-    script.src = '/static/scripts/' + value + '.js?ts=' + new Date().getTime();
-    script.type = 'module';
-    script.id = "script";
-    document.body.appendChild(script);
-    handleStyles(value)
+  let pathName = window.location.pathname;
+  let value = findRouteKey(pathName);
+  if (!value) {
+    loadError(
+      404,
+      "Page not found",
+      "The page you are looking for does not exist"
+    );
+    return;
+  }
+  if (document.getElementById("script"))
+    document.getElementById("script").remove();
+  let script = document.createElement("script");
+  script.src = "/static/scripts/" + value + ".js?ts=" + new Date().getTime();
+  script.type = "module";
+  script.id = "script";
+  document.body.appendChild(script);
+  handleStyles(value);
 }
 
 async function assignLocalStorage() {
-    if (!checkIfAuthRequired())
-        return;
-    let profile = await getProfile();
-    localStorage.setItem('activeUserNickname', profile.nickname);
+  if (!checkIfAuthRequired()) return;
+  let profile = await getProfile();
+  localStorage.setItem("activeUserNickname", profile.nickname);
 }
 
 export function checkIfAuthRequired() {
-    const pathName = window.location.pathname;
-    let value = findRouteKey(pathName);
-    if (!value)
-        return false;
-    const route = routes.get(value);
-    return route.auth_required;
+  const pathName = window.location.pathname;
+  let value = findRouteKey(pathName);
+  if (!value) return false;
+  const route = routes.get(value);
+  return route.auth_required;
 }
 
 async function renderPage() {
-    loadRequiredScripts()
-    loadSpecificScript();
-    await checkForAuth();
-    assignRouting()
+  loadRequiredScripts();
+  loadSpecificScript();
+  await checkForAuth();
+  assignRouting();
 }
 
 const App = async () => {
-    await checkForAuth();
-    loadSpecificScript();
-    loadRequiredScripts();
-    assignRouting()
-    await assignLocalStorage();
-}
+  await checkForAuth();
+  loadSpecificScript();
+  loadRequiredScripts();
+  assignRouting();
+  await assignLocalStorage();
+};
 
-window.addEventListener('popstate', (event) => {
-        let pathName = window.location.pathname;
-        loadPage(pathName);
-    }
-);
+window.addEventListener("popstate", (event) => {
+  let pathName = window.location.pathname;
+  loadPage(pathName);
+});
 
-document.addEventListener('DOMContentLoaded', App);
-
+document.addEventListener("DOMContentLoaded", App);

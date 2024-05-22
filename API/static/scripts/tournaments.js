@@ -22,7 +22,7 @@ class TournamentList extends BaseComponent{
                     tournament.current_participants.map(participant => `
                     <div class="players-img">
                     <img
-                      src="${BASE_URL}${participant.profile_picture}"
+                      src="${participant.profile_picture}"
                       alt=""
                     />
                   </div>

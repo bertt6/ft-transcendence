@@ -15,32 +15,49 @@ from pathlib import Path
 from dotenv import load_dotenv
 import datetime
 
-import Apps.Tournament.apps
+
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
+mimetypes.add_type("text/html", ".html", True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+WHITENOISE_MIMETYPES = {
+    '.css': 'text/css',
+}
 
 load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0a4fd7e3567eab20bab2f2d6682ea96d0d865050bfcde9c293aa7f9ec48bce55'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "https://localhost:80",
+    "http://127.0.0.1:3000",
+    "https://127.0.0.1:80",
     "http://localhost:3030",
+    "https://165.22.77.100",
+    "https://165.22.77.100:8000",
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://localhost:80",
     "http://127.0.0.1:3000",
+    "https://127.0.0.1:80",
     "http://localhost:3030",
+    "https://165.22.77.100",
+    "https://165.22.77.100:80",
+    "https://165.22.77.100:8000",
+    
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -69,6 +86,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware", # Here
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -103,7 +121,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(os.getenv("REDIS_HOST"), os.getenv("REDIS_PORT"))],
         },
     },
 }
@@ -127,10 +145,16 @@ REST_FRAMEWORK = {
 
     }
 }
-
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'mediafiles'
+
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -144,10 +168,8 @@ DATABASES = {
         "PORT": os.getenv('PG_PORT'),
     }
 }
+SECURE_SSL_REDIRECT = True
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -175,15 +197,6 @@ TIME_ZONE = 'Europe/Istanbul'
 USE_I18N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -213,20 +226,18 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': datetime.timedelta(days=1),
 }
-
+SESSION_COOKIE_SECURE = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
+EMAIL_USE_TLS = False
+EMAIL_PORT = 465
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_SSL = False
+EMAIL_USE_SSL = True
 CACHES = {
     'default': {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         'LOCATION': 'unique-snowflake',
     }
 }
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media/images'

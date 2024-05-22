@@ -19,7 +19,7 @@ class SearchUsersComponent extends BaseComponent {
         <div class="user-wrapper" data-is-friend="false">
           <div class="user-pic-wrapper">
             <img
-              src="${BASE_URL}${user.profile_picture}"
+              src="${user.profile_picture}"
               alt=""
             />
           </div>
@@ -132,7 +132,7 @@ class SocialPostsComponent extends BaseComponent {
                     <pong-redirect class="post-info" href="/profile/${tweet.from_user.nickname}">
                       <div class="user-pic-wrapper">
                         <img
-                            src="${BASE_URL}${tweet.from_user.profile_picture}"
+                            src="${tweet.from_user.profile_picture}"
                             alt=""
                         />
                       </div>
@@ -157,7 +157,7 @@ class SocialPostsComponent extends BaseComponent {
                     </div>
                     ${tweet.image ? `
                     <div class="post-image">
-                      <img  src="${BASE_URL}${tweet.image}" alt="There is a problem with the image" />
+                      <img  src="${tweet.image}" alt="There is a problem with the image" />
                     </div>
                     ` : ''}
                   </div>
@@ -295,7 +295,7 @@ class SelectedPostComponent extends BaseComponent {
                   </div>
                   ${tweet.image ?
             `<div class="post-image">
-                    <img src="${BASE_URL}${tweet.image}" alt="There was a problem with the image" />
+                    <img src="${tweet.image}" alt="There was a problem with the image" />
               </div>` : ''}
                 </div>
                 <div class="post-interaction">
@@ -693,7 +693,7 @@ const renderAllPosts = async () => {
                 <div class="social-send-info">
                   <div class="user-pic-wrapper">
                     <img
-                      src="${BASE_URL}${profile_picture_url}"
+                      src="${profile_picture_url}"
                      alt=""
                     />
                   </div>
@@ -861,7 +861,7 @@ let chatSocket;
 let chatSocketOnMessage;
 async function connectToRoom(room, conversationComponent) {
     const nickname = getActiveUserNickname();
-    chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
+    chatSocket = new WebSocket(`/ws/chat/${room.id}/${nickname}`);
     chatSocketOnMessage = (event) => {
         let data = JSON.parse(event.data);
         let message = {

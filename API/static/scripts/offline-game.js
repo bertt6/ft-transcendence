@@ -1,8 +1,5 @@
-import {BASE_URL, loadPage} from "./spa.js";
-
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
-
 // Set initial positions for paddles and ball
 let ballX = canvas.width / 2;
 let ballY = canvas.height / 2;
@@ -19,12 +16,22 @@ let player2Y = canvas.height / 2 - paddleHeight / 2;
 let pause = false
 let finish = false
 let firstStart = true
-
+let frame = null
 let playerOneScore = 0
 let playerTwoScore = 0
-
+let offlineHandleKeyDown;
+let offlineHandleKeyUp;
 let keysPressed = {};
+(function() {
 
+  function destroy() {
+      clearKeyListeners()
+      if(frame)
+            cancelAnimationFrame(frame)
+  }
+
+  window.offlineGame = {destroy };
+})();
 function drawRect(x, y, width, height, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, width, height);
@@ -36,14 +43,12 @@ function drawCircle(x, y, radius, color) {
     ctx.arc(x, y, radius, 0, Math.PI * 2, true);
     ctx.fill();
 }
-
 function pauseGame() {
     pause = true
     setTimeout(function () {
         pause = false
     }, 3000)
 }
-
 function draw() {
     // clear the canvas
     drawRect(0, 0, canvas.width, canvas.height, 'black');
@@ -101,7 +106,7 @@ function gameLoop() {
         update();
         draw();
     }
-    requestAnimationFrame(gameLoop);
+    frame = requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
@@ -125,11 +130,29 @@ function setCurrentPoints() {
     }
 
 }
+function addKeyListeners() {
+    const keysPressed = {};
 
-// handle player controls
-// Object to track pressed keys
+    offlineHandleKeyDown = function(event) {
+        keysPressed[event.key] = true;
+    };
 
-// Handle keydown event
+    offlineHandleKeyUp = function(event) {
+        keysPressed[event.key] = false;
+    };
+
+    window.addEventListener('keydown', offlineHandleKeyDown);
+    window.addEventListener('keyup', offlineHandleKeyUp);
+}
+function clearKeyListeners() {
+    if (offlineHandleKeyDown) {
+        window.removeEventListener('keydown', offlineHandleKeyDown);
+    }
+    if (offlineHandleKeyUp) {
+        window.removeEventListener('keyup', offlineHandleKeyUp);
+    }
+}
+
 window.addEventListener('keydown', function (event) {
     keysPressed[event.key] = true;
 });

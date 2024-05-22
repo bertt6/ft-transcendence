@@ -41,7 +41,7 @@ class Notification extends BaseComponent {
           <button data-type="close" class="request-close-button">X</button>
           <div>
             <div class="request-profile-image">
-              <img src="${BASE_URL}${this.state.profile.profile_picture}" alt="" />
+              <img src="${this.state.profile.profile_picture}" alt="" />
             </div>
             <span>${this.state.message}</span>
           </div>

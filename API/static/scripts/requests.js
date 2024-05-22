@@ -34,7 +34,7 @@ async function handleRejectedCallback(request_id) {
 
 export async function getSocket() {
     const nickname = getActiveUserNickname();
-    const url = `ws://localhost:8000/ws/requests/${nickname}`;
+    const url = `/ws/requests/${nickname}`;
     return new Promise((resolve, reject) => {
         if (socket) {
             if (socket.readyState === WebSocket.OPEN) {

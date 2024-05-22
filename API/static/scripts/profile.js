@@ -223,7 +223,7 @@ class ProfileInfo extends BaseComponent {
               <div class="profile-photoo">
                 <img
                     id='profile-photoo'
-                  src="${BASE_URL}${profile_picture}"
+                  src="${profile_picture}"
                   alt=""
                   class=""
                 />
@@ -255,7 +255,7 @@ class ProfileInfo extends BaseComponent {
                 </div>
               <div class="profile-photoo">
                 <img
-                  src="${BASE_URL}${profile_picture}"
+                  src="${profile_picture}"
                   alt=""
                 />
               </div>

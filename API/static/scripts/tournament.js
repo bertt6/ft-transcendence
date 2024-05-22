@@ -15,7 +15,7 @@ class TournamentPlayers extends BaseComponent {
                   <div class="participant-details">
                     <div class="participant-image-wrapper">
                       <img
-                        src="${BASE_URL}${player.profile_picture}"
+                        src="${player.profile_picture}"
                         alt=""
                       />
                     </div>
@@ -124,7 +124,7 @@ function handleFinishedTournament(response) {
     let winnerHTML = `
           <div class="winner-wrapper">
           <div class="winner-image-wrapper">
-            <img src="${BASE_URL}${winner.profile_picture}" alt="" />
+            <img src="${winner.profile_picture}" alt="" />
           </div>
           <h1>Winner is ${winner.nickname}</h1>
         </div>

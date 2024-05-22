@@ -54,6 +54,10 @@ async function postVerificationCode(value) {
         loadPage('/home/')
         notify('Successfully verified', 3, 'success')
         localStorage.removeItem("timer")
+        if (!localStorage.getItem("activeUserNickname")) {
+            let profile = await getProfile();
+            localStorage.setItem("activeUserNickname", profile.nickname)
+        }
     }
     catch (e) {
         console.error(e.json())

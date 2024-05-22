@@ -24,7 +24,7 @@ class Participants extends BaseComponent {
             <div class="spectators-container">
                 ${this.state.spectators.map((spectator, index) => `
                     <div class="spectator-image" data-index="${index}">
-                        <img src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                        <img src="${spectator.profile_picture}" alt="image cannot be loaded">
                     </div>
                 `).join("")}
             </div>
@@ -41,7 +41,7 @@ class Participants extends BaseComponent {
             <h6>Spectators - ${this.state.spectators.length}</h6>
                 ${this.state.spectators.map((spectator, index) => `
                     <div class="popup-content">
-                        <img class='spectator-image' src="${BASE_URL}${spectator.profile_picture}" alt="image cannot be loaded">
+                        <img class='spectator-image' src="${spectator.profile_picture}" alt="image cannot be loaded">
                         <a>${spectator.nickname}</a>
                     </div>
                 `).join('')}
@@ -154,13 +154,13 @@ function setPlayerData(state) {
     const {details} = state;
     let playerOneWrapper = document.getElementById("player-one");
     let image = playerOneWrapper.querySelector("img");
-    image.src = `${BASE_URL}${details.player1.profile_picture}`;
+    image.src = `${details.player1.profile_picture}`;
     let detailsWrapper = document.getElementById("player-one-details");
     let name = detailsWrapper.querySelector(".player-name");
     name.innerText = details.player1.nickname;
     let playerTwoWrapper = document.getElementById("player-two");
     image = playerTwoWrapper.querySelector("img");
-    image.src = `${BASE_URL}${details.player2.profile_picture}`;
+    image.src = `${details.player2.profile_picture}`;
     detailsWrapper = document.getElementById("player-two-details");
     name = detailsWrapper.querySelector(".player-name");
     name.innerText = details.player2.nickname;
@@ -175,7 +175,7 @@ function printWinner(data, winner, socket) {
     let winnerHTML = `
           <div class="winner-wrapper">
           <div class="winner-image-wrapper">
-            <img src="${BASE_URL}${winner.profile_picture}" alt="" />
+            <img src="${winner.profile_picture}" alt="" />
           </div>
           <h1>Winner is ${winner.nickname}</h1>
         </div>
@@ -231,7 +231,7 @@ function handleParticipants(data) {
 async function connectToServer() {
     const path = window.location.pathname;
     const id = path.split("/")[2];
-    let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
+    let socket = new WebSocket(`/ws/game/${id}`)
 
     window.addEventListener('popstate', (event) => {
             socket.close()
