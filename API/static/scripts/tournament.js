@@ -32,7 +32,30 @@ class TournamentPlayers extends BaseComponent {
 
     }
 }
+class CurrentMatchups extends BaseComponent {
+    constructor(state, parentElement) {
+        super(state, parentElement);
+    }
 
+    handleHTML() {
+        return `
+            ${this.state.matchUps.map(matchUp => `
+                <div class="matchup">
+                    <div class="matchup-player">
+                        <span>${matchUp.players[0]}</span>
+                    </div>
+                    <div class="matchup-player">
+                        <span>${matchUp.players[1]}</span>
+                    </div>
+                </div>
+            `).join("")}
+            `
+    }
+    render() {
+        this.html = this.handleHTML();
+        super.render();
+    }
+}
 function handleButtons(players, socket) {
     const nickname = getActiveUserNickname();
     const buttonWrapper = document.getElementById("button-wrapper");
@@ -54,13 +77,19 @@ function handleButtons(players, socket) {
     }
 }
 
-function handleErrorStates(data) {
+function handleErrorStates(data,socket) {
+    socket.close();
     notify(data.message, 3, 'error')
     setTimeout(() => {
+        console.log("redirecting")
         loadPage("/home/")
     }, 3000);
 }
-
+function handleMatchups(data) {
+    let parentElement = document.getElementById("matchups");
+    const currentMatchups = new CurrentMatchups({matchUps: data}, parentElement);
+    currentMatchups.render();
+}
 function renderTournamentInfo(response, socket) {
     let parentElement = document.getElementById("tournament-participants");
     const tournamentPlayers = new TournamentPlayers({players: response.data.players}, parentElement);
@@ -72,15 +101,16 @@ function renderTournamentInfo(response, socket) {
 function handleGameRedirection(response) {
     for (let game of response.data) {
         if (game.players.includes(getActiveUserNickname())) {
-            console.log("redirecting to game")
-            loadPage(`/game/${game.game_id}`)
+            notify("Game is starting", 2, "success")
+            setTimeout(() => {
+                loadPage(`/game/${game.game_id}`)
+            }, 2000);
         }
     }
 }
 
 function handleFinishedTournament(response) {
     let winner = response.data.winner;
-    console.log("winner", winner)
     let winnerHTML = `
           <div class="winner-wrapper">
           <div class="winner-image-wrapper">
@@ -89,7 +119,6 @@ function handleFinishedTournament(response) {
           <h1>Winner is ${winner.nickname}</h1>
         </div>
   `
-
     let element = document.createElement("div");
     element.id = "game-message-wrapper";
     element.innerHTML = winnerHTML;
@@ -106,7 +135,7 @@ function connectToSocket() {
         "tournament_started",
         "players_not_ready",
         "invalid_params",
-        "tournament_finished"
+        "tournament_started",
     ]
     try {
         const nickname = getActiveUserNickname();
@@ -122,22 +151,29 @@ function connectToSocket() {
         }
         socket.onmessage = (event) => {
             const response = JSON.parse(event.data);
-            console.log("socket sent data", response)
-            if (errorStates.includes(response.send_type)) {
-                handleErrorStates(response);
-            }
-            if (response.send_type === "tournament_info") {
+            console.log(response)
+            if (errorStates.includes(response.send_type))
+                handleErrorStates(response,socket);
+            if (response.send_type === "tournament_info")
                 renderTournamentInfo(response, socket);
-            } else if (response.send_type === "game_info") {
+            else if (response.send_type === "game_info")
                 handleGameRedirection(response);
-            } else if (response.send_type === "tournament_finished") {
+             else if (response.send_type === "tournament_winner")
                 handleFinishedTournament(response);
-            }
+             else if(response.send_type === "current_matchups")
+                handleMatchups(response.data);
+             else
+                console.log("unknown message type", response)
         }
         socket.onclose = () => {
             console.log("disconnected from the server");
         }
-
+        socket.onerror = (error) => {
+            console.error(error);
+        }
+            window.addEventListener("popstate", () => {
+            socket.close();
+    });
     } catch (e) {
         console.error(e);
     }

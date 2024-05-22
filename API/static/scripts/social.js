@@ -7,6 +7,57 @@ import {getSocket} from "./requests.js";
 import {calculateDate, escapeHTML, getActiveUserNickname, getProfile} from "./utils.js";
 import {getStatusSocket} from "./Status.js";
 
+class SearchUsersComponent extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+        this.html = this.handleHTML();
+    }
+
+    handleHTML() {
+        return `
+        ${this.state.users.map(user => `
+        <div class="user-wrapper" data-is-friend="false">
+          <div class="user-pic-wrapper">
+            <img
+              src="${BASE_URL}${user.profile_picture}"
+              alt=""
+            />
+          </div>
+          <div class="user-info-wrapper">
+            <div class="d-flex align-items-center justify-content-center gap-2">
+              <h6>${user.nickname}</h6>
+              ${user.is_friend ? `<div class="friend-icon"></div>` : ''}
+            </div>
+             <span>${this.checkStatus(user.nickname) ? this.getStatus(user.nickname) : 'Offline'}</span>
+          </div>
+        </div>
+        `).join('')}
+        `
+    }
+
+    render() {
+        this.parentElement.innerHTML = this.html;
+        super.render();
+        let allUsers = document.getElementsByClassName("user-wrapper");
+        for (let i = 0; i < allUsers.length; i++) {
+            allUsers[i].addEventListener("click", toggleChat);
+        }
+        for (let element of allUsers) {
+            element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
+        }
+    }
+    getStatus(nickname) {
+        return this.state.status.online_users.find(user => user.nickname === nickname).status;
+    }
+    checkStatus(nickname) {
+        return this.state.status.online_users.some(user => user.nickname === nickname);
+    }
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.html = this.handleHTML();
+        this.render();
+    }
+}
 class ChatFriendsComponent extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -16,7 +67,7 @@ class ChatFriendsComponent extends BaseComponent {
     handleHTML() {
         return `
               ${this.state.friends.map(friend => `
-                <div class="user-wrapper">
+                <div class="user-wrapper" data-is-friend="true">
                   <div class="user-pic-wrapper">
                     <img
                       src="${friend.profile_picture}"
@@ -46,10 +97,14 @@ class ChatFriendsComponent extends BaseComponent {
     }
 
     render() {
+        this.parentElement.innerHTML = this.html;
         super.render();
         let allUsers = document.getElementsByClassName("user-wrapper");
         for (let i = 0; i < allUsers.length; i++) {
             allUsers[i].addEventListener("click", toggleChat);
+        }
+        for (let element of allUsers) {
+            element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
         }
     }
 
@@ -86,14 +141,18 @@ class SocialPostsComponent extends BaseComponent {
                         <span>${calculateDate(tweet.date)}</span>
                       </div>
                     </pong-redirect>
+                    ${
+            tweet.from_user.id === userId ? `
                     <button class="post-delete-button" data-tweet-id="${tweet.id}">
                       <img  src="/static/public/trash.svg" alt="" style="width: 32px" />
                     </button>
+                    ` : ''
+        }
                   </div>
                   <div>
                     <div class="post-text">
                       <p>
-                        ${escapeHTML(tweet.content)}
+                        ${tweet.content}
                       </p>
                     </div>
                     ${tweet.image ? `
@@ -144,6 +203,8 @@ class SocialPostsComponent extends BaseComponent {
         this.parentElement.innerHTML = this.html;
         if (this.state.next !== null)
             this.addObserver();
+        else
+            document.getElementById('load-more').remove();
     }
 }
 
@@ -184,6 +245,7 @@ class PostTweetFormComponent extends BaseComponent {
         if (previewCloseButton) {
             previewCloseButton.addEventListener('click', () => {
                 postTweetFormComponent.setState({imageUrl: undefined});
+                document.getElementById('image-add').value = '';
             });
         }
     }
@@ -203,7 +265,7 @@ class SelectedPostComponent extends BaseComponent {
     }
 
     handleHTML() {
-        let {tweet, userId,comments} = this.state;
+        let {tweet, userId, comments} = this.state;
         return `
             <div class="selected-post">
               <div class="post-container">
@@ -211,7 +273,7 @@ class SelectedPostComponent extends BaseComponent {
                   <div class="post-info">
                     <div class="user-pic-wrapper">
                       <img
-                        src="https://picsum.photos/seed/picsum/200/300"
+                        src="${tweet.from_user.profile_picture}"
                         alt=""
                       />
                     </div>
@@ -220,9 +282,7 @@ class SelectedPostComponent extends BaseComponent {
                       <span>${calculateDate(tweet.date)}</span>
                     </div>
                   </div>
-                  <div>
-                    <img src="/static/public/more.svg" alt="" style="width: 50px" />
-                  </div>
+
                   <div id="comment-back-button" style="cursor: pointer">
                     <img src="/static/public/go-back.svg" alt="Load Failed" />
                   </div>
@@ -230,7 +290,7 @@ class SelectedPostComponent extends BaseComponent {
                 <div>
                   <div class="post-text">
                     <p>
-                    ${escapeHTML(tweet.content)}
+                    ${tweet.content}
                     </p>
                   </div>
                   ${tweet.image ?
@@ -254,33 +314,12 @@ class SelectedPostComponent extends BaseComponent {
                     />
                   </form>
                 </div>
-                <div class="post-comments">
-            ${comments.map(comment => `
-          <div class="post-comment">
-                <div class="user-pic-wrapper" style="height: 3rem">
-                  <img
-                    src="https://picsum.photos/seed/picsum/200/300"
-                    alt=""
-                  />
-                </div>
-                <div style="flex: 1">
-                <div style="display: flex;justify-content: space-between">          
-              <h6>${comment.from_user.nickname}</h6>
-                <span>${calculateDate(comment.date)}</span>
-</div>
-                  <p>
-                    ${escapeHTML(comment.content)}
-                  </p>
-                </div>
-              </div>
-        `).join('')}
-        
+                <div class="post-comments" id="post-comments">
                 </div>
               </div>
             </div>
         `
     }
-
     setState(newState) {
         this.state = {...this.state, ...newState};
         this.html = this.handleHTML();
@@ -291,13 +330,66 @@ class SelectedPostComponent extends BaseComponent {
         super.render();
         let backButton = document.getElementById('comment-back-button');
         backButton.addEventListener('click', () => {
-
             history.pushState({}, '', '/social');
             renderAllPosts();
         });
     }
 }
-
+class CommentsComponent extends BaseComponent {
+    constructor(state, parentElement = null) {
+        super(state, parentElement);
+    }
+    handleHtml()
+    {
+        const {comments} = this.state;
+        return `
+       ${comments.map(comment => `
+          <div class="post-comment">
+                <div class="user-pic-wrapper" style="height: 3rem">
+                  <img
+                    src="${comment.from_user.profile_picture}"
+                    alt=""
+                  />
+                </div>
+                <div style="flex: 1">
+                <div style="display: flex;justify-content: space-between">          
+              <h6>${comment.from_user.nickname}</h6>
+                <span>${calculateDate(comment.date)}</span>
+            </div>
+                  <p>
+                    ${comment.content}
+                  </p>
+                </div>
+              </div>
+        `).join('')}
+        <div id="comment-loading">Please wait...</div>
+        `
+    }
+    render() {
+        this.html = this.handleHtml();
+        super.render();
+        if(this.state.next !== null)
+            this.addObserver();
+        else
+            document.getElementById('comment-loading').remove();
+    }
+    setState(newState) {
+        this.state = {...this.state, ...newState};
+        this.render();
+    }
+    addObserver() {
+        let loading = document.getElementById('comment-loading');
+        if (!loading)
+            return;
+        let observer = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting) {
+                let response = await request(this.state.next, {method: 'GET'});
+                this.setState({comments: [...this.state.comments, ...response.results.comments], next: response.next});
+            }
+        }, {threshold: 0.9});
+        observer.observe(loading);
+    }
+}
 class ConversationComponent extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -307,15 +399,15 @@ class ConversationComponent extends BaseComponent {
         let username = getActiveUserNickname();
         return `
         ${
-            this.state.messages.map(message => `
-             ${message.user.id === this.state.senderId ? `
+            this.state.messages.toReversed().map(message => `
+             ${message.user.nickname === username ? `
               <div class="sent-message-container">
                   <div class="message-data-wrapper">
                     <span class="sent-message-date">${calculateDate(message.created_date)}</span>
                     <span class="sent-message-name">${message.user.nickname}</span>
                 </div>
                   <p>
-                    ${escapeHTML(message.content)}
+                    ${message.content}
                   </p>
                 </div>
                 ` : `
@@ -325,30 +417,61 @@ class ConversationComponent extends BaseComponent {
                   <span class="received-message-date">${calculateDate(message.created_date)}</span>
                 </div>
                   <p>
-                    ${escapeHTML(message.content)}
+                    ${message.content}
                   </p>
                 </div>
                 `}
             `).join('')
         }
+        <div id="chat-loading">Please wait...</div>
         `
     }
-
     render() {
         this.html = this.handleHtml();
         this.parentElement.innerHTML = this.html;
+        if(this.state.next !== null)
+            this.addObserver();
+        else
+            document.getElementById('chat-loading').remove();
     }
 
     setState(newState) {
         this.state = {...this.state, ...newState};
         this.render();
     }
+    addObserver() {
+    let loading = document.getElementById('chat-loading');
+        if (!loading)
+            return;
+        let observer = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting) {
+                console.log(this.state.next)
+                let response = await request(this.state.next, {method: 'GET'});
+                this.setState({messages: [...this.state.messages, ...response.results.messages], next: response.next});
+            }
+        }, {threshold: 0.9});
+        observer.observe(loading);
+    }
 }
+
 
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
+(function() {
+
+  function destroy() {
+      cleanupChatFriends()
+      cleanupChatSocket()
+  }
+
+  // Expose init and destroy to the global scope
+  window.social = {destroy };
+})();
+let statusSocket;
+let handleMessageListener;
+
 const fetchChatFriends = async () => {
     const endpoint = `profile/friends`;
     try {
@@ -356,9 +479,10 @@ const fetchChatFriends = async () => {
             method: 'GET',
         });
         try {
-            let statusSocket = await getStatusSocket();
-            statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
-            statusSocket.addEventListener('message', (event) => {
+            statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({ request_type: 'get_user_status', from: "social" }));
+
+            handleMessageListener = (event) => {
                 let userStatus = JSON.parse(event.data);
                 let parentElement = document.getElementById('user-data-wrapper');
                 let chatFriendsComponent = new ChatFriendsComponent({
@@ -366,19 +490,27 @@ const fetchChatFriends = async () => {
                     status: userStatus
                 }, parentElement);
                 chatFriendsComponent.render();
-            });
+            };
+
+            statusSocket.addEventListener('message', handleMessageListener);
         } catch (e) {
             console.error(e);
         }
-
     } catch (error) {
         console.error('Error:', error);
+    }
+}
+
+const cleanupChatFriends = () => {
+    if (statusSocket && handleMessageListener) {
+        statusSocket.removeEventListener('message', handleMessageListener);
     }
 }
 const fetchSocialPosts = async () => {
     try {
         let response = await request(`tweets/`, {method: 'GET'})
-        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next});
+        let profile = await getProfile();
+        socialPostsComponent.setState({tweets: response.results.tweets, next: response.next, userId: profile.id});
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching social posts', 3, 'error');
@@ -410,17 +542,22 @@ async function submitTweet(event) {
         notify('Error posting tweet', 3, 'error');
     }
 }
+
 async function assignLikeButtons() {
     let likeButtons = document.getElementsByClassName('like-button');
     for (let button of likeButtons) {
         let tweetId = button.getAttribute('data-tweet-id');
         button.addEventListener('click', async () => {
             try {
-                let data = await request(`like_tweet/${tweetId}/`, {
+                let data = await request(`like-tweet/${tweetId}/`, {
                     method: 'PATCH',
 
                 });
                 button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
+                if (!data.ok) {
+                    notify(data.message, 3, 'error');
+                    button.children[0].src = button.children[0].src.includes('not') ? '/static/public/liked.svg' : '/static/public/not-liked.svg';
+                }
             } catch (error) {
                 console.error('Error:', error);
                 notify('Error liking tweet', 3, 'error');
@@ -428,6 +565,7 @@ async function assignLikeButtons() {
         });
     }
 }
+
 async function assignCommentButtons() {
     let commentButtons = document.getElementsByClassName('comment-button');
     for (let button of commentButtons) {
@@ -438,6 +576,7 @@ async function assignCommentButtons() {
         });
     }
 }
+
 async function assignDeleteButtons() {
     let buttons = document.getElementsByClassName('post-delete-button');
     for (let button of buttons) {
@@ -447,6 +586,11 @@ async function assignDeleteButtons() {
                 let data = await request(`delete-tweet/${tweetId}/`, {
                     method: 'DELETE',
                 });
+                console.log(data)
+                if (!data.ok) {
+                    notify(data.error, 3, 'error');
+                    return;
+                }
                 notify('Tweet deleted successfully', 3, 'success');
                 let parentElement = button.parentElement.parentElement;
                 parentElement.remove();
@@ -457,57 +601,75 @@ async function assignDeleteButtons() {
         });
     }
 }
-async function assignEventListeners() {
+
+async function assignPostTweetForm() {
     let form = document.getElementById('social-send-form');
     form.addEventListener('submit', submitTweet);
     let imageAdd = document.getElementById('image-add');
     imageAdd.addEventListener('change', (event) => {
+        if (event.target.files.length === 0)
+            return;
+        if (event.target.files[0].size > 1000000) {
+            notify('Image size should be less than 1MB', 3, 'error');
+            return;
+        }
         let file = event.target.files[0];
         let url = URL.createObjectURL(file);
         postTweetFormComponent.setState({imageUrl: url});
     });
+}
+
+async function assignEventListeners() {
+    await assignPostTweetForm();
     await assignLikeButtons();
     await assignCommentButtons();
     await assignDeleteButtons();
 }
-
-const renderIndividualPost = async (tweetId) => {
-    let response = await request(`get-tweet-and-comments/${tweetId}/`, {
-        method: 'GET',
-    });
-    let data = await getProfile();
-    let parentElement = document.getElementById('social-container');
-    let selectedPostComponent = new SelectedPostComponent({tweet: response.results.tweet, userId: data.id,comments:response.results.comments}, parentElement);
-    selectedPostComponent.render();
-    await assignLikeButtons();
-    await fetchChatFriends()
-    let form = document.getElementById('comment-send-form');
-    form.addEventListener('submit', async (event) => {
-            event.preventDefault();
+async function commentSubmit(e,commentsComponent,tweetId)
+{
+            e.preventDefault();
             let inputValue = document.getElementById('comment-input').value;
             try {
                 let data = await request(`post-comment/`, {
                     method: 'POST',
                     body: JSON.stringify({content: inputValue, tweet: tweetId})
                 });
+                if(!data.ok)
+                {
+                    notify(data.error, 3, 'error');
+                    return;
+                }
                 notify('Comment posted successfully', 3, 'success');
-                let newComments = [data, ...selectedPostComponent.state.tweet.results.comments];
-                selectedPostComponent.setState({
-                    tweet: {
-                        results: {
-                            tweet: selectedPostComponent.state.tweet.results.tweet,
-                            comments: newComments
-                        }
-                    }
+                let newComments = [data, ...commentsComponent.state.comments];
+                commentsComponent.setState({
+                    comments: newComments
                 });
             } catch (error) {
                 console.error('Error:', error);
                 notify('Error posting comment', 3, 'error');
             }
-        }
-    );
 }
-
+const renderIndividualPost = async (tweetId) => {
+    let response = await request(`get-tweet-and-comments/${tweetId}/`, {
+        method: 'GET',
+    });
+    let data = await getProfile();
+    let parentElement = document.getElementById('social-container');
+    let selectedPostComponent = new SelectedPostComponent({
+        tweet: response.results.tweet,
+        userId: data.id,
+    }, parentElement);
+    selectedPostComponent.render();
+    let commentsComponent = new CommentsComponent({
+        comments: response.results.comments,
+        next: response.next
+    },document.getElementById('post-comments'));
+    commentsComponent.render();
+    await assignLikeButtons();
+    await fetchChatFriends()
+    let form = document.getElementById('comment-send-form');
+    form.addEventListener('submit', (e) => commentSubmit(e,commentsComponent,tweetId));
+}
 async function getProfile2() {
     try {
         let data = await request(`profile/`, {
@@ -520,9 +682,9 @@ async function getProfile2() {
         return null;
     }
 }
-
 const renderAllPosts = async () => {
     let profile_picture_url = await getProfile2();
+    const nickname = getActiveUserNickname();
     let container = document.getElementById('social-container');
     container.innerHTML = `
                   <div
@@ -537,7 +699,7 @@ const renderAllPosts = async () => {
                      alt=""
                     />
                   </div>
-                  <h6 id="username">Test12</h6>
+                  <h6 id="username"></h6>
                 </div>
                 <form class="social-send" id="social-send-form">
                   <input
@@ -566,17 +728,15 @@ const renderAllPosts = async () => {
                 </div>
               </div>
             </div>
-
     `
+    document.getElementById('username').innerText = nickname;
     socialPostsComponent.parentElement = document.getElementById('posts-wrapper');
     postTweetFormComponent.parentElement = document.getElementById('social-send-form');
     await Promise.all([fetchChatFriends(), fetchSocialPosts(), getProfile()]);
     await assignEventListeners();
-
 }
-
 async function handleAddFriend(element) {
-    const socket = getSocket();
+    const socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
     let friendRequestButton = document.getElementById('options-add-friend');
     try {
@@ -597,9 +757,8 @@ async function handleAddFriend(element) {
         notify('Error adding friend', 3, 'error');
     }
 }
-
-function handleInviteToPong(element) {
-    let socket = getSocket();
+async function handleInviteToPong(element) {
+    let socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
     let sendBody = {
         request_type: "game",
@@ -609,15 +768,53 @@ function handleInviteToPong(element) {
     socket.send(JSON.stringify(sendBody));
     notify('Invite sent', 3, 'success');
 }
-
+async function handleRemoveFriend(element)
+{
+    let nickname = element.children[1].children[0].innerText;
+    let params = new URLSearchParams()
+    params.append('nickname', nickname)
+    try {
+        let response = await request(`profile/friends/?${params.toString()}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            notify(response.error, 3, 'error');
+            return;
+        }
+        notify('Friend removed', 3, 'success');
+    } catch (error) {
+        console.error('Error:', error);
+        notify('Error removing friend', 3, 'error');
+    }
+}
+async function handleBlockUser(element) {
+    let nickname = element.children[1].children[0].innerText;
+    try {
+        let response = await request(`profile/block/`, {
+            method: 'POST',
+            body: JSON.stringify({nickname: nickname})
+        });
+        if (!response.ok) {
+            notify(response.error, 3, 'error');
+            return;
+        }
+        notify('User blocked', 3, 'success');
+    } catch (error) {
+        console.error('Error:', error);
+        notify('Error blocking user', 3, 'error');
+    }
+}
 function addContextListeners(element) {
     let addFriendButton = document.getElementById('options-add-friend');
+    if (addFriendButton.innerText === 'Add Friend')
+        addFriendButton.addEventListener('click', () => handleAddFriend(element));
+    else
+        addFriendButton.addEventListener('click', () => handleRemoveFriend(element));
     let blockUserButton = document.getElementById('options-block-user');
     let inviteToPongButton = document.getElementById('options-invite-to-pong');
-    addFriendButton.addEventListener('click', () => handleAddFriend(element));
     inviteToPongButton.addEventListener('click', () => handleInviteToPong(element));
+    blockUserButton.addEventListener('click', () =>handleBlockUser(element));
 }
-
 function handleRightClick(event, element) {
     event.preventDefault();
     let mouseX = event.clientX;
@@ -626,15 +823,20 @@ function handleRightClick(event, element) {
     chatOptions.style.top = `${mouseY}px`;
     chatOptions.style.left = `${mouseX}px`;
     chatOptions.classList.add("chat-options-open");
+    const isFriend = element.getAttribute('data-is-friend');
+    if(isFriend === 'true')
+    {
+        document.getElementById('options-add-friend').innerText = 'Remove Friend';
+    }
     chatOptions.addEventListener("click", (event) => {
         event.stopPropagation();
     });
+    let inviteToPong = document.getElementById('options-invite-to-pong');
 
     function handleChatContext() {
         let redirect = document.getElementById('profile-redirect');
         redirect.setAttribute('href', `/profile/${element.children[1].children[0].innerText}`)
     }
-
     handleChatContext()
     addContextListeners(element)
     document.addEventListener(
@@ -646,22 +848,32 @@ function handleRightClick(event, element) {
         {once: true}
     );
 }
-
 async function fetchMessages(roomId) {
     try {
         let response = await request(`chat/get-messages/${roomId}/`, {
             method: 'GET'
         });
-        return response.results;
+        return response
     } catch (error) {
         console.error('Error:', error);
         notify('Error fetching messages', 3, 'error');
     }
 }
-
+let chatSocket;
+let chatSocketOnMessage;
 async function connectToRoom(room, conversationComponent) {
-    const nickname = getActiveUserNickname()
-    const socket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
+    const nickname = getActiveUserNickname();
+    chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
+    chatSocketOnMessage = (event) => {
+        let data = JSON.parse(event.data);
+        let message = {
+            content: data.message,
+            user: {nickname: data.user, id: data.id},
+            created_date: new Date()
+        };
+        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
+    };
+    chatSocket.addEventListener('message', chatSocketOnMessage);
     let chatSendForm = document.getElementById('chat-send');
     let chatInput = document.getElementById('chat-input');
     chatSendForm.addEventListener('submit', (event) => {
@@ -669,25 +881,25 @@ async function connectToRoom(room, conversationComponent) {
         let content = chatInput.value;
         if (content.length <= 0)
             return;
-        socket.send(JSON.stringify({message: content}));
+        chatSocket.send(JSON.stringify({message: content}));
         chatInput.value = '';
     });
-    socket.onmessage = (event) => {
-        let data = JSON.parse(event.data);
-        let message = {
-            content: data.message,
-            user: {nickname: data.user, id: data.id},
-            created_date: new Date()
-        }
-        conversationComponent.setState({messages: [message, ...conversationComponent.state.messages]});
+}
+function cleanupChatSocket() {
+    if (chatSocket && chatSocketOnMessage) {
+        chatSocket.removeEventListener('message', chatSocketOnMessage);
+        chatSocket.close();
     }
 }
-
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
+    let profilePicture = element.children[0].children[0].src;
     let wrapper = document.getElementById('conversation-wrapper');
     let activeUserInfoWrapper = document.getElementById('active-user-info');
-    activeUserInfoWrapper.children[0].innerText = nickname;
+    let image = activeUserInfoWrapper.children[0].children[0]
+    let name = activeUserInfoWrapper.children[1].children[0]
+    name.innerText = nickname;
+    image.src = profilePicture;
     let spinner = new Spinner({isVisible: true}, wrapper);
     spinner.render();
     try {
@@ -703,7 +915,8 @@ async function fetchRoomData(element) {
             {
                 senderId: localStorage.getItem("activeUserId"),
                 receiverId: room.second_user,
-                messages: response.messages
+                messages: response.results.messages,
+                next: response.next
             },
             conversationWrapper);
         spinner.setState({isVisible: false});
@@ -731,28 +944,74 @@ async function toggleChat() {
     }
 }
 
-function handleChatState() {
 
+function debounce(func, delay) {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
 }
 
-function handleChatEvents() {
-    console.log('Handling chat events')
-    let elements = document.getElementsByClassName("user-wrapper");
-    for (let element of elements) {
-        element.addEventListener("contextmenu", (event) => handleRightClick(event, element));
+async function handleInput(event) {
+    let searchInput = document.getElementById('user-search-input');
+    event.preventDefault();
+    let searchValue = searchInput.value.trim(); // Trim to remove extra spaces
+    let parentElement = document.getElementById('user-data-wrapper');
+    if (searchValue) {
+        let params = new URLSearchParams();
+        params.append('search', searchValue);
+        let url = `profile-search/?${params.toString()}`;
+        let response = await request(url, {method: 'GET'});
+        let statusSocket = await getStatusSocket();
+        statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
+        statusSocket.addEventListener('message', (event) => {
+            let userStatus = JSON.parse(event.data);
+            let chatFriendsComponent = new SearchUsersComponent({
+                users: response,
+                status: userStatus
+            }, parentElement);
+            chatFriendsComponent.render();
+        });
     }
+}
+function handleChatState() {
+    let chatContainer = document.getElementById("chat-container");
+  let socialWrapper = document.getElementById("social-container");
+  let chatCloseButton = document.getElementById("chat-close-button");
+  chatCloseButton.addEventListener("click", () => {
+    chatContainer.classList.add("chat-transition");
+    setTimeout(() => {
+      chatContainer.classList.remove("chat-transition");
+      socialWrapper.classList.add("social-wrapper-chat-closed");
+    }, 1000);
+    chatContainer.classList.add("chat-closed");
+  });
+}
+function handleChatEvents() {
+    let searchInput = document.getElementById('user-search-input');
+    searchInput.addEventListener('keyup', (e) => {
+        if (e.key.length === 1 || searchInput.value.length > 0) {
+            return;
+        }
+        fetchChatFriends()
+    });
+    searchInput.addEventListener('input', debounce(handleInput, 2000));
 }
 
 const App = async () => {
-    let regex = /\/tweet\/(\d+)/;
+    let regex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
     let match = window.location.pathname.match(regex);
     if (match)
-        await renderIndividualPost(match[1]);
+        await renderIndividualPost(match[0]);
     else
         await renderAllPosts();
     assignRouting();
     handleChatState();
     handleChatEvents();
+
     //I don't know if this make sense but, I added this to prevent the form from submitting when
     //there is no chat active
     document.querySelectorAll('form').forEach(form => {
@@ -765,7 +1024,7 @@ window.addEventListener('popstate', async (event) => {
     if (window.location.pathname === '/social/')
         await renderAllPosts();
     else {
-        let regex = /\/tweet\/(\d+)/;
+        let regex = /\/tweet\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
         let match = window.location.pathname.match(regex);
         if (match) {
             await renderIndividualPost(match[1]);

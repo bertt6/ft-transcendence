@@ -9,6 +9,10 @@ class ProfileGetSerializer(serializers.ModelSerializer):
         model = Profile
         fields = "__all__"
 
+class ProfileSearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['nickname', 'profile_picture']
 
 class ProfilePostSerializer(serializers.ModelSerializer):
     class Meta:

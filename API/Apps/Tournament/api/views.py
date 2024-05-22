@@ -37,7 +37,7 @@ def create(request, profile_id):
 def tournaments(request):
     profile_id = request.user.profile.id
     if request.method == 'GET':
-        all_tournaments = Tournament.objects.all()
+        all_tournaments = Tournament.objects.filter(is_finished=False)
         serializer = TournamentGetSerializer(all_tournaments, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':

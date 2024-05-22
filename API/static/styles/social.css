@@ -7,6 +7,7 @@
   flex-direction: column;
   padding: 2rem;
   overflow: hidden;
+  min-width: 230px;
 }
 .chat-send-wrapper {
   width: 100%;
@@ -76,9 +77,9 @@ input {
   flex-direction: column;
   flex-basis: calc(400px + 10%);
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
-  padding-right: 2rem;
+  padding: 0 1rem;
   gap: 1rem;
-  max-width: 400px;
+  width: 350px;
   overflow: hidden;
   transition: all 1s ease;
 }
@@ -116,7 +117,6 @@ input {
 }
 
 .active-user-info-wrapper {
-  margin-top: 1rem;
   overflow: hidden;
   text-wrap: nowrap;
   flex: 1;
@@ -317,10 +317,11 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: 100%;
 }
 .post-info {
   display: flex;
-  gap: 2px;
+  gap: 10px;
   align-items: center;
   flex-basis: 100%;
   overflow: hidden;
@@ -398,6 +399,7 @@ input[type="file"] {
   overflow-y: auto;
   overflow-x: hidden;
   margin-top: 20px;
+  height: 100%;
 }
 .post-comment {
   display: flex;
