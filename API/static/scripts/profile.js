@@ -91,7 +91,6 @@ class BlockedUsers extends BaseComponent {
     render() {
         this.parentElement.innerHTML = this.html;
         for (let i = 0; this.state.blockedUsers.length > i; i++) {
-            console.log(this.state.blockedUsers[i].id)
             document.getElementById(`${i}-button`).addEventListener("click", () =>
                 this.removeBlockedUser(this.state.blockedUsers[i].nickname, i)
             )
@@ -100,74 +99,6 @@ class BlockedUsers extends BaseComponent {
     }
 }
 
-class PaddleColor extends BaseComponent {
-    constructor(state, parentElement = null) {
-        super(state, parentElement);
-        this.html = this.handleHTML();
-    }
-
-    handleHTML() {
-        return `
-        <form>
-    <div class="paddle-color-wrapper">
-        <div class="colors-text">COLORS</div>
-        <div class="paddle-color-row">
-            <div class="paddle-color-item">
-                <input type="radio" id="red1" name="color_row1" value="red1">
-                <label for="red1">
-                    <div>
-                        <p>White</p>
-                    </div>
-                    <div class="red">
-                        <img src="/static/public/whitepaddle.png" alt="">
-                    </div>
-                </label>
-            </div>
-            <div class="paddle-color-item">
-                <input type="radio" id="red2" name="color_row1" value="red2">
-                <label for="red2">
-                    <div>
-                        <p>Blue</p>
-                    </div>
-                    <div class="red">
-                        <img src="/static/public/bluepaddle.png" alt="">
-                    </div>
-                </label>
-            </div>
-        </div>
-        <div class="paddle-color-row">
-            <div class="paddle-color-item">
-                <input type="radio" id="red3" name="color_row1" value="red3">
-                <label for="red3">
-                    <div>
-                        <p>Red</p>
-                    </div>
-                    <div class="red">
-                        <img src="/static/public/redpaddle.png" alt="">
-                    </div>
-                </label>
-            </div>
-            <div class="paddle-color-item">
-                <input type="radio" id="red4" name="color_row1" value="red4">
-                <label for="red4">
-                    <div>
-                        <p>Green</p>
-                    </div>
-                    <div class="red">
-                        <img src="/static/public/greenpaddle.png" alt="">
-                    </div>
-                </label>
-            </div>
-        </div>
-    </div>
-</form>
-    `;
-    }
-
-    render() {
-        this.parentElement.innerHTML = this.html;
-    }
-}
 
 function calculateWinRate(wins, losses) {
     let winRate = wins + losses === 0 ? 0 : (wins / (wins + losses)) * 100;
@@ -267,7 +198,6 @@ class Friends extends BaseComponent {
         super.render();
         assignRouting();
         for (let i = 0; this.state.friends.length > i; i++) {
-            console.log(this.state.friends[i].id)
             document.getElementById(`${i}-button`).addEventListener("click", () =>
                 this.removeFriend(this.state.friends[i].id, i)
             )
@@ -348,7 +278,6 @@ class ProfileInfo extends BaseComponent {
                     'Content-Type': '',
                 }
             });
-            console.log(response)
             if(!response.ok)
             {
                 let message = parseErrorToNotify(response)
@@ -378,7 +307,6 @@ class ProfileInfo extends BaseComponent {
                 let image = document.getElementById('profile-photo')
                 if (image.files.length > 0) {
                     formData.append('profile_picture', image.files[0]);
-                    console.log(image.files[0])
                 }
                 formData.append('nickname', escapeHTML(document.getElementById('profile-nickname').value))
                 formData.append('bio',escapeHTML(document.getElementById('profile-bio').value))
@@ -454,23 +382,8 @@ async function assignDataRouting() {
         history.replaceState(null, null, '#blockedusers')
         handleRouting()
     });
-    paddleColorButton.addEventListener('click', () => {
-        history.replaceState(null, null, '#paddlecolor')
-        handleRouting()
-    });
 }
 
-async function fetchPaddleColor() {
-    //profile/ endpoint PUT Request to update paddle color
-    const colors = [
-        { color: "red", hex: "#FF0000" },
-        { color: "green", hex: "#00FF00" },
-        { color: "blue", hex: "#0000FF" },
-        { color: "yellow", hex: "#FFFF00" },
-        { color: "purple", hex: "#800080" }
-    ];
-    return colors;
-}
 async function fetchStats() {
     try {
         let response = await request(`profile/stats/`, {
@@ -502,7 +415,6 @@ async function fetchBlockedUsers() {
         let data = await request('profile/block/', {
             method: "GET"
         })
-        console.log(data)
         return data
     } catch (error) {
         console.error('Error:', error);
@@ -555,11 +467,6 @@ async function handleRouting() {
         let data = await fetchBlockedUsers();
         const blockedUsers = new BlockedUsers({ blockedUsers: data }, parentElement);
         blockedUsers.render();
-    }
-    else if (hash === '#paddlecolor') {
-        const paddleColor = await fetchPaddleColor();
-        const paddleColorComponent = new PaddleColor({ colors: paddleColor }, parentElement);
-        paddleColorComponent.render();
     }
     else {
         let data = await fetchHistory();

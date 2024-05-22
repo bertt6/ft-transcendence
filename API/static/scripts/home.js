@@ -6,7 +6,6 @@ async function handleRouting()
 }
 (function() {
   function destroy() {
-    console.log('Home script unloaded');
   }
 
   // Expose init and destroy to the global scope

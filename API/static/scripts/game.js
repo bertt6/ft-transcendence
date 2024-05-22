@@ -219,7 +219,6 @@ function printCountdown() {
         }
     }, 1000);
 }
-
 function handleParticipants(data) {
     const currentSpectators = participantsComponent.state.spectators;
     if (JSON.stringify(currentSpectators) !== JSON.stringify(data.spectators)) {
@@ -229,7 +228,6 @@ function handleParticipants(data) {
         participantsComponent.render();
     }
 }
-
 async function connectToServer() {
     const path = window.location.pathname;
     const id = path.split("/")[2];
@@ -277,18 +275,19 @@ async function connectToServer() {
           handleInitialState(data);
           handleMovement(socket, data);
       } else if (data.state_type === "score_state") {
-        draw(data.game,"red","blue");
+        draw(data.game);
         setCurrentPoints(data);
         printCountdown();
       } else if (data.state_type === 'finish_state') {
-        draw(data.game,"red","blue");
+        draw(data.game);
         setCurrentPoints(data);
         printWinner(data,data.winner);
         removeKeyboardEventListeners();
+        socket.close();
       }
       else if(data.state_type === "game_state")
       {
-        draw(data.game,"red","blue");
+        draw(data.game);
         setCurrentPoints(data);
         handleParticipants(data);
       }
@@ -306,7 +305,6 @@ async function connectToServer() {
 }
 function addKeyboardEventListeners(socket, currentPaddle) {
     handleKeyDown = (event) => {
-        console.log("socket.state",socket.readyState)
         if (event.key === "w" || event.key === "s") {
             currentPaddle.dy = event.key === "w" ? -10 : 10;
             const body = {
@@ -348,11 +346,9 @@ function handleMovement(socket,data)
         currentPaddle.paddle = "player_two";
     addKeyboardEventListeners(socket, currentPaddle);
 }
-
 async function App() {
     await connectToServer();
 }
-
 App().catch((e) => {
     console.error(e);
 });

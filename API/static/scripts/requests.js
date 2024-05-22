@@ -16,7 +16,6 @@ async function handleAcceptCallback(data, request_id) {
             'method': 'POST',
             body: JSON.stringify(body),
         })
-        console.log(response)
     } catch (error) {
         console.error(error)
     }
@@ -28,7 +27,6 @@ async function handleRejectedCallback(request_id) {
             'method': 'PUT',
             body: JSON.stringify({status: 'rejected'}),
         })
-        console.log(response)
     } catch (error) {
         console.error(error)
     }
@@ -114,7 +112,6 @@ async function App() {
         try {
             const data = JSON.parse(e.data);
             const sender_profile = await getProfile(data.sender);
-            console.log(sender_profile)
             if (data.request_type === "friend")
                 notify.request(
                     `You have a friend request from ${data.sender}`,
@@ -129,7 +126,6 @@ async function App() {
                     () => handleRejectedCallback(data.request_id)
                 );
             else if (data.request_type === "created_game") {
-                console.log(data)
                 loadPage(`/game/${data.game_id}/`);
             }
         } catch (error) {

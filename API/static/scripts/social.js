@@ -445,7 +445,6 @@ class ConversationComponent extends BaseComponent {
             return;
         let observer = new IntersectionObserver(async (entries) => {
             if (entries[0].isIntersecting) {
-                console.log(this.state.next)
                 let response = await request(this.state.next, {method: 'GET'});
                 this.setState({messages: [...this.state.messages, ...response.results.messages], next: response.next});
             }
@@ -586,7 +585,6 @@ async function assignDeleteButtons() {
                 let data = await request(`delete-tweet/${tweetId}/`, {
                     method: 'DELETE',
                 });
-                console.log(data)
                 if (!data.ok) {
                     notify(data.error, 3, 'error');
                     return;
