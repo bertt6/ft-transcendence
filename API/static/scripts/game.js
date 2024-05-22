@@ -80,34 +80,74 @@ let participantsComponent = new Participants({
 }, element);
 
 function draw(data) {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.save();  // Save the current state of the context
-    ctx.translate(canvasWidth / 2, canvasHeight / 2);
-    ctx.beginPath();
-    ctx.moveTo(0, -canvasHeight / 2);
-    ctx.lineTo(0, canvasHeight / 2);
-    ctx.strokeStyle = "white";
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.fillStyle = "white";
-    ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillRect(data.player_one.paddle_x, data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
-    ctx.fillRect(data.player_two.paddle_x, data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
-    ctx.restore();  // Restore the context state to what it was before translating the origin
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.save();  // Save the current state of the context
+  ctx.translate(canvasWidth / 2, canvasHeight / 2);
+
+    // Draw the middle line
+  ctx.beginPath();
+  ctx.moveTo(0, -canvasHeight / 2);
+  ctx.lineTo(0, canvasHeight / 2);
+  ctx.strokeStyle = "white";
+  ctx.stroke();
+
+    // Draw the ball
+  ctx.fillStyle = "white";
+  ctx.beginPath();
+  ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
+  ctx.fill();
+
+    // Draw paddles with border radius
+    const borderRadius = 8;
+
+    // Function to draw rounded rectangles
+    function drawRoundedRect(x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Draw player one's paddle
+    drawRoundedRect(
+        data.player_one.paddle_x,
+        data.player_one.paddle_y - paddleHeight / 2,
+        paddleWidth,
+        paddleHeight,
+        borderRadius
+    );
+
+    // Draw player two's paddle
+    drawRoundedRect(
+        data.player_two.paddle_x,
+        data.player_two.paddle_y - paddleHeight / 2,
+        paddleWidth,
+        paddleHeight,
+        borderRadius
+    );
+
+  ctx.restore();  // Restore the context state to what it was before translating the origin
 }
 
-function setCurrentPoints(state) {
-    const {game} = state;
-    let playerOnePoints = game.player_one.score;
-    let playerTwoPoints = game.player_two.score;
-    let points = document.getElementById("game-points");
-    let splitPoints = points.innerText.split(" - ").map(Number);
+function setCurrentPoints(state)
+{
+  const {game} = state;
+  let playerOnePoints = game.player_one.score;
+  let playerTwoPoints = game.player_two.score;
+  let points = document.getElementById("game-points");
+  let splitPoints = points.innerText.split(" - ").map(Number);
 
     points.classList.remove("skeleton")
     if (splitPoints[0] !== playerOnePoints || splitPoints[1] !== playerTwoPoints)
         points.innerText = `${game.player_one.score} - ${game.player_two.score}`;
-
 }
 
 function setPlayerData(state) {
