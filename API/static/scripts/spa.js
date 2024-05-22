@@ -6,6 +6,7 @@ export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
 export const API_42_URL = 'https://api.intra.42.fr'
 export const WEBSOCKET_URL = 'ws://localhost:8000/ws'
+let currentScript = null;
 
 export function setCookie(name, value, days) {
     let expires = "";
@@ -16,6 +17,7 @@ export function setCookie(name, value, days) {
     }
     document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
+
 export function getCookie(name) {
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
@@ -26,6 +28,7 @@ export function getCookie(name) {
     }
     return null;
 }
+
 const routes = new Map([
     ['login', {
         auth_required: false,
@@ -191,95 +194,6 @@ const routes = new Map([
               <button class="header-wrapper" id="paddle-color-button"><span>PADDLE COLOR</span></button>
             </div>
           <div id="data-wrapper">
-                <div class="friends-wrapper" style="display: none">
-              <div class="friend-wrapper">
-                <div class="friend-info">
-                  <div class="friend-image">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
-                  </div>
-                  <div class="friend-data">
-                    <h6>NAME</h6>
-                    <span>First Last name</span>
-                  </div>
-                </div>
-                <div class="friend-more">
-                  <div><img src="/public/image.svg" alt="" /></div>
-                  <div><img src="/public/chat-bubble.svg" alt="" /></div>
-                  <div><img src="/public/more.svg" alt="" /></div>
-                </div>
-              </div>
-              <div class="friend-wrapper">
-                <div class="friend-info">
-                  <div class="friend-image">
-                    <img src="https://picsum.photos/id/237/200/300" alt="" />
-                  </div>
-                  <div class="friend-data">
-                    <h6>NAME</h6>
-                    <span>First Last name</span>
-                  </div>
-                </div>
-                <div class="friend-more">
-                  <div><img src="/public/image.svg" alt="" /></div>
-                  <div><img src="/public/chat-bubble.svg" alt="" /></div>
-                  <div><img src="/public/more.svg" alt="" /></div>
-                </div>
-              </div>
-            </div>
-            <div class="histories-wrapper">
-              <div class="history-wrapper">
-                <div class="friend-info">
-                  <div class="history-type"><h5>1v1</h5></div>
-                </div>
-                <div class="history-data">
-                  <h5>BSAMLI</h5>
-                  <h5>VS</h5>
-                  <h5>OFIRAT</h5>
-                </div>
-                <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
-                </div>
-                <div>
-                  <h5>1 DAY AGO</h5>
-                </div>
-              </div>
-              <div class="history-wrapper">
-                <div class="friend-info">
-                  <div class="history-type"><h5>1v1</h5></div>
-                </div>
-                <div class="history-data">
-                  <h5>BSAMLI</h5>
-                  <h5>VS</h5>
-                  <h5>OFIRAT</h5>
-                </div>
-                <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
-                </div>
-                <div>
-                  <h5>1 DAY AGO</h5>
-                </div>
-              </div>
-              <div class="history-wrapper">
-                <div>
-                  <h5>Tournament</h5>
-                </div>
-                <div class="history-data">
-                  <h5>BSAMLI</h5>
-                  <h5>VS</h5>
-                  <h5>OFIRAT</h5>
-                </div>
-                <div class="history-score">
-                  <h5>4</h5>
-                  <h5>-</h5>
-                  <h5>0</h5>
-                </div>
-                <div>
-                  <h5>1 DAY AGO</h5>
-                </div>
-              </div>
             </div>
           </div>
           </div>
@@ -292,10 +206,10 @@ const routes = new Map([
         url: ['/social/', '/social/\\w+/g'],
         html: `
       <ul class="chat-options" id="chat-options">
-        <li>Invite to Pong</li>
-        <pong-redirect id="options-profile">Go To Profile</pong-redirect>
-          <li>Block</li>
-          <li>Add Friend</li>
+        <li id="options-invite-to-pong">Invite to Pong</li>
+        <pong-redirect id="profile-redirect">Go To Profile</pong-redirect>
+          <li id="options-block-user">Block</li>
+          <li id="options-add-friend">Add Friend</li>
       </ul>
 
       
@@ -308,10 +222,10 @@ const routes = new Map([
             <div id="user-chat-friends">
                 <div class="users-wrapper">
                 <div>
-                  <div class="chat-send-wrapper">
+                  <form class="chat-send-wrapper">
                     <h2>SEARCH...</h2>
-                    <input type="text" placeholder="SEARCH A NAME" id="friend-search-input" />
-                </div>
+                    <input type="text" placeholder="SEARCH A NAME" id="user-search-input" />
+                </form>
               </div>
               <div class="user-data-wrapper loading" id="user-data-wrapper">
               <div class="lds-ring">
@@ -324,25 +238,19 @@ const routes = new Map([
             </div>
             </div>
             <div class="chat-container" id="chat-container">
-                           <div class="active-user-wrapper">
-                <div class="user-info">
+               <div class="active-user-wrapper">
+                <div class="user-info" id="active-user-info">
                   <div class="user-pic-wrapper">
                     <img
                       src="https://picsum.photos/seed/picsum/200/300"
                       alt=""
                     />
                   </div>
-                  <div class="active-user-info-wrapper" id="active-user-info">
-                    <h6>test1</h6>
-                    <span>active now</span>
-                    <div class="spotify-info">
-                      <img src="/static/public/music.svg" alt="" style="width: 20px" />
-                      <span>Currently listening test123</span>
-                    </div>
+                  <div class="active-user-info-wrapper">
+                    <h6></h6>
                   </div>
                 </div>
                 <div class="d-flex">
-                  <img src="/static/public/more.svg" alt="" style="width: 50px" />
                   <div id="chat-close-button"  style="cursor: pointer">
                     <img  src="/static/public/go-back.svg" alt="" />
                   </div>
@@ -355,7 +263,7 @@ const routes = new Map([
                 <input
                   type="text"
                   name=""
-                  id=""
+                   id="chat-input"
                   placeholder="Send a message"
                   style="width: 100%"
                 />
@@ -419,10 +327,10 @@ const routes = new Map([
         class="container-fluid position-relative home-wrapper"
         style="padding: 0"
       >
-        <pong-redirect  class="home-element menu-element" id="single-menu" href="/play/">
+        <pong-redirect  class="home-element" id="single-menu" href="/play/">
           <h1>Singleplayer</h1>
         </pong-redirect >
-        <pong-redirect class="home-element menu-element" id="multi-menu" href="/matchmaking/">
+        <pong-redirect class="home-element" id="multi-menu" href="/matchmaking/">
           <h1>Multiplayer</h1>
         </pong-redirect>
         <pong-redirect  class="home-element" id="tournament-menu" href="/tournaments/">
@@ -598,10 +506,12 @@ const routes = new Map([
               <div class="range-wrapper">
                 <input
                   type="range"
-                  id="max_participants"
+                  id="range-input"
                   min="4"
                   max="16"
                   value="2"
+                   name="max_participants"
+
                 />
                 <span id="range-value">4</span>
               </div>
@@ -614,10 +524,10 @@ const routes = new Map([
       </div>
         `
     }],
-    ['tournament',{
-        auth_required:true,
-        url:[/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
-        html:`
+    ['tournament', {
+        auth_required: true,
+        url: [/tournament\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})/],
+        html: `
       <div
         class="background container-fluid social-background"
         style="padding: 0"
@@ -638,8 +548,8 @@ const routes = new Map([
                   <div class="joined-ready">(NOT READY)</div>
                 </div>
                 <hr />
-                <div class="joined-remaining">
-                  <h1>25 Seconds Remaining</h1>
+                <div class="tournament-matchups" id="matchups">
+
                 </div>
               </div>
             </div>
@@ -724,6 +634,12 @@ const requiredScripts = [
     '/static/scripts/inbox.js',
     '/static/scripts/Status.js',
 ]
+const nonAuthScripts = [
+    '/static/scripts/requests.js',
+    '/static/components/Component.js',
+    '/static/components/spinner.js',
+    '/static/scripts/utils.js',
+    ]
 export function loadError(statusCode, title, message) {
     let content = document.getElementById('main');
     content.innerHTML = routes.get('error').html;
@@ -762,6 +678,21 @@ function findRouteKey(pathName) {
 }
 
 function loadRequiredScripts() {
+        let pathName = window.location.pathname;
+    let value = findRouteKey(pathName);
+    let route = routes.get(value);
+    if (route.auth_required === false) {
+        nonAuthScripts.forEach(script => {
+            if (!document.getElementById(script)) {
+                let newScript = document.createElement('script');
+                newScript.src = script;
+                newScript.id = script;
+                newScript.type = 'module';
+                document.body.appendChild(newScript);
+            }
+        });
+        return;
+    }
     requiredScripts.forEach(script => {
         if (!document.getElementById(script)) {
             let newScript = document.createElement('script');
@@ -814,8 +745,12 @@ export function loadPage(fileName) {
 
     }
     let content = document.getElementById('main');
-    content.innerHTML = route.html;
+    content.innerHTML = route.html
+    if(currentScript && window[currentScript] && window[currentScript].destroy)
+        window[currentScript].destroy();
     renderPage().catch(console.error);
+    currentScript = data;
+
 }
 
 async function tryRefreshToken() {
@@ -831,7 +766,6 @@ async function tryRefreshToken() {
             }),
         });
         setCookie('access_token', data.access, 1);
-        setCookie('refresh_token', data.refresh, 1);
         return true;
     } catch (error) {
         notify('Please login again', 3, 'error')
@@ -851,10 +785,18 @@ async function checkForAuth() {
     const route = routes.get(value);
     if (route.auth_required === true)
         loadPage('/auth/login/');
-
+    else {
+        if (!localStorage.getItem('activeUserNickname')) {
+            let profile = await getProfile();
+            localStorage.setItem('activeUserNickname', profile.nickname);
+        }
+    }
 }
 
 export function assignRouting() {
+     const returnButton = `  <pong-redirect class="return-to-home" id="redirect-to-home" href="/home/"><h1>HOME</h1></pong-redirect>`
+    if(!document.getElementById('redirect-to-home'))
+        document.body.insertAdjacentHTML('beforebegin', returnButton);
     let elements = document.querySelectorAll("pong-redirect");
     for (let element of elements) {
         if (element.getAttribute(('listener')) === 'true')
@@ -867,13 +809,14 @@ export function assignRouting() {
         });
         element.setAttribute('listener', 'true');
     }
+
 }
 
 function loadSpecificScript() {
     let pathName = window.location.pathname;
     let value = findRouteKey(pathName);
-    if (!value){
-    loadError(404, 'Page not found', 'The page you are looking for does not exist')
+    if (!value) {
+        loadError(404, 'Page not found', 'The page you are looking for does not exist')
         return;
     }
     if (document.getElementById('script'))
@@ -887,11 +830,12 @@ function loadSpecificScript() {
 }
 
 async function assignLocalStorage() {
-    if(!checkIfAuthRequired())
+    if (!checkIfAuthRequired())
         return;
     let profile = await getProfile();
     localStorage.setItem('activeUserNickname', profile.nickname);
 }
+
 export function checkIfAuthRequired() {
     const pathName = window.location.pathname;
     let value = findRouteKey(pathName);
@@ -900,18 +844,22 @@ export function checkIfAuthRequired() {
     const route = routes.get(value);
     return route.auth_required;
 }
+
 async function renderPage() {
+    loadRequiredScripts()
     loadSpecificScript();
     await checkForAuth();
     assignRouting()
 }
+
 const App = async () => {
-    loadRequiredScripts();
     await checkForAuth();
     loadSpecificScript();
+    loadRequiredScripts();
     assignRouting()
     await assignLocalStorage();
 }
+
 window.addEventListener('popstate', (event) => {
         let pathName = window.location.pathname;
         loadPage(pathName);

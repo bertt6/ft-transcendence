@@ -10,7 +10,8 @@ const canvasHeight = canvas.height;
 const paddleWidth = 10;
 const paddleHeight = 200;
 const ballSize = 20;
-
+let handleKeyDown;
+let handleKeyUp;
 
 class Participants extends BaseComponent {
     constructor(state, parentElement) {
@@ -72,67 +73,69 @@ class Participants extends BaseComponent {
         this.render();
     }
 }
+
 let element = document.getElementById('spectators-wrapper')
 let participantsComponent = new Participants({
     spectators: []
-},element);
+}, element);
+
 function draw(data) {
-  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-  ctx.save();  // Save the current state of the context
-  ctx.translate(canvasWidth / 2, canvasHeight / 2);
-  ctx.beginPath();
-  ctx.moveTo(0, -canvasHeight / 2);
-  ctx.lineTo(0, canvasHeight / 2);
-  ctx.strokeStyle = "white";
-  ctx.stroke();
-  ctx.fillStyle = "white";
-  // Adjust y-coordinates by half the canvas height
-  ctx.beginPath();
-  ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "red";
-ctx.fillRect(data.player_one.paddle_x, data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
-ctx.fillStyle = "blue";
-ctx.fillRect(data.player_two.paddle_x, data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
-  ctx.restore();  // Restore the context state to what it was before translating the origin
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.save();  // Save the current state of the context
+    ctx.translate(canvasWidth / 2, canvasHeight / 2);
+    ctx.beginPath();
+    ctx.moveTo(0, -canvasHeight / 2);
+    ctx.lineTo(0, canvasHeight / 2);
+    ctx.strokeStyle = "white";
+    ctx.stroke();
+    ctx.fillStyle = "white";
+    // Adjust y-coordinates by half the canvas height
+    ctx.beginPath();
+    ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "red";
+    ctx.fillRect(data.player_one.paddle_x, data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
+    ctx.fillStyle = "blue";
+    ctx.fillRect(data.player_two.paddle_x, data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
+    ctx.restore();  // Restore the context state to what it was before translating the origin
 }
-function setCurrentPoints(state)
-{
-  const {game} = state;
-  let playerOnePoints = game.player_one.score;
-  let playerTwoPoints = game.player_two.score;
-  let points = document.getElementById("game-points");
-  let splitPoints = points.innerText.split(" - ").map(Number);
+
+function setCurrentPoints(state) {
+    const {game} = state;
+    let playerOnePoints = game.player_one.score;
+    let playerTwoPoints = game.player_two.score;
+    let points = document.getElementById("game-points");
+    let splitPoints = points.innerText.split(" - ").map(Number);
 
     points.classList.remove("skeleton")
-    if(splitPoints[0] !== playerOnePoints || splitPoints[1] !== playerTwoPoints)
-      points.innerText =`${game.player_one.score} - ${game.player_two.score}`;
+    if (splitPoints[0] !== playerOnePoints || splitPoints[1] !== playerTwoPoints)
+        points.innerText = `${game.player_one.score} - ${game.player_two.score}`;
 
 }
-function setPlayerData(state)
-{
-  const {details} = state;
-  let playerOneWrapper  = document.getElementById("player-one");
-  let image = playerOneWrapper.querySelector("img");
-  image.src = `${BASE_URL}${details.player1.profile_picture}`;
-  let detailsWrapper = document.getElementById("player-one-details");
+
+function setPlayerData(state) {
+    const {details} = state;
+    let playerOneWrapper = document.getElementById("player-one");
+    let image = playerOneWrapper.querySelector("img");
+    image.src = `${BASE_URL}${details.player1.profile_picture}`;
+    let detailsWrapper = document.getElementById("player-one-details");
     let name = detailsWrapper.querySelector(".player-name");
     name.innerText = details.player1.nickname;
-    let playerTwoWrapper  = document.getElementById("player-two");
+    let playerTwoWrapper = document.getElementById("player-two");
     image = playerTwoWrapper.querySelector("img");
     image.src = `${BASE_URL}${details.player2.profile_picture}`;
     detailsWrapper = document.getElementById("player-two-details");
     name = detailsWrapper.querySelector(".player-name");
     name.innerText = details.player2.nickname;
 }
-function handleInitialState(state)
-{
-  setCurrentPoints(state)
-  setPlayerData(state);
-  draw(state.game,"red","blue");
+function handleInitialState(state) {
+
+    setCurrentPoints(state)
+    setPlayerData(state);
+
 }
-function printWinner(data,winner,socket){
-  let winnerHTML = `
+function printWinner(data, winner, socket) {
+    let winnerHTML = `
           <div class="winner-wrapper">
           <div class="winner-image-wrapper">
             <img src="${BASE_URL}${winner.profile_picture}" alt="" />
@@ -140,30 +143,27 @@ function printWinner(data,winner,socket){
           <h1>Winner is ${winner.nickname}</h1>
         </div>
   `
-   let element = document.createElement("div");
+    let element = document.createElement("div");
     element.id = "game-message-wrapper";
     element.innerHTML = winnerHTML;
     document.body.appendChild(element);
     setTimeout(() => {
         element.remove();
         }, 5000);
-    console.log(data)
     if (data.tournament_id !== "None")
     {
         localStorage.setItem("tournament_id",data.tournament_id);
         setTimeout(() => {
             loadPage(`/tournament/${data.tournament_id}/`);
         }, 5000);
-    }
-    else
-    {
+    } else {
         setTimeout(() => {
             loadPage("/home/");
         }, 5000);
     }
 }
-function printCountdown()
-{
+
+function printCountdown() {
     let countdown = 3;
     let element = document.createElement("div");
     element.id = "game-message-wrapper";
@@ -176,17 +176,16 @@ function printCountdown()
         countdown -= 1;
         textElement.classList.add("fade-in");
         textElement.innerText = countdown.toString();
-        if(countdown === 0)
-        {
+        if (countdown === 0) {
             clearInterval(interval);
             element.remove();
         }
     }, 1000);
 }
+
 function handleParticipants(data) {
     const currentSpectators = participantsComponent.state.spectators;
-    if (JSON.stringify(currentSpectators) !== JSON.stringify(data.spectators))
-    {
+    if (JSON.stringify(currentSpectators) !== JSON.stringify(data.spectators)) {
         participantsComponent.setState({
             spectators: data.spectators
         });
@@ -194,8 +193,7 @@ function handleParticipants(data) {
     }
 }
 
-async function connectToServer()
-{
+async function connectToServer() {
     const path = window.location.pathname;
     const id = path.split("/")[2];
     let socket = new WebSocket(`ws://localhost:8000/ws/game/${id}`)
@@ -213,17 +211,15 @@ async function connectToServer()
             send_type: "join",
         }));
     };
-
-    socket.onerror = () =>   {
-        loadError(500,"Server error", "redirecting to home page");
+    socket.onerror = () => {
+        loadError(500, "Server error", "redirecting to home page");
         setTimeout(() => {
             loadPage("/home/");
         }, 3000);
     }
 
-    socket.onmessage = async  (event) => {
-      const data = JSON.parse(event.data);
-        console.log(data)
+    socket.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
       if(data.state_type === "initial_state")
       {
 
@@ -251,6 +247,7 @@ async function connectToServer()
         draw(data.game,"red","blue");
         setCurrentPoints(data);
         printWinner(data,data.winner);
+        removeKeyboardEventListeners();
       }
       else if(data.state_type === "game_state")
       {
@@ -262,9 +259,44 @@ async function connectToServer()
       {
           loadError(data.status,data.title, data.message);
           socket.close()
+          removeKeyboardEventListeners();
       }
     };
+    socket.onclose = () => {
+        removeKeyboardEventListeners();
+    }
     return socket;
+}
+function addKeyboardEventListeners(socket, currentPaddle) {
+    handleKeyDown = (event) => {
+        console.log("socket.state",socket.readyState)
+        if (event.key === "w" || event.key === "s") {
+            currentPaddle.dy = event.key === "w" ? -10 : 10;
+            const body = {
+                ...currentPaddle,
+                "send_type": "null"
+            };
+            socket.send(JSON.stringify(body));
+        }
+    };
+
+    handleKeyUp = (event) => {
+        if (event.key === "w" || event.key === "s") {
+            currentPaddle.dy = 0;
+            const body = {
+                ...currentPaddle,
+                "send_type": "null"
+            };
+            socket.send(JSON.stringify(body));
+        }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+}
+function removeKeyboardEventListeners() {
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("keyup", handleKeyUp);
 }
 function handleMovement(socket,data)
 {
@@ -277,35 +309,13 @@ function handleMovement(socket,data)
     currentPaddle.paddle = "player_one";
     else if (data.details.player2.nickname === nickname)
         currentPaddle.paddle = "player_two";
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "w" || event.key === "s")
-        {
-
-            console.log(currentPaddle)
-          currentPaddle.dy = event.key === "w" ? -10: 10;
-            const body = {
-                ...currentPaddle,
-                "send_type": "null"
-            }
-            socket.send(JSON.stringify(body));
-        }
-    });
-  document.addEventListener("keyup", (event) => {
-  if (event.key === "w" || event.key === "s") {
-
-    currentPaddle.dy = 0;
-      const body = {
-          ...currentPaddle,
-          "send_type": "null"
-      }
-      socket.send(JSON.stringify(body));
-  }
-});
+    addKeyboardEventListeners(socket, currentPaddle);
 }
-async function App()
-{
-  await connectToServer();
+
+async function App() {
+    await connectToServer();
 }
+
 App().catch((e) => {
     console.error(e);
 });

@@ -34,9 +34,9 @@ class TournamentConsumer(WebsocketConsumer):
     def check_params(self):
         if self.tournament_id is None or self.nickname is None:
             return False
-        if Profile.objects.filter(nickname=self.nickname).exists():
+        if not Profile.objects.filter(nickname=self.nickname).exists():
             return False
-        if Tournament.objects.filter(id=self.tournament_id).exists():
+        if not Tournament.objects.filter(id=self.tournament_id).exists():
             return False
         return True
 
@@ -51,20 +51,28 @@ class TournamentConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        if self.check_params():
+        self.accept()
+        if not self.check_params():
             self.send_error("invalid_params")
             self.close(code=1000)
             return
-        self.accept()
         instance = Profile.objects.get(nickname=self.nickname)
         serializer = TournamentProfileSerializer(instance)
         cache_key = f"user_{self.tournament_id}"
         created_by = False
         tournament = Tournament.objects.get(id=self.tournament_id)
         if tournament.is_finished:
-            self.send_error("tournament_finished")
+            self.send_to_group(
+                {"winner": tournament.winner.nickname, "profile_picture": tournament.winner.profile_picture.url},
+                "tournament_winner")
             self.close(code=1000)
             return
+        if tournament.rounds.exists():
+            if tournament.current_participants.get(nickname=self.nickname) is None:
+                self.send_error("tournament_started")
+                self.close(code=1000)
+                return
+
         if tournament.created_by == instance:
             created_by = True
         data = add_player_to_cache(serializer.data, cache_key, created_by)
@@ -73,6 +81,7 @@ class TournamentConsumer(WebsocketConsumer):
             self.channel_name,
         )
         tournament.current_participants.add(instance)
+        self.send_current_matchups()
         tournament.save()
         tournament_info = {
             "tournament_name": tournament.name,
@@ -100,19 +109,45 @@ class TournamentConsumer(WebsocketConsumer):
             return
 
     def send_error(self, error_type):
-        if error_type == "invalid_profile":
-            self.send(text_data=json.dumps(
-                {"error": 'invalid_profile', "message": "Only the creator can start the tournament"}))
-        elif error_type == "invalid_tournament":
-            self.send(text_data=json.dumps({"error": "invalid_tournament", "message": "Not enough players"}))
-        elif error_type == "tournament_started":
-            self.send(text_data=json.dumps({"error": "tournament_started", "message": "Tournament Already Started"}))
-        elif error_type == "players_not_ready":
-            self.send(text_data=json.dumps({"error": "players_not_ready", "message": "All players must be ready"}))
-        elif error_type == "invalid_params":
-            self.send(text_data=json.dumps({"error": "invalid_params", "message": "Something went wrong"}))
-        elif error_type == "tournament_finished":
-            self.send(text_data=json.dumps({"error": "tournament_finished", "message": "Tournament is finished"}))
+        all_errors = [
+            {
+                "error": 'invalid_profile',
+                "message": "Only the creator can start the tournament"
+            },
+            {
+                "error": "invalid_tournament",
+                "message": "Not enough players"
+            },
+            {
+                "error": "tournament_started",
+                "message": "Tournament Already Started"
+            },
+            {
+                "error": "players_not_ready",
+                "message": "All players must be ready"
+            },
+            {
+                "error": "invalid_params",
+                "message": "Something went wrong"
+            },
+            {
+                "error": "tournament_finished",
+                "message": "Tournament is already finished"
+            },
+            {
+                "error": "tournament_started",
+                "message": "Tournament is already started"
+            }
+
+        ]
+        error = next((item for item in all_errors if item["error"] == error_type), None)
+        if error is None:
+            return
+        self.send(text_data=json.dumps({
+            "send_type": error["error"],
+            "message": error["message"]
+        }))
+
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
@@ -131,6 +166,20 @@ class TournamentConsumer(WebsocketConsumer):
                 tournament.created_by = participants.first()
             else:
                 tournament.delete()
+
+    def send_current_matchups(self):
+        tournament = Tournament.objects.get(id=self.tournament_id)
+        cache_data = get_players_from_cache(f"user_{self.tournament_id}")
+        all_games = []
+        for i in range(0, len(cache_data), 2):
+            if i + 1 < len(cache_data):
+                game = {
+                    "game_id": i,
+                    "players": [cache_data[i]["nickname"], cache_data[i + 1]["nickname"]]
+                }
+                all_games.append(game)
+
+        self.send_to_group(all_games, "current_matchups")
 
     def StartTournament(self, data):
         tournament = Tournament.objects.get(id=self.tournament_id)
@@ -179,8 +228,10 @@ class TournamentConsumer(WebsocketConsumer):
             print("Turnuva Yok")
             return
         print(last_round)
-        if tournament.is_finished == True:
-            print("Turnuva Bitti")
+        if tournament.is_finished:
+            self.send_to_group(
+                {"winner": tournament.winner.nickname, "profile_picture": tournament.winner.profile_picture.url},
+                "tournament_winner")
             return
         if last_round:
             all_matches_have_winner = all(Game.winner is not None for match in last_round.matches.all())
@@ -199,7 +250,7 @@ class TournamentConsumer(WebsocketConsumer):
                 tournament.is_finished = True
                 tournament.save()
                 self.send_to_group({"winner": game.winner.nickname, "profile_picture": game.winner.profile_picture.url},
-                                   "tournament_finished")
+                                   "tournament_winner")
             if not player_participated:
                 print("Player Maclarda Yok")
                 return

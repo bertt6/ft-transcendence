@@ -12,14 +12,15 @@ function handleValue() {
 async function assignFormHandler(e)
 {
   e.preventDefault();
+    console.log('form submitted')
   e.stopImmediatePropagation()
     let form = e.target;
   let button = document.getElementById('create-button');
     let formData = new FormData(form);
     let data = {};
-    formData.forEach((value,key) => {
-      data[key] = value;
-    });
+formData.forEach((value, key) => {
+  data[key] = value;
+});
     try
     {
       let spinner = new Spinner({isVisible:true,className:"create-button-loader"}, button);
@@ -28,7 +29,6 @@ async function assignFormHandler(e)
         method: 'POST',
         body: JSON.stringify(data)
       });
-        console.log(response.ok)
       if(!response.ok)
         {
             let message = parseErrorToNotify(response);
@@ -41,7 +41,7 @@ async function assignFormHandler(e)
         notify('Tournament created', 3, 'success');
         button.disabled = false;
         button.innerText = "CREATE";
-        loadPage(`/tournaments/${response.id}`)
+        loadPage(`/tournament/${response.id}`)
     }
     catch(e)
     {
@@ -52,6 +52,8 @@ async function assignFormHandler(e)
     }
 }
 async function App() {
+    let range = document.getElementById("range-input");
+    range.value = 4;
   document.getElementById("range-input").addEventListener("input", handleValue);
   let form = document.getElementById("create-form");
   form.addEventListener("submit",assignFormHandler)

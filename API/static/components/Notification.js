@@ -126,7 +126,7 @@ export function notify(message,time=3,type) {
     notification.render();
     setProgressBarWithTime(time);
     setTimeout(() => {
-        document.getElementById('not-wrapper').remove();
+        document.getElementById('not-wrapper')?.remove();
     }, time * 1000);
 }
 function animateNotification(notification) {

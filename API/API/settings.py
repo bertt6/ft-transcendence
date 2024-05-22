@@ -46,7 +46,6 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
-    'django_crontab',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -131,7 +130,7 @@ REST_FRAMEWORK = {
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = ""
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 

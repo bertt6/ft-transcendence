@@ -23,7 +23,6 @@ websocket_urlpatterns = [
     re_path(r'^ws/matchmaking/(?P<nickname>[^/]+)$', MatchMakingConsumer.as_asgi()),
     re_path(r'^ws/game/(?P<game_id>[^/]+)$', GameConsumer.as_asgi()),
     re_path(r'^ws/tournament/$', TournamentConsumer.as_asgi()),
-
 ]
 
 application = ProtocolTypeRouter(

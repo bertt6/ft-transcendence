@@ -1,15 +1,16 @@
-import {loadError} from "./spa.js";
+import {notify} from "../components/Notification.js";
 
 async function handleRouting()
 {
 
 }
-async function App()
-{
-    await handleRouting();
-}
+(function() {
+  function destroy() {
+    console.log('Home script unloaded');
+  }
 
-App().catch((error) => {
-    console.error(error)
-});
+  // Expose init and destroy to the global scope
+  window.home = { destroy };
+})();
+
 

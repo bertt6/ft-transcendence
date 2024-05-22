@@ -30,7 +30,7 @@ class History extends BaseComponent {
                   <h5>${calculateDate(history.date)}</h5>
                 </div>
               </div>
-            `).join(``)}
+            `).join('')}
             </div>
           </div>
 `
@@ -46,18 +46,22 @@ class BlockedUsers extends BaseComponent {
         this.html = this.handleHTML();
     }
 
-    async removeBlockedUser(id, index) {
+    async removeBlockedUser(nickname, index) {
         try {
-            let data = await request('profile/block-users/', {
+            let data = await request('profile/block/', {
                 method: "POST",
                 body: JSON.stringify({
-                    profile_id: id
+                    nickname: nickname
                 })
             });
+            if(!data.ok)
+            {
+                notify('Error removing blocked user',3,'error');
+                return
+            }
             let wrapper = document.getElementById(`${index}-blocked-user-wrapper`)
-
             wrapper.remove()
-            return data;
+            notify('User unblocked', 3, 'success');
         } catch (error) {
             console.error('Error:', error);
             notify('Error fetching friends', 3, 'error');
@@ -89,7 +93,7 @@ class BlockedUsers extends BaseComponent {
         for (let i = 0; this.state.blockedUsers.length > i; i++) {
             console.log(this.state.blockedUsers[i].id)
             document.getElementById(`${i}-button`).addEventListener("click", () =>
-                this.removeBlockedUser(this.state.blockedUsers[i].id, i)
+                this.removeBlockedUser(this.state.blockedUsers[i].nickname, i)
             )
         }
 
@@ -112,10 +116,10 @@ class PaddleColor extends BaseComponent {
                 <input type="radio" id="red1" name="color_row1" value="red1">
                 <label for="red1">
                     <div>
-                        <p>Red</p>
+                        <p>White</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/whitepaddle.png" alt="">
                     </div>
                 </label>
             </div>
@@ -123,10 +127,10 @@ class PaddleColor extends BaseComponent {
                 <input type="radio" id="red2" name="color_row1" value="red2">
                 <label for="red2">
                     <div>
-                        <p>Red</p>
+                        <p>Blue</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/bluepaddle.png" alt="">
                     </div>
                 </label>
             </div>
@@ -139,7 +143,7 @@ class PaddleColor extends BaseComponent {
                         <p>Red</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/redpaddle.png" alt="">
                     </div>
                 </label>
             </div>
@@ -147,10 +151,10 @@ class PaddleColor extends BaseComponent {
                 <input type="radio" id="red4" name="color_row1" value="red4">
                 <label for="red4">
                     <div>
-                        <p>Red</p>
+                        <p>Green</p>
                     </div>
                     <div class="red">
-                        <img src="/static/public/SingleCloud.png" alt="">
+                        <img src="/static/public/greenpaddle.png" alt="">
                     </div>
                 </label>
             </div>
@@ -407,6 +411,12 @@ async function fetchProfile() {
         let data = await request(`profile-with-nickname/${nickname}/`, {
             method: 'GET',
         });
+        if(!data.ok)
+        {
+            notify('Error fetching profile', 3, 'error')
+            loadPage('/home/');
+            return
+            }
         const profileParentElement = document.getElementById('profile-info');
         const profile = new ProfileInfo({ profile: data, isEditing: false }, profileParentElement);
         profile.render();
@@ -489,7 +499,7 @@ async function fetchFriends() {
 
 async function fetchBlockedUsers() {
     try {
-        let data = await request('profile/block-users/', {
+        let data = await request('profile/block/', {
             method: "GET"
         })
         console.log(data)
@@ -507,8 +517,6 @@ async function fetchHistory()
         let data = await request(`profile/history/`,{
             method:'GET',
         });
-        console.log(data)
-
         if(!data.ok)
         {
             notify('Error fetching history',3,'error');
