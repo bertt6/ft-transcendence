@@ -55,5 +55,7 @@ def finish_game(game_id, winner_nickname):
         game.save()
         if game.player1.nickname != winner_nickname:
             game.player2.win_games(game.player1.mmr)
+            game.player1.lose_games(game.player2.mmr)
         else:
             game.player1.win_games(game.player2.mmr)
+            game.player2.lose_games(game.player1.mmr)
