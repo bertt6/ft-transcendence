@@ -36,7 +36,6 @@ async function matchFounded() {
 async function connectToSocket() {
   let interval;
   const nickname = getActiveUserNickname()
-  console.log(nickname)
     const socket = new WebSocket(`ws://localhost:8000/ws/matchmaking/${nickname}`);
     socket.onopen = () => {
       interval = handleText();

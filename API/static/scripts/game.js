@@ -243,6 +243,7 @@ async function connectToServer() {
         setCurrentPoints(data);
         printWinner(data,data.winner);
         removeKeyboardEventListeners();
+        socket.close();
       }
       else if(data.state_type === "game_state")
       {

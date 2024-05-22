@@ -33,7 +33,6 @@ try{
         spinner.setState({isVisible: false});
         button.disabled = false;
         button.innerText = 'REGISTER';
-        console.log(data)
         const message = parseErrorToNotify(data);
         notify(message, 3, 'error');
     }

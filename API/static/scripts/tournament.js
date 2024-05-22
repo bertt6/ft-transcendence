@@ -1,4 +1,4 @@
-import {BASE_URL, loadPage, WEBSOCKET_URL} from "./spa.js";
+import {BASE_URL, loadError, loadPage, WEBSOCKET_URL} from "./spa.js";
 import {getActiveUserNickname} from "./utils.js";
 import BaseComponent from "../components/Component.js";
 import {notify} from "../components/Notification.js";
@@ -81,7 +81,6 @@ function handleErrorStates(data,socket) {
     socket.close();
     notify(data.message, 3, 'error')
     setTimeout(() => {
-        console.log("redirecting")
         loadPage("/home/")
     }, 3000);
 }
@@ -151,7 +150,6 @@ function connectToSocket() {
         }
         socket.onmessage = (event) => {
             const response = SON.parse(event.data);
-            console.log(response)
             if (errorStates.includes(response.send_type))
                 handleErrorStates(response,socket);
             if (response.send_type === "tournament_info")
@@ -163,10 +161,9 @@ function connectToSocket() {
              else if(response.send_type === "current_matchups")
                 handleMatchups(response.data);
              else
-                console.log("unknown message type", response)
+                 loadError(404, "Page not found")
         }
         socket.onclose = () => {
-            console.log("disconnected from the server");
         }
         socket.onerror = (error) => {
             console.error(error);

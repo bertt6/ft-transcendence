@@ -12,7 +12,6 @@ function handleValue() {
 async function assignFormHandler(e)
 {
   e.preventDefault();
-    console.log('form submitted')
   e.stopImmediatePropagation()
     let form = e.target;
   let button = document.getElementById('create-button');

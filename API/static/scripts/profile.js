@@ -91,7 +91,6 @@ class BlockedUsers extends BaseComponent {
     render() {
         this.parentElement.innerHTML = this.html;
         for (let i = 0; this.state.blockedUsers.length > i; i++) {
-            console.log(this.state.blockedUsers[i].id)
             document.getElementById(`${i}-button`).addEventListener("click", () =>
                 this.removeBlockedUser(this.state.blockedUsers[i].nickname, i)
             )
@@ -199,7 +198,6 @@ class Friends extends BaseComponent {
         super.render();
         assignRouting();
         for (let i = 0; this.state.friends.length > i; i++) {
-            console.log(this.state.friends[i].id)
             document.getElementById(`${i}-button`).addEventListener("click", () =>
                 this.removeFriend(this.state.friends[i].id, i)
             )
@@ -280,7 +278,6 @@ class ProfileInfo extends BaseComponent {
                     'Content-Type': '',
                 }
             });
-            console.log(response)
             if(!response.ok)
             {
                 let message = parseErrorToNotify(response)
@@ -310,7 +307,6 @@ class ProfileInfo extends BaseComponent {
                 let image = document.getElementById('profile-photo')
                 if (image.files.length > 0) {
                     formData.append('profile_picture', image.files[0]);
-                    console.log(image.files[0])
                 }
                 formData.append('nickname', escapeHTML(document.getElementById('profile-nickname').value))
                 formData.append('bio',escapeHTML(document.getElementById('profile-bio').value))
@@ -419,7 +415,6 @@ async function fetchBlockedUsers() {
         let data = await request('profile/block/', {
             method: "GET"
         })
-        console.log(data)
         return data
     } catch (error) {
         console.error('Error:', error);
