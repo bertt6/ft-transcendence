@@ -4,14 +4,13 @@ async function handleRouting()
 {
 
 }
-async function App()
-{
+(function() {
+  function destroy() {
+    console.log('Home script unloaded');
+  }
 
-    console.log("App started")
-    await handleRouting();
-}
+  // Expose init and destroy to the global scope
+  window.home = { destroy };
+})();
 
-App().catch((error) => {
-    console.error(error)
-});
 

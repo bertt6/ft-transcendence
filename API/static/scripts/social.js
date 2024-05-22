@@ -390,7 +390,6 @@ class CommentsComponent extends BaseComponent {
         observer.observe(loading);
     }
 }
-
 class ConversationComponent extends BaseComponent {
     constructor(state, parentElement = null) {
         super(state, parentElement);
@@ -455,10 +454,24 @@ class ConversationComponent extends BaseComponent {
     }
 }
 
+
 let parentElement = document.getElementById('posts-wrapper');
 let socialPostsComponent = new SocialPostsComponent({}, parentElement);
 let parentFormElement = document.getElementById('social-send-form');
 let postTweetFormComponent = new PostTweetFormComponent({}, parentFormElement);
+(function() {
+
+  function destroy() {
+      cleanupChatFriends()
+      cleanupChatSocket()
+  }
+
+  // Expose init and destroy to the global scope
+  window.social = {destroy };
+})();
+let statusSocket;
+let handleMessageListener;
+
 const fetchChatFriends = async () => {
     const endpoint = `profile/friends`;
     try {
@@ -466,9 +479,10 @@ const fetchChatFriends = async () => {
             method: 'GET',
         });
         try {
-            let statusSocket = await getStatusSocket();
-            statusSocket.send(JSON.stringify({request_type: 'get_user_status', from: "social"}));
-            statusSocket.addEventListener('message', (event) => {
+            statusSocket = await getStatusSocket();
+            statusSocket.send(JSON.stringify({ request_type: 'get_user_status', from: "social" }));
+
+            handleMessageListener = (event) => {
                 let userStatus = JSON.parse(event.data);
                 let parentElement = document.getElementById('user-data-wrapper');
                 let chatFriendsComponent = new ChatFriendsComponent({
@@ -476,13 +490,20 @@ const fetchChatFriends = async () => {
                     status: userStatus
                 }, parentElement);
                 chatFriendsComponent.render();
-            });
+            };
+
+            statusSocket.addEventListener('message', handleMessageListener);
         } catch (e) {
             console.error(e);
         }
-
     } catch (error) {
         console.error('Error:', error);
+    }
+}
+
+const cleanupChatFriends = () => {
+    if (statusSocket && handleMessageListener) {
+        statusSocket.removeEventListener('message', handleMessageListener);
     }
 }
 const fetchSocialPosts = async () => {
@@ -496,7 +517,6 @@ const fetchSocialPosts = async () => {
     }
 
 }
-
 async function submitTweet(event) {
     event.preventDefault();
     let inputValue = document.getElementById('social-text-input').value;
@@ -650,7 +670,6 @@ const renderIndividualPost = async (tweetId) => {
     let form = document.getElementById('comment-send-form');
     form.addEventListener('submit', (e) => commentSubmit(e,commentsComponent,tweetId));
 }
-
 async function getProfile2() {
     try {
         let data = await request(`profile/`, {
@@ -663,7 +682,6 @@ async function getProfile2() {
         return null;
     }
 }
-
 const renderAllPosts = async () => {
     let profile_picture_url = await getProfile2();
     const nickname = getActiveUserNickname();
@@ -717,7 +735,6 @@ const renderAllPosts = async () => {
     await Promise.all([fetchChatFriends(), fetchSocialPosts(), getProfile()]);
     await assignEventListeners();
 }
-
 async function handleAddFriend(element) {
     const socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
@@ -740,7 +757,6 @@ async function handleAddFriend(element) {
         notify('Error adding friend', 3, 'error');
     }
 }
-
 async function handleInviteToPong(element) {
     let socket = await getSocket();
     let nickname = element.children[1].children[0].innerText;
@@ -799,7 +815,6 @@ function addContextListeners(element) {
     inviteToPongButton.addEventListener('click', () => handleInviteToPong(element));
     blockUserButton.addEventListener('click', () =>handleBlockUser(element));
 }
-
 function handleRightClick(event, element) {
     event.preventDefault();
     let mouseX = event.clientX;
@@ -833,7 +848,6 @@ function handleRightClick(event, element) {
         {once: true}
     );
 }
-
 async function fetchMessages(roomId) {
     try {
         let response = await request(`chat/get-messages/${roomId}/`, {
@@ -845,10 +859,21 @@ async function fetchMessages(roomId) {
         notify('Error fetching messages', 3, 'error');
     }
 }
-
+let chatSocket;
+let chatSocketOnMessage;
 async function connectToRoom(room, conversationComponent) {
-    const nickname = getActiveUserNickname()
-    const socket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
+    const nickname = getActiveUserNickname();
+    chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${room.id}/${nickname}`);
+    chatSocketOnMessage = (event) => {
+        let data = JSON.parse(event.data);
+        let message = {
+            content: data.message,
+            user: {nickname: data.user, id: data.id},
+            created_date: new Date()
+        };
+        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
+    };
+    chatSocket.addEventListener('message', chatSocketOnMessage);
     let chatSendForm = document.getElementById('chat-send');
     let chatInput = document.getElementById('chat-input');
     chatSendForm.addEventListener('submit', (event) => {
@@ -856,20 +881,16 @@ async function connectToRoom(room, conversationComponent) {
         let content = chatInput.value;
         if (content.length <= 0)
             return;
-        socket.send(JSON.stringify({message: content}));
+        chatSocket.send(JSON.stringify({message: content}));
         chatInput.value = '';
     });
-    socket.onmessage = (event) => {
-        let data = JSON.parse(event.data);
-        let message = {
-            content: data.message,
-            user: {nickname: data.user, id: data.id},
-            created_date: new Date()
-        }
-        conversationComponent.setState({messages: [...conversationComponent.state.messages, message]});
+}
+function cleanupChatSocket() {
+    if (chatSocket && chatSocketOnMessage) {
+        chatSocket.removeEventListener('message', chatSocketOnMessage);
+        chatSocket.close();
     }
 }
-
 async function fetchRoomData(element) {
     let nickname = element.children[1].children[0].innerText;
     let profilePicture = element.children[0].children[0].src;
@@ -911,7 +932,6 @@ async function fetchRoomData(element) {
 async function toggleChat() {
     let chatContainer = document.getElementById("chat-container");
     let socialWrapper = document.getElementById("social-container");
-    console.log(this)
     await fetchRoomData(this);
     if (chatContainer.classList.contains("chat-closed")) {
         chatContainer.classList.add("chat-transition");

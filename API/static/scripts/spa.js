@@ -6,6 +6,7 @@ export const API_URL = 'http://localhost:8000/api/v1';
 export const BASE_URL = 'http://localhost:8000';
 export const API_42_URL = 'https://api.intra.42.fr'
 export const WEBSOCKET_URL = 'ws://localhost:8000/ws'
+let currentScript = null;
 
 export function setCookie(name, value, days) {
     let expires = "";
@@ -262,7 +263,7 @@ const routes = new Map([
                 <input
                   type="text"
                   name=""
-                  id=""
+                   id="chat-input"
                   placeholder="Send a message"
                   style="width: 100%"
                 />
@@ -744,8 +745,12 @@ export function loadPage(fileName) {
 
     }
     let content = document.getElementById('main');
-    content.innerHTML = route.html;
+    content.innerHTML = route.html
+    if(currentScript && window[currentScript] && window[currentScript].destroy)
+        window[currentScript].destroy();
     renderPage().catch(console.error);
+    currentScript = data;
+
 }
 
 async function tryRefreshToken() {
@@ -789,8 +794,9 @@ async function checkForAuth() {
 }
 
 export function assignRouting() {
-     const returnButton = `  <pong-redirect class="return-to-home" href="/home/"><h1>HOME</h1></pong-redirect>`
-    document.body.insertAdjacentHTML('beforebegin', returnButton);
+     const returnButton = `  <pong-redirect class="return-to-home" id="redirect-to-home" href="/home/"><h1>HOME</h1></pong-redirect>`
+    if(!document.getElementById('redirect-to-home'))
+        document.body.insertAdjacentHTML('beforebegin', returnButton);
     let elements = document.querySelectorAll("pong-redirect");
     for (let element of elements) {
         if (element.getAttribute(('listener')) === 'true')
@@ -853,6 +859,7 @@ const App = async () => {
     assignRouting()
     await assignLocalStorage();
 }
+
 window.addEventListener('popstate', (event) => {
         let pathName = window.location.pathname;
         loadPage(pathName);
