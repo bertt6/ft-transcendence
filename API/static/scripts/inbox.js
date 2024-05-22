@@ -153,7 +153,7 @@ function checkInboxRequired() {
 }
 
 export async function createInbox() {
-    if (getActiveUserNickname() === null || !checkIfAuthRequired(window.location.pathname) && checkInboxRequired(window.location.pathname))
+    if (getActiveUserNickname() === null  && checkInboxRequired(window.location.pathname))
         return;
     if(document.getElementById('inbox-data-wrapper'))
         return;
