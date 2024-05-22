@@ -88,14 +88,11 @@ function draw(data) {
     ctx.lineTo(0, canvasHeight / 2);
     ctx.strokeStyle = "white";
     ctx.stroke();
-    ctx.fillStyle = "white";
-    // Adjust y-coordinates by half the canvas height
     ctx.beginPath();
+    ctx.fillStyle = "white";
     ctx.arc(data.ball.x, data.ball.y, ballSize, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "red";
     ctx.fillRect(data.player_one.paddle_x, data.player_one.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
-    ctx.fillStyle = "blue";
     ctx.fillRect(data.player_two.paddle_x, data.player_two.paddle_y - paddleHeight / 2, paddleWidth, paddleHeight);
     ctx.restore();  // Restore the context state to what it was before translating the origin
 }
@@ -182,7 +179,6 @@ function printCountdown() {
         }
     }, 1000);
 }
-
 function handleParticipants(data) {
     const currentSpectators = participantsComponent.state.spectators;
     if (JSON.stringify(currentSpectators) !== JSON.stringify(data.spectators)) {
@@ -192,7 +188,6 @@ function handleParticipants(data) {
         participantsComponent.render();
     }
 }
-
 async function connectToServer() {
     const path = window.location.pathname;
     const id = path.split("/")[2];
@@ -240,18 +235,18 @@ async function connectToServer() {
           handleInitialState(data);
           handleMovement(socket, data);
       } else if (data.state_type === "score_state") {
-        draw(data.game,"red","blue");
+        draw(data.game);
         setCurrentPoints(data);
         printCountdown();
       } else if (data.state_type === 'finish_state') {
-        draw(data.game,"red","blue");
+        draw(data.game);
         setCurrentPoints(data);
         printWinner(data,data.winner);
         removeKeyboardEventListeners();
       }
       else if(data.state_type === "game_state")
       {
-        draw(data.game,"red","blue");
+        draw(data.game);
         setCurrentPoints(data);
         handleParticipants(data);
       }
@@ -269,7 +264,6 @@ async function connectToServer() {
 }
 function addKeyboardEventListeners(socket, currentPaddle) {
     handleKeyDown = (event) => {
-        console.log("socket.state",socket.readyState)
         if (event.key === "w" || event.key === "s") {
             currentPaddle.dy = event.key === "w" ? -10 : 10;
             const body = {
@@ -311,11 +305,9 @@ function handleMovement(socket,data)
         currentPaddle.paddle = "player_two";
     addKeyboardEventListeners(socket, currentPaddle);
 }
-
 async function App() {
     await connectToServer();
 }
-
 App().catch((e) => {
     console.error(e);
 });

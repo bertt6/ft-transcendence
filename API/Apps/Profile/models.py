@@ -31,14 +31,13 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     nickname = models.CharField(max_length=100, unique=True, blank=False, null=False, validators=[MinLengthValidator(3)])
     stats = models.OneToOneField(Stats, on_delete=models.CASCADE, null=True)
-    profile_picture = models.ImageField(upload_to='profile-pictures/', default="profile-pictures/default.jpeg")
+    profile_picture = models.ImageField(upload_to='profile-pictures/', default="profile-pictures/default.png")
     is_online = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     friends = models.ManyToManyField('Profile', blank=True, related_name='profile_friends')
     bio = models.TextField(blank=True, null=True, default=None)
     mmr = models.IntegerField(default=1000)
     blocked_users = models.ManyToManyField('Profile', blank=True, related_name='users_blocked')
-    preferred_color = models.CharField(max_length=7, default="white", choices=ColorChoices)
 
     def __str__(self):
         return self.nickname

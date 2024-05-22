@@ -150,7 +150,7 @@ function connectToSocket() {
             }
         }
         socket.onmessage = (event) => {
-            const response = JSON.parse(event.data);
+            const response = SON.parse(event.data);
             console.log(response)
             if (errorStates.includes(response.send_type))
                 handleErrorStates(response,socket);
