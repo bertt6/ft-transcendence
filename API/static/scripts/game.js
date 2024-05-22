@@ -247,6 +247,7 @@ async function connectToServer() {
         draw(data.game,"red","blue");
         setCurrentPoints(data);
         printWinner(data,data.winner);
+        removeKeyboardEventListeners();
       }
       else if(data.state_type === "game_state")
       {
@@ -263,13 +264,12 @@ async function connectToServer() {
     };
     socket.onclose = () => {
         removeKeyboardEventListeners();
-
     }
     return socket;
 }
 function addKeyboardEventListeners(socket, currentPaddle) {
     handleKeyDown = (event) => {
-        if (socket.CLOSED || socket.CLOSING) return;
+        console.log("socket.state",socket.readyState)
         if (event.key === "w" || event.key === "s") {
             currentPaddle.dy = event.key === "w" ? -10 : 10;
             const body = {
@@ -281,7 +281,6 @@ function addKeyboardEventListeners(socket, currentPaddle) {
     };
 
     handleKeyUp = (event) => {
-        if (socket.CLOSED || socket.CLOSING) return;
         if (event.key === "w" || event.key === "s") {
             currentPaddle.dy = 0;
             const body = {
